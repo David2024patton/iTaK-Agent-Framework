@@ -1,0 +1,27 @@
+# iTaK Telemetry Collector
+# Receives all agent telemetry data for training/analysis
+# Uses Jaeger for visualization + file export for training data
+
+services:
+  # OTLP Collector - receives telemetry from agents
+  otel-collector:
+    image: otel/opentelemetry-collector:latest
+    container_name: itak-telemetry-collector
+    ports:
+      - "4317:4317" # gRPC receiver
+      - "4318:4318" # HTTP receiver
+      - "4319:4319" # HTTP receiver (CrewAI default port)
+    volumes:
+      - ./otel-config.yaml:/etc/otelcol/config.yaml
+      - ./telemetry-data:/data
+    command: [ "--config=/etc/otelcol/config.yaml" ]
+
+  # Jaeger UI - visualize traces
+  jaeger:
+    image: jaegertracing/all-in-one:latest
+    container_name: itak-jaeger
+    ports:
+      - "16686:16686" # Jaeger UI
+      - "14250:14250" # gRPC
+    environment:
+      - COLLECTOR_OTLP_ENABLED=true

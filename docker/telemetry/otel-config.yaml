@@ -1,0 +1,41 @@
+# OpenTelemetry Collector Configuration
+# Receives traces from iTaK agents and exports to multiple destinations
+
+receivers:
+  otlp:
+    protocols:
+      grpc:
+        endpoint: 0.0.0.0:4317
+      http:
+        endpoint: 0.0.0.0:4318
+        cors:
+          allowed_origins:
+            - "*"
+
+processors:
+  batch:
+    timeout: 1s
+    send_batch_size: 1024
+
+exporters:
+  # Export to Jaeger for visualization
+  otlp/jaeger:
+    endpoint: jaeger:4317
+    tls:
+      insecure: true
+
+  # Export to JSON files for training data
+  file/json:
+    path: /data/traces.jsonl
+    format: json
+
+  # Log to console for debugging
+  debug:
+    verbosity: detailed
+
+service:
+  pipelines:
+    traces:
+      receivers: [otlp]
+      processors: [batch]
+      exporters: [otlp/jaeger, file/json, debug]
