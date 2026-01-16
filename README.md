@@ -10,12 +10,12 @@
 </p>
 
 <p align="center">
-  <a href="#features">Features</a> •
-  <a href="#quick-start">Quick Start</a> •
-  <a href="#10-layer-architecture">Architecture</a> •
-  <a href="#unique-features">Unique Features</a> •
-  <a href="#configuration">Configuration</a> •
-  <a href="#license">License</a>
+  <a href="#-features">Features</a> •
+  <a href="#-quick-start">Quick Start</a> •
+  <a href="#-10-layer-architecture">Architecture</a> •
+  <a href="#-unique-features">Unique Features</a> •
+  <a href="#-configuration">Configuration</a> •
+  <a href="#-license">License</a>
 </p>
 
 <p align="center">
