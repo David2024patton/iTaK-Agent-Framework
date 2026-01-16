@@ -52,7 +52,7 @@ rag_tool = RagTool().from_web_page('https://example.com')
 
 ## **Contribution**
 
-Contributions to RagTool and the broader itak tools ecosystem are welcome. To contribute, please follow the standard GitHub workflow for forking the repository, making changes, and submitting a pull request.
+Contributions to RagTool and the broader iTaK tools ecosystem are welcome. To contribute, please follow the standard GitHub workflow for forking the repository, making changes, and submitting a pull request.
 
 ## **License**
 
