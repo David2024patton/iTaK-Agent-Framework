@@ -35,6 +35,7 @@ from itak.cli.model_selector import (
     download_models,
 )
 from itak.cli.model_catalog import get_model_info
+from itak.cli.studio_launcher import launch_studio
 
 
 @click.group()
@@ -116,6 +117,24 @@ def version(tools):
             click.echo(f"iTaK tools version: {tools_version}")
         except Exception:
             click.echo("iTaK tools not installed")
+
+
+@iTaK.command()
+@click.option("--port", "-p", default=8501, help="Port to run Studio on (default: 8501)")
+@click.option("--no-browser", is_flag=True, help="Don't auto-open browser")
+def studio(port, no_browser):
+    """Launch iTaK Studio - Visual Agent Builder GUI.
+    
+    Opens a Streamlit-based GUI for:
+    - Creating agents with drag & drop
+    - Editing tasks visually
+    - Composing crews
+    - Managing tools
+    - Running and monitoring crews
+    
+    Example: itak studio --port 8080
+    """
+    launch_studio(port=port, no_browser=no_browser)
 
 
 @iTaK.command()
