@@ -108,8 +108,13 @@ def can_run_on_gpu(model_size_gb, vram_gb):
     return vram_gb >= required
 
 def can_run_on_cpu(model_size_gb, ram_gb):
-    """Check if model can run on CPU (slower but works)"""
-    # CPU needs model size + ~4GB for OS and overhead
+    """Check if model can run on CPU (only practical for small models)"""
+    # Only recommend CPU for models ~3B and under (roughly 2.5GB or less)
+    # Larger models are impractically slow on CPU even with lots of RAM
+    MAX_CPU_MODEL_SIZE = 2.5  # ~3B parameter models
+    if model_size_gb > MAX_CPU_MODEL_SIZE:
+        return False
+    # For small models, check RAM
     required = model_size_gb + 4.0
     return ram_gb >= required
 
