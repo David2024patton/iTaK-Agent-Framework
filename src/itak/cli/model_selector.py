@@ -118,6 +118,9 @@ def display_model_menu(filter_incompatible=True, show_numbers=False):
                 click.secho(f" {model_info['desc']}", fg="white", dim=True)
                 
                 model_index += 1
+            
+            # Blank line after each family for spacing
+            click.secho("")
     
     click.secho("\n" + "="*70, fg="cyan")
     click.secho("* = Recommended | [GPU] = Fast | [CPU] = Can run on CPU", fg="white", dim=True)
