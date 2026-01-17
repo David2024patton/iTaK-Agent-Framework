@@ -129,7 +129,15 @@ def display_model_menu(filter_incompatible=True, show_numbers=False):
     click.secho("* = Recommended | [GPU] = Fast | [CPU] = Can run on CPU", fg="white", dim=True)
     if hidden_count > 0:
         click.secho(f"({hidden_count} models hidden - too large for your system)", fg="white", dim=True)
-    click.secho("="*70 + "\n", fg="cyan")
+    click.secho("="*70, fg="cyan")
+    
+    # Show domain summary
+    from .model_catalog import DOMAIN_CATEGORIES
+    click.secho("\n📚 AVAILABLE DOMAINS:", fg="yellow", bold=True)
+    for domain, desc in DOMAIN_CATEGORIES:
+        click.secho(f"  [{domain}]", fg="cyan", nl=False)
+        click.secho(f" {desc}", fg="white", dim=True)
+    click.secho("")
     
     return model_map
 

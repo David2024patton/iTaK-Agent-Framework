@@ -120,6 +120,12 @@ OLLAMA_MODEL_CATALOG = {
                     "qwen3-vl:32b": {"size": "21GB", "ctx": "256K", "desc": "Expert vision analysis"},
                 }
             },
+            "Moondream": {
+                "desc": "Tiny vision model - see and describe images with minimal resources",
+                "models": {
+                    "moondream:1.8b": {"size": "1.7GB", "ctx": "8K", "desc": "Tiny vision, runs anywhere"},
+                }
+            },
             "Granite Vision": {
                 "desc": "IBM multimodal models with vision capabilities",
                 "models": {
@@ -137,6 +143,93 @@ OLLAMA_MODEL_CATALOG = {
                     "smollm2:135m": {"size": "271MB", "ctx": "8K", "desc": "Tiny, runs on phone"},
                     "smollm2:360m": {"size": "726MB", "ctx": "8K", "desc": "Small, fast on phone"},
                     "smollm2:1.7b": {"size": "1.8GB", "ctx": "8K", "desc": "Compact balanced"},
+                }
+            },
+        }
+    },
+    
+    # ============== DOMAIN-SPECIFIC MODELS ==============
+    
+    "[DATA] SQL & Analytics Models": {
+        "description": "Generate SQL queries from natural language - talk to your database",
+        "families": {
+            "SQLCoder": {
+                "desc": "State-of-the-art text-to-SQL - converts questions to database queries",
+                "models": {
+                    "sqlcoder:7b": {"size": "4.1GB", "ctx": "8K", "desc": "Text-to-SQL, accurate"},
+                    "sqlcoder:15b": {"size": "8.9GB", "ctx": "8K", "desc": "Text-to-SQL, powerful"},
+                }
+            },
+            "DuckDB NSQL": {
+                "desc": "Optimized for DuckDB and analytical SQL queries",
+                "models": {
+                    "duckdb-nsql:7b": {"size": "4.1GB", "ctx": "8K", "desc": "DuckDB optimized SQL"},
+                }
+            },
+        }
+    },
+    "[MATH] Mathematics Models": {
+        "description": "Specialized for solving math problems and equations",
+        "families": {
+            "Mathstral": {
+                "desc": "Mistral AI model specialized for mathematics and reasoning",
+                "models": {
+                    "mathstral:7b": {"size": "4.1GB", "ctx": "32K", "desc": "Math reasoning expert"},
+                }
+            },
+            "Wizard Math": {
+                "desc": "Fine-tuned for mathematical problem solving",
+                "models": {
+                    "wizard-math:7b": {"size": "4.1GB", "ctx": "8K", "desc": "Math problem solver"},
+                }
+            },
+            "Qwen2 Math": {
+                "desc": "Alibaba's math-specialized model",
+                "models": {
+                    "qwen2-math:7b": {"size": "4.4GB", "ctx": "4K", "desc": "Qwen math specialist"},
+                }
+            },
+        }
+    },
+    "[ROLEPLAY] Creative & Character Models": {
+        "description": "Creative writing, storytelling, and character roleplay",
+        "families": {
+            "Dolphin": {
+                "desc": "Uncensored, creative model great for roleplay and storytelling",
+                "models": {
+                    "dolphin3:8b": {"size": "4.9GB", "ctx": "128K", "desc": "Creative, uncensored"},
+                    "dolphin-llama3:8b": {"size": "4.7GB", "ctx": "8K", "desc": "Llama3-based creative"},
+                    "dolphin-mixtral:8x7b": {"size": "26GB", "ctx": "32K", "desc": "Powerful creative MoE"},
+                }
+            },
+            "OpenHermes": {
+                "desc": "Trained on high-quality synthetic data for creative tasks",
+                "models": {
+                    "openhermes:7b": {"size": "4.1GB", "ctx": "8K", "desc": "Creative, helpful"},
+                }
+            },
+            "Neural Chat": {
+                "desc": "Intel's conversational AI for natural dialogue",
+                "models": {
+                    "neural-chat:7b": {"size": "4.1GB", "ctx": "8K", "desc": "Natural conversation"},
+                }
+            },
+        }
+    },
+    "[WRITING] Content & Editing Models": {
+        "description": "Content writing, editing, summarization, and documentation",
+        "families": {
+            "Mistral Nemo": {
+                "desc": "Mistral AI's best small model for writing and editing tasks",
+                "models": {
+                    "mistral-nemo:12b": {"size": "7.1GB", "ctx": "128K", "desc": "Writing expert, long ctx"},
+                }
+            },
+            "Stable Beluga": {
+                "desc": "Stability AI model for instruction following and writing",
+                "models": {
+                    "stable-beluga:7b": {"size": "4.1GB", "ctx": "4K", "desc": "Instruction + writing"},
+                    "stable-beluga:13b": {"size": "7.4GB", "ctx": "4K", "desc": "Stronger writing"},
                 }
             },
         }
@@ -163,10 +256,23 @@ OLLAMA_MODEL_CATALOG = {
                     "huihui_ai/deephermes3-abliterated:8b": {"size": "4.9GB", "ctx": "128K", "desc": "Reasoning, no refusals"},
                 }
             },
+            "Wizard Vicuna Uncensored": {
+                "desc": "Classic uncensored model for unrestricted conversations",
+                "models": {
+                    "wizard-vicuna-uncensored:7b": {"size": "4.1GB", "ctx": "4K", "desc": "Classic uncensored"},
+                    "wizard-vicuna-uncensored:13b": {"size": "7.4GB", "ctx": "4K", "desc": "Stronger uncensored"},
+                }
+            },
+            "Llama2 Uncensored": {
+                "desc": "Llama2 with safety filters removed",
+                "models": {
+                    "llama2-uncensored:7b": {"size": "3.8GB", "ctx": "4K", "desc": "Llama2 uncensored"},
+                }
+            },
         }
     },
     
-    # ============== SPECIALIZED CATEGORIES (Less Common) ==============
+    # ============== SPECIALIZED PROFESSIONAL CATEGORIES ==============
     
     "[ENTERPRISE] Business Models": {
         "description": "Enterprise-grade models from major companies (IBM, NVIDIA, Cohere)",
@@ -276,6 +382,12 @@ OLLAMA_MODEL_CATALOG = {
                     "meditron:7b": {"size": "4.1GB", "ctx": "4K", "desc": "Medical knowledge, research"},
                 }
             },
+            "MedLlama": {
+                "desc": "Llama2 fine-tuned on medical conversations and literature",
+                "models": {
+                    "medllama2:7b": {"size": "3.8GB", "ctx": "4K", "desc": "Medical conversations"},
+                }
+            },
         }
     },
 }
@@ -290,7 +402,30 @@ RECOMMENDED_MODELS = {
     "lightweight": "smollm2:1.7b",
     "medical": "meditron:7b",
     "legal": "initium/law_model:Q5_0",
+    "finance": "0xroyce/plutus:latest",
+    "sql": "sqlcoder:7b",
+    "math": "mathstral:7b",
+    "writing": "mistral-nemo:12b",
+    "roleplay": "dolphin3:8b",
 }
+
+# Domain categories for quick reference
+DOMAIN_CATEGORIES = [
+    ("REASONING", "Deep thinking, step-by-step problem solving"),
+    ("CODING", "Code generation, fixing, and understanding"),
+    ("AGENTS", "Tool-calling, function execution, automation"),
+    ("VISION", "Image understanding and multimodal"),
+    ("LIGHTWEIGHT", "Phone, tablet, edge devices"),
+    ("DATA", "SQL generation, database queries"),
+    ("MATH", "Mathematics, equations, calculations"),
+    ("ROLEPLAY", "Creative writing, storytelling, characters"),
+    ("WRITING", "Content, editing, documentation"),
+    ("UNCENSORED", "No safety filters, unrestricted"),
+    ("ENTERPRISE", "IBM, NVIDIA, Cohere business models"),
+    ("FINANCE", "Trading, investing, market analysis"),
+    ("LEGAL", "Law, contracts, legal research"),
+    ("MEDICAL", "Healthcare, medical literature"),
+]
 
 def get_all_model_names():
     """Get flat list of all model names"""
@@ -314,3 +449,7 @@ def get_model_info(model_name):
                     **info
                 }
     return None
+
+def get_domain_summary():
+    """Get list of available domains for display"""
+    return DOMAIN_CATEGORIES
