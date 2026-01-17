@@ -338,9 +338,51 @@ build_task:
             with open(tasks_yaml_path, 'w') as f:
                 f.write(tasks_yaml)
             
+            # Also generate matching crew.py with builder agent
+            crew_py = f'''from crewai import Agent, Crew, Process, Task
+from crewai.project import CrewBase, agent, crew, task
+from crewai_tools import FileWriterTool
+
+@CrewBase
+class {class_name}Crew():
+    """{class_name} crew"""
+
+    agents_config = 'config/agents.yaml'
+    tasks_config = 'config/tasks.yaml'
+
+    @agent
+    def builder(self) -> Agent:
+        return Agent(
+            config=self.agents_config['builder'],
+            tools=[FileWriterTool()],
+            verbose=True
+        )
+
+    @task
+    def build_task(self) -> Task:
+        return Task(
+            config=self.tasks_config['build_task'],
+        )
+
+    @crew
+    def crew(self) -> Crew:
+        """Creates the {class_name} crew"""
+        return Crew(
+            agents=self.agents,
+            tasks=self.tasks,
+            process=Process.sequential,
+            verbose=True,
+        )
+'''
+            
+            crew_py_path = src_folder / "crew.py"
+            with open(crew_py_path, 'w') as f:
+                f.write(crew_py)
+            
             click.secho("\n✅ Auto-generated configuration files:", fg="green", bold=True)
             click.secho(f"  - {agents_yaml_path}", fg="green")
             click.secho(f"  - {tasks_yaml_path}", fg="green")
+            click.secho(f"  - {crew_py_path}", fg="green")
             click.secho("\n💡 You can edit these files to customize your crew", fg="yellow")
 
     click.secho(f"\n🎉 Crew {name} created successfully!", fg="green", bold=True)
