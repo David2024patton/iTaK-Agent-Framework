@@ -352,38 +352,41 @@ build_task:
         click.secho(f"  3. itak run", fg="white")
         
         # Ask if user wants to run immediately
-        if click.confirm("\n🚀 Do you want to install dependencies and run the crew now?", default=True):
-            import os
-            import subprocess
+        if click.confirm("\n🚀 Do you want to run the crew now and start building?", default=True):
+            import sys
             
-            click.secho("\n📦 Installing dependencies...", fg="yellow")
+            click.secho("\n🤖 Starting autonomous build...", fg="yellow", bold=True)
+            click.secho("="*70, fg="cyan")
+            click.secho("The AI agents will now build your project based on the description.", fg="white")
+            click.secho("This may take several minutes depending on complexity.", fg="white")
+            click.secho("="*70 + "\n", fg="cyan")
+            
             try:
-                # Change to crew directory and install
+                # Add crew directory to Python path
                 crew_path = folder_path.absolute()
-                result = subprocess.run(
-                    ["itak", "install"],
-                    cwd=str(crew_path),
-                    capture_output=True,
-                    text=True
-                )
+                sys.path.insert(0, str(crew_path / "src"))
                 
-                if result.returncode == 0:
-                    click.secho("✅ Dependencies installed!", fg="green")
-                    
-                    click.secho("\n🤖 Running your crew...", fg="yellow", bold=True)
-                    click.secho("="*70, fg="cyan")
-                    
-                    # Run the crew
-                    subprocess.run(
-                        ["itak", "run"],
-                        cwd=str(crew_path)
-                    )
-                else:
-                    click.secho(f"❌ Installation failed: {result.stderr}", fg="red")
-                    click.secho(f"\nYou can install manually with: cd {folder_name} && itak install", fg="yellow")
+                # Import and run the crew
+                crew_module = __import__(f"{folder_name}.crew", fromlist=["crew"])
+                crew_class_name = class_name + "Crew"
+                crew_class = getattr(crew_module, crew_class_name)
+                
+                # Instantiate and run the crew
+                crew_instance = crew_class()
+                result = crew_instance.crew().kickoff()
+                
+                click.secho("\n" + "="*70, fg="cyan")
+                click.secho("✅ Build complete!", fg="green", bold=True)
+                click.secho("="*70, fg="cyan")
+                click.secho(f"\n📁 Check the {folder_name} directory for generated files", fg="yellow")
+                click.secho(f"📊 View telemetry: http://145.79.2.67:3456/", fg="cyan")
+                
             except Exception as e:
-                click.secho(f"❌ Error: {e}", fg="red")
-                click.secho(f"\nYou can run manually with: cd {folder_name} && itak install && itak run", fg="yellow")
+                click.secho(f"\n❌ Error running crew: {e}", fg="red")
+                click.secho(f"\nYou can run manually with:", fg="yellow")
+                click.secho(f"  cd {folder_name}", fg="white")
+                click.secho(f"  itak install", fg="white")
+                click.secho(f"  itak run", fg="white")
         else:
             click.secho("\n💡 Run these commands when ready:", fg="yellow")
             click.secho(f"  cd {folder_name} && itak install && itak run", fg="white")
