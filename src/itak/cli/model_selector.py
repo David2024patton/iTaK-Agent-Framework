@@ -92,22 +92,6 @@ def display_model_menu(filter_incompatible=True, show_numbers=False):
                 model_size = parse_size_to_gb(model_info['size'])
                 can_cpu = model_size <= 2.5  # 3B and under can run on CPU
                 
-                if compat == 'gpu':
-                    if can_cpu:
-                        compat_str = "[GPU][CPU]"
-                    else:
-                        compat_str = "[GPU]"
-                    compat_color = "green"
-                elif compat == 'cpu':
-                    compat_str = "[CPU]"
-                    compat_color = "yellow"
-                elif compat == 'no_disk':
-                    compat_str = "[DISK]"
-                    compat_color = "red"
-                else:
-                    compat_str = "[???]"
-                    compat_color = "red"
-                
                 star = "* " if is_recommended else "  "
                 
                 # Show number only if requested (for selection mode)
@@ -118,7 +102,19 @@ def display_model_menu(filter_incompatible=True, show_numbers=False):
                 
                 click.secho(f"{model_name.ljust(30)}", fg="bright_white", bold=True, nl=False)
                 click.secho(f" {size_str}", fg="cyan", nl=False)
-                click.secho(f" {compat_str}", fg=compat_color, nl=False)
+                
+                # Show GPU and CPU tags with different colors
+                if compat == 'gpu':
+                    click.secho(" [GPU]", fg="green", nl=False)
+                    if can_cpu:
+                        click.secho("[CPU]", fg="bright_yellow", nl=False)  # Orange-ish
+                elif compat == 'cpu':
+                    click.secho(" [CPU]", fg="bright_yellow", nl=False)
+                elif compat == 'no_disk':
+                    click.secho(" [DISK]", fg="red", nl=False)
+                else:
+                    click.secho(" [???]", fg="red", nl=False)
+                
                 click.secho(f" {model_info['desc']}", fg="white", dim=True)
                 
                 model_index += 1

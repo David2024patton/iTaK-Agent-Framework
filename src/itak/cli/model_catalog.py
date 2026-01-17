@@ -3,10 +3,10 @@
 
 OLLAMA_MODEL_CATALOG = {
     "[REASONING] Deep Thinking Models": {
-        "description": "Deep thinking models for complex reasoning tasks",
+        "description": "Models that think step-by-step to solve complex problems",
         "families": {
             "DeepSeek R1": {
-                "desc": "Open reasoning models with performance approaching O3 and Gemini 2.5 Pro",
+                "desc": "Open reasoning models rivaling OpenAI o3 and Google Gemini 2.5 Pro",
                 "models": {
                     "deepseek-r1:1.5b": {"size": "1.1GB", "ctx": "128K", "desc": "Fast reasoning, lightweight"},
                     "deepseek-r1:7b": {"size": "4.7GB", "ctx": "128K", "desc": "Balanced reasoning power"},
@@ -16,9 +16,9 @@ OLLAMA_MODEL_CATALOG = {
                 }
             },
             "Qwen3": {
-                "desc": "Latest generation Qwen LLMs with dense and mixture-of-experts variants",
+                "desc": "Alibaba's latest LLMs with both dense and mixture-of-experts variants",
                 "models": {
-                    "qwen3:0.6b": {"size": "523MB", "ctx": "40K", "desc": "Ultra-lightweight, edge devices"},
+                    "qwen3:0.6b": {"size": "523MB", "ctx": "40K", "desc": "Ultra-lightweight, for phones"},
                     "qwen3:1.7b": {"size": "1.4GB", "ctx": "40K", "desc": "Light and fast general purpose"},
                     "qwen3:4b": {"size": "2.5GB", "ctx": "256K", "desc": "Efficient general purpose"},
                     "qwen3:8b": {"size": "5.2GB", "ctx": "40K", "desc": "Balanced performance (default)"},
@@ -27,7 +27,7 @@ OLLAMA_MODEL_CATALOG = {
                 }
             },
             "Cogito": {
-                "desc": "Hybrid reasoning models by Deep Cogito, outperforming LLaMA/DeepSeek/Qwen",
+                "desc": "Hybrid reasoning by Deep Cogito - beats LLaMA, DeepSeek, Qwen at same size",
                 "models": {
                     "cogito:3b": {"size": "2.2GB", "ctx": "128K", "desc": "Thinking model, compact"},
                     "cogito:8b": {"size": "4.9GB", "ctx": "128K", "desc": "Thinking model, balanced"},
@@ -37,10 +37,10 @@ OLLAMA_MODEL_CATALOG = {
         }
     },
     "[CODING] Development Models": {
-        "description": "Specialized models for code generation and development",
+        "description": "Models specialized for writing, fixing, and understanding code",
         "families": {
             "Qwen2.5 Coder": {
-                "desc": "Code-specific Qwen with SOTA code generation, reasoning, and fixing",
+                "desc": "State-of-the-art open-source code generation, reasoning, and fixing",
                 "models": {
                     "qwen2.5-coder:0.5b": {"size": "398MB", "ctx": "32K", "desc": "Ultra-fast code completion"},
                     "qwen2.5-coder:1.5b": {"size": "986MB", "ctx": "32K", "desc": "Quick code assistance"},
@@ -48,6 +48,18 @@ OLLAMA_MODEL_CATALOG = {
                     "qwen2.5-coder:7b": {"size": "4.7GB", "ctx": "32K", "desc": "Strong coding (default)"},
                     "qwen2.5-coder:14b": {"size": "9.0GB", "ctx": "32K", "desc": "Advanced code generation"},
                     "qwen2.5-coder:32b": {"size": "20GB", "ctx": "32K", "desc": "Expert-level coding"},
+                }
+            },
+            "Magicoder": {
+                "desc": "Trained on OSS-Instruct: learns from real open-source code for realistic coding",
+                "models": {
+                    "magicoder:7b": {"size": "4.1GB", "ctx": "16K", "desc": "OSS-trained, low-bias code"},
+                }
+            },
+            "Yi Coder": {
+                "desc": "State-of-the-art coding with fewer than 10B parameters",
+                "models": {
+                    "yi-coder:9b": {"size": "5.0GB", "ctx": "128K", "desc": "SOTA code, long context"},
                 }
             },
             "DeepSeek Coder Tools": {
@@ -60,7 +72,7 @@ OLLAMA_MODEL_CATALOG = {
                 }
             },
             "Other Coders": {
-                "desc": "Alternative coding models",
+                "desc": "Additional specialized coding models",
                 "models": {
                     "mini-coder": {"size": "2.5GB", "ctx": "256K", "desc": "Compact coder, long context"},
                 }
@@ -68,7 +80,7 @@ OLLAMA_MODEL_CATALOG = {
         }
     },
     "[AGENTS] Tool-Calling Models": {
-        "description": "Models optimized for AI agents and tool use",
+        "description": "Models that can use tools, call functions, and work as AI agents",
         "families": {
             "Qwen Cline": {
                 "desc": "Optimized for Cline autonomous coding agent workflows",
@@ -77,8 +89,14 @@ OLLAMA_MODEL_CATALOG = {
                     "qwen2.5-coder-cline:14b": {"size": "9.0GB", "ctx": "32K", "desc": "Advanced Cline agent"},
                 }
             },
+            "Yi Coder Cline": {
+                "desc": "Yi-based models tuned for autonomous coding agents",
+                "models": {
+                    "yi-coder-cline:9b": {"size": "5.0GB", "ctx": "128K", "desc": "Yi-based Cline agent"},
+                }
+            },
             "Qwen Abliterate": {
-                "desc": "Uncensored Qwen variants with removed safety filters",
+                "desc": "Qwen with safety filters removed - uncensored for research",
                 "models": {
                     "qwen2.5-coder-abliterate:0.5b": {"size": "398MB", "ctx": "32K", "desc": "Uncensored, ultra-light"},
                     "qwen2.5-coder-abliterate:1.5b": {"size": "1.1GB", "ctx": "32K", "desc": "Uncensored, fast"},
@@ -87,10 +105,10 @@ OLLAMA_MODEL_CATALOG = {
                     "qwen2.5-coder-abliterate:14b": {"size": "9.0GB", "ctx": "32K", "desc": "Uncensored, powerful"},
                 }
             },
-            "Yi Coder": {
-                "desc": "Yi-based models optimized for coding agents",
+            "DeepHermes Abliterate": {
+                "desc": "Nous Research DeepHermes with reasoning + safety filters removed",
                 "models": {
-                    "yi-coder-cline:9b": {"size": "5.0GB", "ctx": "128K", "desc": "Yi-based Cline agent"},
+                    "huihui_ai/deephermes3-abliterated:8b": {"size": "4.9GB", "ctx": "128K", "desc": "Reasoning + uncensored"},
                 }
             },
             "Hermes": {
@@ -103,7 +121,7 @@ OLLAMA_MODEL_CATALOG = {
         }
     },
     "[VISION] Multimodal Models": {
-        "description": "Models that understand images and text",
+        "description": "Models that can see and understand images along with text",
         "families": {
             "Qwen3 VL": {
                 "desc": "Most powerful vision-language model in Qwen family",
@@ -123,8 +141,19 @@ OLLAMA_MODEL_CATALOG = {
             },
         }
     },
+    "[MEDICAL] Healthcare Models": {
+        "description": "Models trained for medical and healthcare applications",
+        "families": {
+            "Meditron": {
+                "desc": "Open-source medical LLM adapted from Llama 2 for healthcare",
+                "models": {
+                    "meditron:7b": {"size": "4.1GB", "ctx": "4K", "desc": "Medical knowledge, diagnosis"},
+                }
+            },
+        }
+    },
     "[ENTERPRISE] Specialized Models": {
-        "description": "Enterprise-grade and task-specific models",
+        "description": "Enterprise-grade models for business and research",
         "families": {
             "IBM Granite MoE": {
                 "desc": "IBM Mixture-of-Experts models for enterprise use",
@@ -158,35 +187,40 @@ OLLAMA_MODEL_CATALOG = {
                     "mixtral:8x7b": {"size": "26GB", "ctx": "32K", "desc": "Mixture of experts, powerful"},
                 }
             },
+            "Command R7B": {
+                "desc": "Cohere Labs - optimized for RAG, tool use, and 23 languages",
+                "models": {
+                    "c4ai-command-r7b:7b": {"size": "5.1GB", "ctx": "128K", "desc": "RAG + agentic + multilingual"},
+                }
+            },
             "Aya Expanse": {
-                "desc": "Cohere multilingual model for 23+ languages",
+                "desc": "Cohere multilingual model supporting 23+ languages",
                 "models": {
                     "aya-expanse:8b": {"size": "5.1GB", "ctx": "8K", "desc": "Multilingual, 23+ languages"},
                 }
             },
             "Nemotron": {
-                "desc": "NVIDIA SLM optimized for roleplay, RAG, and function calling",
+                "desc": "NVIDIA small model optimized for roleplay, RAG, and function calling",
                 "models": {
                     "nemotron-mini:4b": {"size": "2.7GB", "ctx": "4K", "desc": "NVIDIA efficient model"},
                 }
             },
-            "Other Enterprise": {
-                "desc": "Specialized enterprise models",
+            "Essential AI": {
+                "desc": "8B dense models trained from scratch, optimized for code and STEM",
                 "models": {
-                    "command-r7b:7b": {"size": "5.1GB", "ctx": "8K", "desc": "Cohere RAG-optimized"},
-                    "rnj-1:8b": {"size": "5.1GB", "ctx": "32K", "desc": "Research model"},
+                    "rnj-1:8b": {"size": "5.1GB", "ctx": "32K", "desc": "Code + STEM optimized"},
                 }
             },
         }
     },
-    "[LIGHTWEIGHT] Edge Models": {
-        "description": "Ultra-compact models for edge devices and fast inference",
+    "[LIGHTWEIGHT] Phone & Tablet Models": {
+        "description": "Small models that run on phones, tablets, and low-power devices",
         "families": {
             "SmolLM2": {
-                "desc": "Compact language models (135M-1.7B) for on-device deployment",
+                "desc": "Compact models (135M-1.7B) that can run directly on your phone",
                 "models": {
-                    "smollm2:135m": {"size": "271MB", "ctx": "8K", "desc": "Tiny, mobile-ready"},
-                    "smollm2:360m": {"size": "726MB", "ctx": "8K", "desc": "Small, fast inference"},
+                    "smollm2:135m": {"size": "271MB", "ctx": "8K", "desc": "Tiny, runs on phone"},
+                    "smollm2:360m": {"size": "726MB", "ctx": "8K", "desc": "Small, fast on phone"},
                     "smollm2:1.7b": {"size": "1.8GB", "ctx": "8K", "desc": "Compact balanced"},
                 }
             },
@@ -202,6 +236,7 @@ RECOMMENDED_MODELS = {
     "vision": "qwen3-vl:8b",
     "agent": "qwen2.5-coder-cline:7b",
     "lightweight": "smollm2:1.7b",
+    "medical": "meditron:7b",
 }
 
 def get_all_model_names():
