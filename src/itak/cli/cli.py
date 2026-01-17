@@ -36,6 +36,12 @@ from itak.cli.model_selector import (
 )
 from itak.cli.model_catalog import get_model_info
 from itak.cli.studio_launcher import launch_studio
+from itak.cli.auto_setup import auto_setup, is_first_run
+
+
+# Run auto-setup on first use
+if is_first_run():
+    auto_setup()
 
 
 @click.group()
@@ -117,6 +123,36 @@ def version(tools):
             click.echo(f"iTaK tools version: {tools_version}")
         except Exception:
             click.echo("iTaK tools not installed")
+
+
+@iTaK.command()
+@click.option("--force", "-f", is_flag=True, help="Force re-run setup even if already done")
+def setup(force):
+    """Install/reinstall all iTaK dependencies.
+    
+    Automatically runs on first use, but you can run manually to:
+    - Install missing dependencies
+    - Update to latest versions
+    - Reinstall after errors
+    
+    Example: itak setup --force
+    """
+    from itak.cli.auto_setup import auto_setup, reset_setup
+    
+    if force:
+        reset_setup()
+        click.secho("Setup marker reset. Running full setup...\n", fg="yellow")
+    
+    success = auto_setup(force=True)
+    
+    if success:
+        click.secho("\nAll dependencies installed! You're ready to go.", fg="green")
+        click.secho("\nQuick start commands:", fg="cyan")
+        click.secho("  itak create crew    - Create a new agent crew", fg="white")
+        click.secho("  itak studio         - Launch visual builder GUI", fg="white")
+        click.secho("  itak models         - Browse and download LLMs", fg="white")
+    else:
+        click.secho("\nSetup completed with some warnings. Check messages above.", fg="yellow")
 
 
 @iTaK.command()
