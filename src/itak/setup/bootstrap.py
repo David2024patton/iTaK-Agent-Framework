@@ -57,6 +57,15 @@ def check_and_install_dependencies():
         'psutil': 'psutil'
     }
     
+    # Check for crewai_tools separately (installed via crewai[tools])
+    crewai_tools_installed = False
+    try:
+        import crewai_tools
+        print_success("crewai[tools] installed")
+        crewai_tools_installed = True
+    except ImportError:
+        print_warning("crewai[tools] missing")
+    
     missing_packages = []
     
     for package_name, import_name in required_packages.items():
@@ -67,18 +76,34 @@ def check_and_install_dependencies():
             print_warning(f"{package_name} missing")
             missing_packages.append(package_name)
     
-    if missing_packages:
-        print_info(f"Installing {len(missing_packages)} missing packages...")
+    # Install missing packages
+    if missing_packages or not crewai_tools_installed:
+        packages_to_install = missing_packages.copy()
+        if not crewai_tools_installed:
+            packages_to_install.append("'crewai[tools]'")
+        
+        print_info(f"Installing {len(packages_to_install)} missing packages...")
         try:
-            subprocess.check_call([
-                sys.executable, '-m', 'pip', 'install', '--quiet'
-            ] + missing_packages)
-            print_success(f"Installed: {', '.join(missing_packages)}")
+            # Install regular packages
+            if missing_packages:
+                subprocess.check_call([
+                    sys.executable, '-m', 'pip', 'install', '--quiet'
+                ] + missing_packages)
+                print_success(f"Installed: {', '.join(missing_packages)}")
+            
+            # Install crewai[tools] separately (needs special handling)
+            if not crewai_tools_installed:
+                subprocess.check_call([
+                    sys.executable, '-m', 'pip', 'install', '--quiet', 'crewai[tools]'
+                ])
+                print_success("Installed: crewai[tools]")
+                
         except subprocess.CalledProcessError as e:
             print_error(f"Failed to install packages: {e}")
-            print_info("Please run manually: pip install " + " ".join(missing_packages))
+            print_info("Please run manually: pip install " + " ".join(packages_to_install))
     else:
         print_success("All Python dependencies installed")
+
 
 
 # Step 1: Identity

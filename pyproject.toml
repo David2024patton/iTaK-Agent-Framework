@@ -59,7 +59,10 @@ Documentation = "https://github.com/David2024patton/iTaK-Agent-Framework#readme"
 Repository = "https://github.com/David2024patton/iTaK-Agent-Framework"
 
 [tool.hatch.build.targets.wheel]
-packages = ["src/itak", "tools"]
+packages = ["src/itak"]
+
+[tool.hatch.build.targets.wheel.sources]
+"tools" = "itak_tools"
 
 [tool.ruff]
 line-length = 100

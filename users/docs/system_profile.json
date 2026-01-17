@@ -1,0 +1,41 @@
+{
+  "user": "BootstrapTest",
+  "timestamp": "2026-01-16T23:43:31.364535",
+  "platform": "Windows",
+  "gpu": "NVIDIA",
+  "cpu_cores": 32,
+  "ram_gb": 127.8,
+  "storage": [
+    {
+      "mount": "C:\\",
+      "total_gb": 1862.3,
+      "free_gb": 624.3
+    },
+    {
+      "mount": "D:\\",
+      "total_gb": 930.6,
+      "free_gb": 439.1
+    },
+    {
+      "mount": "E:\\",
+      "total_gb": 1863.0,
+      "free_gb": 398.1
+    },
+    {
+      "mount": "F:\\",
+      "total_gb": 931.4,
+      "free_gb": 128.6
+    },
+    {
+      "mount": "G:\\",
+      "total_gb": 7452.0,
+      "free_gb": 7283.6
+    },
+    {
+      "mount": "H:\\",
+      "total_gb": 1863.0,
+      "free_gb": 1778.3
+    }
+  ],
+  "python_version": "3.11.7"
+}
