@@ -350,4 +350,40 @@ build_task:
         click.secho(f"  1. cd {folder_name}", fg="white")
         click.secho(f"  2. itak install", fg="white")
         click.secho(f"  3. itak run", fg="white")
-        click.secho("\n🚀 Your crew will build the project autonomously!", fg="green", bold=True)
+        
+        # Ask if user wants to run immediately
+        if click.confirm("\n🚀 Do you want to install dependencies and run the crew now?", default=True):
+            import os
+            import subprocess
+            
+            click.secho("\n📦 Installing dependencies...", fg="yellow")
+            try:
+                # Change to crew directory and install
+                crew_path = folder_path.absolute()
+                result = subprocess.run(
+                    ["itak", "install"],
+                    cwd=str(crew_path),
+                    capture_output=True,
+                    text=True
+                )
+                
+                if result.returncode == 0:
+                    click.secho("✅ Dependencies installed!", fg="green")
+                    
+                    click.secho("\n🤖 Running your crew...", fg="yellow", bold=True)
+                    click.secho("="*70, fg="cyan")
+                    
+                    # Run the crew
+                    subprocess.run(
+                        ["itak", "run"],
+                        cwd=str(crew_path)
+                    )
+                else:
+                    click.secho(f"❌ Installation failed: {result.stderr}", fg="red")
+                    click.secho(f"\nYou can install manually with: cd {folder_name} && itak install", fg="yellow")
+            except Exception as e:
+                click.secho(f"❌ Error: {e}", fg="red")
+                click.secho(f"\nYou can run manually with: cd {folder_name} && itak install && itak run", fg="yellow")
+        else:
+            click.secho("\n💡 Run these commands when ready:", fg="yellow")
+            click.secho(f"  cd {folder_name} && itak install && itak run", fg="white")

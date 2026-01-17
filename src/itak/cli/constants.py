@@ -236,7 +236,15 @@ MODELS = {
         "groq/gemma2-9b-it",
         "groq/gemma-7b-it",
     ],
-    "ollama": ["ollama/llama3.1", "ollama/mixtral"],
+    "ollama": [
+        "ollama/qwen2.5:3b",
+        "ollama/qwen2.5:7b", 
+        "ollama/qwen2.5:14b",
+        "ollama/qwen2.5:32b",
+        "ollama/qwen2.5:72b",
+        "ollama/llama3.1",
+        "ollama/mixtral"
+    ],
     "watson": [
         "watsonx/meta-llama/llama-3-1-70b-instruct",
         "watsonx/meta-llama/llama-3-1-8b-instruct",
