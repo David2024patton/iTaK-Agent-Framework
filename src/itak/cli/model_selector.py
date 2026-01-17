@@ -61,8 +61,14 @@ def display_model_menu(filter_incompatible=True):
             is_recommended = model_name in RECOMMENDED_MODELS.values()
             
             # Compatibility indicator
+            model_size = parse_size_to_gb(model_info['size'])
+            can_cpu = model_size <= 2.5  # 3B and under can run on CPU
+            
             if compat == 'gpu':
-                compat_str = "[GPU]"
+                if can_cpu:
+                    compat_str = "[GPU][CPU OK]"
+                else:
+                    compat_str = "[GPU]"
                 compat_color = "green"
             elif compat == 'cpu':
                 compat_str = "[CPU]"
@@ -86,7 +92,7 @@ def display_model_menu(filter_incompatible=True):
             model_index += 1
     
     click.secho("\n" + "="*70, fg="cyan")
-    click.secho("* = Recommended | [GPU] = Fast | [CPU] = Slower | [DISK] = Need space", fg="white", dim=True)
+    click.secho("* = Recommended | [GPU] = Fast | [CPU OK] = Can run without GPU", fg="white", dim=True)
     if hidden_count > 0:
         click.secho(f"({hidden_count} models hidden - too large for your system)", fg="white", dim=True)
     click.secho("="*70 + "\n", fg="cyan")
