@@ -254,9 +254,6 @@ OLLAMA_MODEL_CATALOG = {
             },
         }
     },
-    # NOTE: AdaptLLM models (law, finance, medicine) on HuggingFace
-    # require GGUF conversion to work with Ollama. Not yet on Ollama library.
-    # See: huggingface.co/AdaptLLM for more domain-specific models
 }
 
 # Recommended starter models for different use cases
