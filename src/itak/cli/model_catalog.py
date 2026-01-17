@@ -229,6 +229,20 @@ OLLAMA_MODEL_CATALOG = {
             },
         }
     },
+    "[LEGAL] Law Models": {
+        "description": "Models trained on legal texts - for legal research and drafting assistance",
+        "families": {
+            "Law Model": {
+                "desc": "Fine-tuned on Mistral 7B for legal and law - acts as a legal virtual assistant",
+                "models": {
+                    "initium/law_model:Q2_K": {"size": "2.7GB", "ctx": "8K", "desc": "Legal assistant, smallest"},
+                    "initium/law_model:Q3_K_M": {"size": "3.3GB", "ctx": "8K", "desc": "Legal assistant, balanced"},
+                    "initium/law_model:Q5_0": {"size": "4.4GB", "ctx": "8K", "desc": "Legal assistant, quality"},
+                    "initium/law_model:Q8_0": {"size": "7.2GB", "ctx": "8K", "desc": "Legal assistant, best quality"},
+                }
+            },
+        }
+    },
     "[MEDICAL] Healthcare Models": {
         "description": "Models trained on medical literature - for healthcare research only",
         "families": {
@@ -240,6 +254,9 @@ OLLAMA_MODEL_CATALOG = {
             },
         }
     },
+    # NOTE: AdaptLLM models (law, finance, medicine) on HuggingFace
+    # require GGUF conversion to work with Ollama. Not yet on Ollama library.
+    # See: huggingface.co/AdaptLLM for more domain-specific models
 }
 
 # Recommended starter models for different use cases
@@ -251,6 +268,7 @@ RECOMMENDED_MODELS = {
     "agent": "qwen2.5-coder-cline:7b",
     "lightweight": "smollm2:1.7b",
     "medical": "meditron:7b",
+    "legal": "initium/law_model:Q5_0",
 }
 
 def get_all_model_names():
