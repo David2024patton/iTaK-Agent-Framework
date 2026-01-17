@@ -229,6 +229,23 @@ OLLAMA_MODEL_CATALOG = {
             },
         }
     },
+    "[FINANCE] Trading & Economics Models": {
+        "description": "Models for finance, trading, investing, risk analysis, and market psychology",
+        "families": {
+            "Fin-R1": {
+                "desc": "Financial reasoning LLM for insurance, trust, securities, and banking",
+                "models": {
+                    "mychen76/Fin-R1:Q6": {"size": "5.9GB", "ctx": "8K", "desc": "Financial reasoning, Q6"},
+                }
+            },
+            "Plutus": {
+                "desc": "Trained on 394 books: finance, trading, psychology, social engineering",
+                "models": {
+                    "0xroyce/plutus:latest": {"size": "4.9GB", "ctx": "128K", "desc": "Finance + psychology + trading"},
+                }
+            },
+        }
+    },
     "[LEGAL] Law Models": {
         "description": "Models trained on legal texts - for legal research and drafting assistance",
         "families": {
