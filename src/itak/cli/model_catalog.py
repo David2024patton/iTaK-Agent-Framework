@@ -2,7 +2,7 @@
 # Organized by category with descriptions and metadata
 
 OLLAMA_MODEL_CATALOG = {
-    "🧠 Reasoning & General Purpose": {
+    "[REASONING] Deep Thinking Models": {
         "description": "Deep thinking models for complex reasoning tasks",
         "models": {
             "deepseek-r1:1.5b": {"size": "1.1GB", "ctx": "128K", "desc": "Fast reasoning, lightweight"},
@@ -21,7 +21,7 @@ OLLAMA_MODEL_CATALOG = {
             "cogito:14b": {"size": "9.0GB", "ctx": "128K", "desc": "Thinking model, powerful"},
         }
     },
-    "💻 Coding & Development": {
+    "[CODING] Development Models": {
         "description": "Specialized models for code generation and development",
         "models": {
             "qwen2.5-coder:0.5b": {"size": "398MB", "ctx": "32K", "desc": "Ultra-fast code completion"},
@@ -37,7 +37,7 @@ OLLAMA_MODEL_CATALOG = {
             "deepseek-r1-coder-tools:14b": {"size": "30GB", "ctx": "128K", "desc": "Professional tools coding"},
         }
     },
-    "🤖 Agent & Tool-Calling": {
+    "[AGENTS] Tool-Calling Models": {
         "description": "Models optimized for AI agents and tool use",
         "models": {
             "qwen2.5-coder-cline:7b": {"size": "4.7GB", "ctx": "32K", "desc": "Cline-optimized coding agent"},
@@ -52,7 +52,7 @@ OLLAMA_MODEL_CATALOG = {
             "hermes3:8b": {"size": "4.7GB", "ctx": "128K", "desc": "Strong function calling"},
         }
     },
-    "👁️ Vision & Multimodal": {
+    "[VISION] Multimodal Models": {
         "description": "Models that understand images and text",
         "models": {
             "qwen3-vl:2b": {"size": "1.9GB", "ctx": "256K", "desc": "Fast vision, lightweight"},
@@ -63,7 +63,7 @@ OLLAMA_MODEL_CATALOG = {
             "granite3.2-vision:2b": {"size": "2.4GB", "ctx": "16K", "desc": "IBM vision model"},
         }
     },
-    "🏢 Enterprise & Specialized": {
+    "[ENTERPRISE] Specialized Models": {
         "description": "Enterprise-grade and task-specific models",
         "models": {
             "granite3.1-moe:1b": {"size": "1.4GB", "ctx": "128K", "desc": "IBM MoE, efficient"},
@@ -84,7 +84,7 @@ OLLAMA_MODEL_CATALOG = {
             "rnj-1:8b": {"size": "5.1GB", "ctx": "32K", "desc": "Research model"},
         }
     },
-    "🪶 Lightweight & Edge": {
+    "[LIGHTWEIGHT] Edge Models": {
         "description": "Ultra-compact models for edge devices and fast inference",
         "models": {
             "smollm2:135m": {"size": "271MB", "ctx": "8K", "desc": "Tiny, mobile-ready"},

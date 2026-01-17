@@ -9,7 +9,7 @@ from .model_catalog import OLLAMA_MODEL_CATALOG, RECOMMENDED_MODELS, get_model_i
 def display_model_menu():
     """Display beautiful categorized model menu"""
     click.secho("\n" + "="*70, fg="cyan")
-    click.secho("🤖 iTaK MODEL CATALOG", fg="cyan", bold=True)
+    click.secho("iTaK MODEL CATALOG", fg="cyan", bold=True)
     click.secho("="*70, fg="cyan")
     
     model_index = 1
@@ -30,7 +30,7 @@ def display_model_menu():
             
             # Check if it's a recommended model
             is_recommended = model_name in RECOMMENDED_MODELS.values()
-            star = "⭐" if is_recommended else "  "
+            star = "*" if is_recommended else " "
             
             click.secho(f"   {star} ", nl=False)
             click.secho(f"{str(model_index).rjust(2)}. ", fg="green", nl=False)
@@ -42,7 +42,7 @@ def display_model_menu():
             model_index += 1
     
     click.secho("\n" + "="*70, fg="cyan")
-    click.secho("⭐ = Recommended for iTaK agents", fg="yellow")
+    click.secho("* = Recommended for iTaK agents", fg="yellow")
     click.secho("="*70 + "\n", fg="cyan")
     
     return model_map
@@ -55,11 +55,11 @@ def select_models_interactive():
     model_map = display_model_menu()
     total_models = len(model_map)
     
-    click.secho("📥 Select models to download:", fg="green", bold=True)
-    click.secho("   • Enter numbers separated by commas (e.g., 1,5,12)", fg="white")
-    click.secho("   • Enter 'r' for recommended set", fg="white")
-    click.secho("   • Enter 'a' for all models (warning: very large!)", fg="white")
-    click.secho("   • Enter 'q' to skip\n", fg="white")
+    click.secho("Select models to download:", fg="green", bold=True)
+    click.secho("   - Enter numbers separated by commas (e.g., 1,5,12)", fg="white")
+    click.secho("   - Enter 'r' for recommended set", fg="white")
+    click.secho("   - Enter 'a' for all models (warning: very large!)", fg="white")
+    click.secho("   - Enter 'q' to skip\n", fg="white")
     
     selection = click.prompt("Your choice", type=str, default="r")
     
@@ -71,7 +71,7 @@ def select_models_interactive():
         return list(RECOMMENDED_MODELS.values())
     
     if selection.lower() == 'a':
-        if click.confirm("⚠️  This will download ALL models (~200GB+). Continue?", default=False):
+        if click.confirm("WARNING: This will download ALL models (~200GB+). Continue?", default=False):
             return list(model_map.values())
         return []
     
@@ -83,10 +83,10 @@ def select_models_interactive():
             if 1 <= idx <= total_models:
                 selected.append(model_map[idx])
             else:
-                click.secho(f"⚠️  Invalid number: {idx} (must be 1-{total_models})", fg="yellow")
+                click.secho(f"Invalid number: {idx} (must be 1-{total_models})", fg="yellow")
         return selected
     except ValueError:
-        click.secho("❌ Invalid input. Please enter numbers separated by commas.", fg="red")
+        click.secho("Invalid input. Please enter numbers separated by commas.", fg="red")
         return []
 
 def download_models(model_names, show_progress=True):
@@ -98,10 +98,10 @@ def download_models(model_names, show_progress=True):
     total = len(model_names)
     
     if total == 0:
-        click.secho("ℹ️  No models selected.", fg="yellow")
+        click.secho("No models selected.", fg="yellow")
         return results
     
-    click.secho(f"\n📥 Downloading {total} model(s)...\n", fg="cyan", bold=True)
+    click.secho(f"\nDownloading {total} model(s)...\n", fg="cyan", bold=True)
     
     for i, model_name in enumerate(model_names, 1):
         info = get_model_info(model_name)
@@ -119,19 +119,19 @@ def download_models(model_names, show_progress=True):
             )
             
             if result.returncode == 0:
-                click.secho(f"   ✅ {model_name} downloaded successfully!", fg="green")
+                click.secho(f"   [OK] {model_name} downloaded successfully!", fg="green")
                 results[model_name] = True
             else:
-                click.secho(f"   ❌ Failed to download {model_name}", fg="red")
+                click.secho(f"   [FAIL] Failed to download {model_name}", fg="red")
                 results[model_name] = False
         except Exception as e:
-            click.secho(f"   ❌ Error: {e}", fg="red")
+            click.secho(f"   [ERROR] {e}", fg="red")
             results[model_name] = False
     
     # Summary
     success_count = sum(1 for v in results.values() if v)
     click.secho(f"\n{'='*70}", fg="cyan")
-    click.secho(f"📊 Download Summary: {success_count}/{total} successful", 
+    click.secho(f"Download Summary: {success_count}/{total} successful", 
                 fg="green" if success_count == total else "yellow", bold=True)
     click.secho(f"{'='*70}\n", fg="cyan")
     
@@ -159,36 +159,36 @@ def check_and_pull_model(model_name):
         info = get_model_info(model_name)
         size_str = info['size'] if info else "unknown size"
         
-        click.secho(f"⚠️  Model '{model_name}' not found locally.", fg="yellow")
+        click.secho(f"Model '{model_name}' not found locally.", fg="yellow")
         click.secho(f"   Downloading {model_name} ({size_str})...", fg="yellow")
         click.secho("   (This may take a few minutes on first run)", fg="white", dim=True)
         
         result = subprocess.run(["ollama", "pull", model_name], capture_output=False)
         
         if result.returncode == 0:
-            click.secho(f"✅ Model '{model_name}' downloaded successfully!", fg="green")
+            click.secho(f"[OK] Model '{model_name}' downloaded successfully!", fg="green")
             return True
         else:
-            click.secho(f"❌ Failed to download '{model_name}'", fg="red")
+            click.secho(f"[FAIL] Failed to download '{model_name}'", fg="red")
             return False
             
     except Exception as e:
-        click.secho(f"⚠️  Could not check models: {e}", fg="yellow")
+        click.secho(f"Could not check models: {e}", fg="yellow")
         return False
 
 def get_quick_model_selection():
     """Quick model selection by category for crew creation"""
-    click.secho("\n🎯 Quick Model Selection:", fg="cyan", bold=True)
+    click.secho("\nQuick Model Selection:", fg="cyan", bold=True)
     click.secho("="*50, fg="cyan")
     
     options = [
-        ("1", "qwen2.5-coder:7b", "💻 Best for coding (4.7GB)"),
-        ("2", "deepseek-r1:8b", "🧠 Best for reasoning (5.2GB)"),
-        ("3", "qwen3:8b", "⚡ Best general purpose (5.2GB)"),
-        ("4", "qwen3-vl:8b", "👁️ Best for vision (6.1GB)"),
-        ("5", "qwen2.5-coder-cline:7b", "🤖 Best for agents (4.7GB)"),
-        ("6", "smollm2:1.7b", "🪶 Lightweight (1.8GB)"),
-        ("c", None, "📋 Show full catalog"),
+        ("1", "qwen2.5-coder:7b", "[CODING] Best for coding (4.7GB)"),
+        ("2", "deepseek-r1:8b", "[REASONING] Best for reasoning (5.2GB)"),
+        ("3", "qwen3:8b", "[GENERAL] Best general purpose (5.2GB)"),
+        ("4", "qwen3-vl:8b", "[VISION] Best for vision (6.1GB)"),
+        ("5", "qwen2.5-coder-cline:7b", "[AGENTS] Best for agents (4.7GB)"),
+        ("6", "smollm2:1.7b", "[LIGHT] Lightweight (1.8GB)"),
+        ("c", None, "[CATALOG] Show full catalog"),
     ]
     
     for opt, model, desc in options:
