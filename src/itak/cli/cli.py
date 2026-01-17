@@ -696,3 +696,7 @@ def traces_status():
 
 if __name__ == "__main__":
     iTaK()
+
+# Entry point for console_scripts
+def main():
+    iTaK()
