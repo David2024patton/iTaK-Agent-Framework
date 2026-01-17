@@ -103,17 +103,20 @@ def display_model_menu(filter_incompatible=True, show_numbers=False):
                 click.secho(f"{model_name.ljust(30)}", fg="bright_white", bold=True, nl=False)
                 click.secho(f" {size_str}", fg="cyan", nl=False)
                 
-                # Show GPU and CPU tags with different colors
+                # Show GPU and CPU tags with different colors (fixed width for alignment)
+                # [GPU][CPU] = 11 chars, [GPU] = 5 chars, need 6 spaces padding
                 if compat == 'gpu':
                     click.secho(" [GPU]", fg="green", nl=False)
                     if can_cpu:
-                        click.secho("[CPU]", fg="bright_yellow", nl=False)  # Orange-ish
+                        click.secho("[CPU]", fg="bright_yellow", nl=False)
+                    else:
+                        click.secho("      ", nl=False)  # Padding to match [CPU] width
                 elif compat == 'cpu':
-                    click.secho(" [CPU]", fg="bright_yellow", nl=False)
+                    click.secho(" [CPU]      ", fg="bright_yellow", nl=False)  # Padded
                 elif compat == 'no_disk':
-                    click.secho(" [DISK]", fg="red", nl=False)
+                    click.secho(" [DISK]     ", fg="red", nl=False)  # Padded
                 else:
-                    click.secho(" [???]", fg="red", nl=False)
+                    click.secho(" [???]      ", fg="red", nl=False)  # Padded
                 
                 click.secho(f" {model_info['desc']}", fg="white", dim=True)
                 
