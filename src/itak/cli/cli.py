@@ -34,6 +34,7 @@ from itak.cli.model_selector import (
     select_models_interactive,
     download_models,
 )
+from itak.cli.model_catalog import get_model_info
 
 
 @click.group()
@@ -120,28 +121,51 @@ def version(tools):
 @iTaK.command()
 @click.option("--list", "-l", "list_only", is_flag=True, help="Just list available models, don't download")
 @click.option("--recommended", "-r", is_flag=True, help="Download recommended model set")
-def models(list_only, recommended):
+@click.option("--all", "-a", "show_all", is_flag=True, help="Show all models (including incompatible)")
+def models(list_only, recommended, show_all):
     """Browse and download Ollama models for iTaK agents.
     
     Features:
+    - System-aware filtering (only shows models you can run)
     - Categorized by use case (Coding, Reasoning, Vision, etc.)
     - Download multiple models at once
-    - Quick recommendations for different tasks
+    - Shows [GPU] fast or [CPU] slow compatibility
+    
+    Use --all to see all models including ones too large for your system.
     """
+    filter_incompatible = not show_all
+    
     if list_only:
-        display_model_menu()
+        display_model_menu(filter_incompatible)
         return
     
     if recommended:
         from itak.cli.model_catalog import RECOMMENDED_MODELS
-        click.secho("\n📥 Downloading recommended models...", fg="cyan", bold=True)
-        download_models(list(RECOMMENDED_MODELS.values()))
+        from itak.cli.system_detect import get_system_specs, get_model_compatibility
+        
+        click.secho("\nDownloading system-compatible recommended models...", fg="cyan", bold=True)
+        
+        # Filter to compatible models
+        specs = get_system_specs()
+        compatible = []
+        for model_name in RECOMMENDED_MODELS.values():
+            info = get_model_info(model_name)
+            if info:
+                compat = get_model_compatibility(info, specs)
+                if compat in ('gpu', 'cpu'):
+                    compatible.append(model_name)
+        
+        if compatible:
+            download_models(compatible)
+        else:
+            click.secho("No recommended models are compatible with your system.", fg="red")
         return
     
     # Interactive selection
-    selected = select_models_interactive()
+    selected = select_models_interactive(filter_incompatible)
     if selected:
         download_models(selected)
+
 
 @iTaK.command()
 @click.option(
