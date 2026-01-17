@@ -1,0 +1,58 @@
+{
+  "timestamp": "2026-01-16T19:51:28.436023",
+  "hardware": {
+    "environment": "Windows",
+    "gpu": "NVIDIA",
+    "cpu_cores": 32,
+    "ram_gb": 127.8,
+    "storage": [
+      {
+        "mount": "C:\\",
+        "total_gb": 1862.3,
+        "free_gb": 625.0,
+        "percent_used": 66.4
+      },
+      {
+        "mount": "D:\\",
+        "total_gb": 930.6,
+        "free_gb": 439.2,
+        "percent_used": 52.8
+      },
+      {
+        "mount": "F:\\",
+        "total_gb": 931.4,
+        "free_gb": 128.6,
+        "percent_used": 86.2
+      },
+      {
+        "mount": "G:\\",
+        "total_gb": 7452.0,
+        "free_gb": 7283.6,
+        "percent_used": 2.3
+      },
+      {
+        "mount": "H:\\",
+        "total_gb": 1863.0,
+        "free_gb": 1778.3,
+        "percent_used": 4.5
+      }
+    ],
+    "python_version": "3.11.7"
+  },
+  "docker_services": {
+    "docker": "running",
+    "ollama": "stopped",
+    "chromadb": "stopped",
+    "context7": "stopped"
+  },
+  "telemetry": {
+    "vps_telemetry": "working",
+    "test_trace_id": "a90eedf670fe657648d4e1bc8041efde",
+    "itak_config": "correct"
+  },
+  "itak_framework": {
+    "itak_installed": true,
+    "dependencies": "complete"
+  },
+  "health_score": 57
+}

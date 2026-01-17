@@ -11,7 +11,7 @@ from typing import Final
 # Default to VPS telemetry server - override with ITAK_TELEMETRY_URL env var
 iTaK_TELEMETRY_BASE_URL: Final[str] = os.getenv(
     "ITAK_TELEMETRY_URL", 
-    "http://145.79.2.67:4319"  # iTaK VPS OTLP collector
+    "http://145.79.2.67:4318"  # iTaK VPS OTLP collector (HTTP endpoint)
 )
 iTaK_TELEMETRY_SERVICE_NAME: Final[str] = "itak-telemetry"
 
