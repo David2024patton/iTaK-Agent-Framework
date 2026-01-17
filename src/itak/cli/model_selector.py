@@ -90,7 +90,7 @@ def display_model_menu(filter_incompatible=True):
                 
                 if compat == 'gpu':
                     if can_cpu:
-                        compat_str = "[GPU][CPU OK]"
+                        compat_str = "[GPU][CPU]"
                     else:
                         compat_str = "[GPU]"
                     compat_color = "green"
@@ -116,7 +116,7 @@ def display_model_menu(filter_incompatible=True):
                 model_index += 1
     
     click.secho("\n" + "="*70, fg="cyan")
-    click.secho("* = Recommended | [GPU] = Fast | [CPU OK] = Can run without GPU", fg="white", dim=True)
+    click.secho("* = Recommended | [GPU] = Fast | [CPU] = Can run on CPU", fg="white", dim=True)
     if hidden_count > 0:
         click.secho(f"({hidden_count} models hidden - too large for your system)", fg="white", dim=True)
     click.secho("="*70 + "\n", fg="cyan")
