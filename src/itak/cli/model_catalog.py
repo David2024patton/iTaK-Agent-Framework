@@ -227,6 +227,12 @@ OLLAMA_MODEL_CATALOG = {
                     "rnj-1:8b": {"size": "5.1GB", "ctx": "32K", "desc": "Code + STEM optimized"},
                 }
             },
+            "Township Small Business": {
+                "desc": "Social media marketing chatbot for small businesses - generates posts, hashtags, visuals",
+                "models": {
+                    "puseletso55/township_smal_business:latest": {"size": "4.1GB", "ctx": "8K", "desc": "SMB social media marketing"},
+                }
+            },
         }
     },
     "[FINANCE] Trading & Economics Models": {
