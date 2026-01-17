@@ -13,7 +13,7 @@ from .system_detect import (
     get_recommendation_tier
 )
 
-def display_model_menu(filter_incompatible=True):
+def display_model_menu(filter_incompatible=True, show_numbers=False):
     """Display categorized model menu with family groupings, optionally filtering by system compatibility"""
     
     # Detect system specs
@@ -30,6 +30,7 @@ def display_model_menu(filter_incompatible=True):
     model_index = 1
     model_map = {}  # Maps index to model name
     hidden_count = 0
+    first_category = True
     
     for category_name, category_data in OLLAMA_MODEL_CATALOG.items():
         # Check if this category has any compatible models
@@ -48,9 +49,12 @@ def display_model_menu(filter_incompatible=True):
             continue
         
         # Category header
+        if not first_category:
+            click.secho("")  # Blank line before new category
+        first_category = False
+        
         click.secho(f"\n{category_name}", fg="yellow", bold=True)
-        click.secho(f"   {category_data['description']}", fg="white", dim=True)
-        click.secho("-" * 68, fg="white", dim=True)
+        click.secho(f"{category_data['description']}", fg="white", dim=True)
         
         # Iterate through families
         for family_name, family_data in category_data.get("families", {}).items():
@@ -67,18 +71,18 @@ def display_model_menu(filter_incompatible=True):
             if not compatible_models:
                 continue
             
-            # Family header with description
+            # Family header with separator
+            click.secho("-" * 70, fg="cyan")
             family_desc = family_data.get("desc", "")
-            click.secho(f"   [{family_name}]", fg="magenta", bold=True, nl=False)
+            click.secho(f"{family_name}", fg="magenta", bold=True)
             if family_desc:
-                click.secho(f" - {family_desc}", fg="white", dim=True)
-            else:
-                click.secho("")
+                click.secho(f"{family_desc}", fg="white", dim=True)
+            click.secho("-" * 70, fg="cyan")
             
             for model_name, model_info, compat in compatible_models:
                 model_map[model_index] = model_name
                 
-                # Format: [index] model_name (size) - description
+                # Format model line
                 size_str = f"[{model_info['size']}]".ljust(10)
                 
                 # Check if it's a recommended model
@@ -104,11 +108,15 @@ def display_model_menu(filter_incompatible=True):
                     compat_str = "[???]"
                     compat_color = "red"
                 
-                star = "*" if is_recommended else " "
+                star = "* " if is_recommended else "  "
                 
-                click.secho(f"      {star} ", nl=False)
-                click.secho(f"{str(model_index).rjust(2)}. ", fg="green", nl=False)
-                click.secho(f"{model_name.ljust(28)}", fg="bright_white", bold=True, nl=False)
+                # Show number only if requested (for selection mode)
+                if show_numbers:
+                    click.secho(f"  {star}{str(model_index).rjust(2)}. ", fg="green", nl=False)
+                else:
+                    click.secho(f"  {star}", nl=False)
+                
+                click.secho(f"{model_name.ljust(30)}", fg="bright_white", bold=True, nl=False)
                 click.secho(f" {size_str}", fg="cyan", nl=False)
                 click.secho(f" {compat_str}", fg=compat_color, nl=False)
                 click.secho(f" {model_info['desc']}", fg="white", dim=True)
@@ -128,7 +136,8 @@ def select_models_interactive(filter_incompatible=True):
     Interactive model selection with system-aware filtering.
     Returns list of selected model names.
     """
-    model_map = display_model_menu(filter_incompatible)
+    # Show menu with numbers for selection
+    model_map = display_model_menu(filter_incompatible, show_numbers=True)
     total_models = len(model_map)
     
     if total_models == 0:
