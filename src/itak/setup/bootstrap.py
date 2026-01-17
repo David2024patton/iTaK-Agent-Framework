@@ -160,7 +160,7 @@ def setup_backend(env_info):
     # Check if ChromaDB is running
     def is_chroma_running():
         try:
-            with urllib.request.urlopen("http://localhost:29800/api/v1/heartbeat", timeout=2) as response:
+            with urllib.request.urlopen("http://localhost:8900/api/v1/version", timeout=2) as response:
                 return response.status == 200
         except:
             return False
@@ -178,7 +178,7 @@ def setup_backend(env_info):
                 subprocess.run([
                     "docker", "run", "-d",
                     "--name", "shared-chromadb",
-                    "-p", "29800:8000",
+                    "-p", "8900:8000",
                     "--restart", "unless-stopped",
                     "chromadb/chroma"
                 ], check=True)
@@ -303,7 +303,7 @@ def main():
         print(f"Resources: {env_info.get('cpu_cores')} cores, {env_info.get('ram_gb')}GB RAM")
         print(f"\nServices Deployed:")
         print(f"  • Ollama (LLM Backend): http://localhost:11434")
-        print(f"  • ChromaDB (Memory): http://localhost:29800")
+        print(f"  • ChromaDB (Memory): http://localhost:8900")
         print(f"  • VPS Telemetry: http://145.79.2.67:4318")
         print(f"\nNext Steps:")
         print(f"  1. Run: python -m itak.cli to start using iTaK")

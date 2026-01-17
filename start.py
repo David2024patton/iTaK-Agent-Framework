@@ -129,17 +129,17 @@ def test_docker_services():
         print_warning("Ollama container not found (port 11434)")
         results['ollama'] = 'stopped'
     
-    # Check ChromaDB (port 29800)
+    # Check ChromaDB (port 8900)
     try:
-        with urllib.request.urlopen("http://localhost:29800/api/v1/heartbeat", timeout=2) as response:
+        with urllib.request.urlopen("http://localhost:8900/api/v1/version", timeout=2) as response:
             if response.status == 200:
-                print_success("ChromaDB responding (port 29800)")
+                print_success("ChromaDB responding (port 8900)")
                 results['chromadb'] = 'running'
             else:
                 print_warning("ChromaDB not responding")
                 results['chromadb'] = 'unhealthy'
     except:
-        print_warning("ChromaDB container not found (port 29800)")
+        print_warning("ChromaDB container not found (port 8900)")
         results['chromadb'] = 'stopped'
     
     # Check Context7 (port 29700)
@@ -337,7 +337,7 @@ def generate_report(hardware, docker, telemetry, itak):
     if docker.get('ollama') != 'running':
         print(f"  • Start Ollama: docker run -d --gpus=all -p 11434:11434 --name ollama ollama/ollama")
     if docker.get('chromadb') != 'running':
-        print(f"  • Start ChromaDB: docker run -d -p 29800:8000 --name shared-chromadb chromadb/chroma")
+        print(f"  • Start ChromaDB: docker run -d -p 8900:8000 --name shared-chromadb chromadb/chroma")
     
     return report
 
