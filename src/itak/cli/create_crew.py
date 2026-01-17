@@ -270,4 +270,84 @@ def create_crew(name, provider=None, skip_provider=False, parent_folder=None):
             dst_file = src_folder / file_name
             copy_template(src_file, dst_file, name, class_name, folder_name)
 
-    click.secho(f"Crew {name} created successfully!", fg="green", bold=True)
+    # Interactive prompts for autonomous crew configuration
+    if not parent_folder and not skip_provider:
+        click.secho("\n" + "="*70, fg="cyan")
+        click.secho("🤖 AUTONOMOUS CREW CONFIGURATION", fg="cyan", bold=True)
+        click.secho("="*70 + "\n", fg="cyan")
+        
+        click.secho("Let's configure your crew! You can paste long descriptions.", fg="yellow")
+        click.secho("Press Enter twice to finish multi-line input.\n", fg="yellow")
+        
+        # Get project description
+        click.secho("📝 What should this crew build? (Describe your project)", fg="green", bold=True)
+        click.secho("Example: Build a multi-tenant inventory SaaS for ECAM...\n", fg="white", dim=True)
+        
+        description_lines = []
+        while True:
+            line = input()
+            if line == "" and description_lines and description_lines[-1] == "":
+                description_lines.pop()  # Remove the last empty line
+                break
+            description_lines.append(line)
+        
+        project_description = "\n".join(description_lines).strip()
+        
+        if project_description:
+            # Auto-generate agents.yaml
+            agents_yaml = f"""# Auto-generated agents configuration
+# Edit this file to customize your agents
+
+builder:
+  role: >
+    Expert Full Stack Developer
+  goal: >
+    {project_description}
+  backstory: >
+    You are an expert developer who builds production-ready applications.
+    You write clean, maintainable code and follow best practices.
+    You have deep expertise in modern web technologies and can build
+    complete applications from scratch.
+"""
+            
+            # Auto-generate tasks.yaml
+            tasks_yaml = f"""# Auto-generated tasks configuration
+# Edit this file to customize your tasks
+
+build_task:
+  description: >
+    {project_description}
+    
+    Create all necessary files, implement all features, and ensure
+    the application is production-ready with proper error handling,
+    documentation, and best practices.
+  expected_output: >
+    Complete working application with all features implemented.
+    All files created and properly structured.
+  agent: builder
+  output_file: output/build_report.md
+"""
+            
+            # Write the auto-generated YAML files
+            agents_yaml_path = src_folder / "config" / "agents.yaml"
+            tasks_yaml_path = src_folder / "config" / "tasks.yaml"
+            
+            with open(agents_yaml_path, 'w') as f:
+                f.write(agents_yaml)
+            
+            with open(tasks_yaml_path, 'w') as f:
+                f.write(tasks_yaml)
+            
+            click.secho("\n✅ Auto-generated configuration files:", fg="green", bold=True)
+            click.secho(f"  - {agents_yaml_path}", fg="green")
+            click.secho(f"  - {tasks_yaml_path}", fg="green")
+            click.secho("\n💡 You can edit these files to customize your crew", fg="yellow")
+
+    click.secho(f"\n🎉 Crew {name} created successfully!", fg="green", bold=True)
+    
+    if not parent_folder:
+        click.secho("\n📋 Next steps:", fg="cyan", bold=True)
+        click.secho(f"  1. cd {folder_name}", fg="white")
+        click.secho(f"  2. itak install", fg="white")
+        click.secho(f"  3. itak run", fg="white")
+        click.secho("\n🚀 Your crew will build the project autonomously!", fg="green", bold=True)
