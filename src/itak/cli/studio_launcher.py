@@ -40,7 +40,7 @@ def install_streamlit():
     subprocess.run([sys.executable, "-m", "pip", "install", "streamlit"], 
                    capture_output=True)
 
-def launch_studio(port=8501, no_browser=False):
+def launch_studio(port=29501, no_browser=False):
     """Launch the CrewAI Studio GUI"""
     
     # Check for streamlit

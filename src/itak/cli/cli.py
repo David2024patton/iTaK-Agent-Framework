@@ -120,7 +120,7 @@ def version(tools):
 
 
 @iTaK.command()
-@click.option("--port", "-p", default=8501, help="Port to run Studio on (default: 8501)")
+@click.option("--port", "-p", default=29501, help="Port to run Studio on (default: 29501)")
 @click.option("--no-browser", is_flag=True, help="Don't auto-open browser")
 def studio(port, no_browser):
     """Launch iTaK Studio - Visual Agent Builder GUI.
