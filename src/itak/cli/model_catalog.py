@@ -203,10 +203,11 @@ OLLAMA_MODEL_CATALOG = {
                     "mixtral:8x7b": {"size": "26GB", "ctx": "32K", "desc": "8x7B experts, powerful"},
                 }
             },
-            "Command R7B": {
-                "desc": "Cohere Labs - optimized for RAG, tool use, and 23 languages",
+            "Command R": {
+                "desc": "Cohere Labs enterprise LLMs - RAG with citations, tool use, 10+ languages",
                 "models": {
                     "c4ai-command-r7b:7b": {"size": "5.1GB", "ctx": "128K", "desc": "RAG + agentic + multilingual"},
+                    "command-r-plus:latest": {"size": "63GB", "ctx": "128K", "desc": "Most powerful, enterprise-grade"},
                 }
             },
             "Aya Expanse": {
