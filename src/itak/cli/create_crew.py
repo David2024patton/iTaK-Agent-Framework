@@ -397,6 +397,8 @@ class {class_name}Crew():
         if click.confirm("\n🚀 Do you want to run the crew now and start building?", default=True):
             import subprocess
             import sys
+            import requests
+            import time
             
             click.secho("\n🤖 Starting autonomous build...", fg="yellow", bold=True)
             click.secho("="*70, fg="cyan")
@@ -407,8 +409,77 @@ class {class_name}Crew():
             try:
                 crew_path = folder_path.absolute()
                 
-                # Step 1: Install dependencies using uv
-                click.secho("📦 Installing dependencies...", fg="yellow")
+                # Self-healing Step 1: Check if Ollama is running
+                click.secho("🔍 Checking Ollama status...", fg="yellow")
+                ollama_running = False
+                try:
+                    response = requests.get("http://localhost:11434/api/tags", timeout=5)
+                    if response.status_code == 200:
+                        ollama_running = True
+                        click.secho("✅ Ollama is running", fg="green")
+                except:
+                    pass
+                
+                if not ollama_running:
+                    click.secho("⚠️  Ollama not running. Starting Ollama...", fg="yellow")
+                    try:
+                        # Try to start Ollama in background
+                        subprocess.Popen(
+                            ["ollama", "serve"],
+                            stdout=subprocess.DEVNULL,
+                            stderr=subprocess.DEVNULL,
+                            creationflags=subprocess.CREATE_NO_WINDOW if sys.platform == 'win32' else 0
+                        )
+                        # Wait for Ollama to start
+                        for i in range(10):
+                            time.sleep(2)
+                            try:
+                                response = requests.get("http://localhost:11434/api/tags", timeout=2)
+                                if response.status_code == 200:
+                                    ollama_running = True
+                                    click.secho("✅ Ollama started successfully", fg="green")
+                                    break
+                            except:
+                                pass
+                        
+                        if not ollama_running:
+                            click.secho("❌ Could not start Ollama. Please start it manually: ollama serve", fg="red")
+                            return
+                    except FileNotFoundError:
+                        click.secho("❌ Ollama not installed. Please install from: https://ollama.ai", fg="red")
+                        return
+                
+                # Self-healing Step 2: Check if required model is available
+                model_name = "qwen2.5:3b"  # Default model
+                click.secho(f"🔍 Checking if model '{model_name}' is available...", fg="yellow")
+                
+                try:
+                    response = requests.get("http://localhost:11434/api/tags", timeout=5)
+                    models = response.json().get("models", [])
+                    model_names = [m.get("name", "") for m in models]
+                    
+                    if model_name not in model_names and f"{model_name}:latest" not in model_names:
+                        click.secho(f"⚠️  Model '{model_name}' not found. Pulling model...", fg="yellow")
+                        click.secho("   (This may take a few minutes on first run)", fg="white", dim=True)
+                        
+                        # Pull the model
+                        result = subprocess.run(
+                            ["ollama", "pull", model_name],
+                            capture_output=False
+                        )
+                        
+                        if result.returncode == 0:
+                            click.secho(f"✅ Model '{model_name}' pulled successfully", fg="green")
+                        else:
+                            click.secho(f"❌ Failed to pull model. Please run: ollama pull {model_name}", fg="red")
+                            return
+                    else:
+                        click.secho(f"✅ Model '{model_name}' is available", fg="green")
+                except Exception as e:
+                    click.secho(f"⚠️  Could not check models: {e}", fg="yellow")
+                
+                # Step 3: Install dependencies using uv
+                click.secho("\n📦 Installing dependencies...", fg="yellow")
                 result = subprocess.run(
                     ["uv", "sync"],
                     cwd=str(crew_path),
