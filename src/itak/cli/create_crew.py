@@ -389,7 +389,7 @@ build_task:
                 
                 # Run crew and stream output to user
                 process = subprocess.Popen(
-                    ["uv", "run", "itak", "run"],
+                    ["uv", "run", "crewai", "run"],
                     cwd=str(crew_path),
                     stdout=subprocess.PIPE,
                     stderr=subprocess.STDOUT,
