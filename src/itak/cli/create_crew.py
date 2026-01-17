@@ -353,6 +353,7 @@ build_task:
         
         # Ask if user wants to run immediately
         if click.confirm("\n🚀 Do you want to run the crew now and start building?", default=True):
+            import subprocess
             import sys
             
             click.secho("\n🤖 Starting autonomous build...", fg="yellow", bold=True)
@@ -362,25 +363,65 @@ build_task:
             click.secho("="*70 + "\n", fg="cyan")
             
             try:
-                # Add crew directory to Python path
                 crew_path = folder_path.absolute()
-                sys.path.insert(0, str(crew_path / "src"))
                 
-                # Import and run the crew
-                crew_module = __import__(f"{folder_name}.crew", fromlist=["crew"])
-                crew_class_name = class_name + "Crew"
-                crew_class = getattr(crew_module, crew_class_name)
+                # Step 1: Install dependencies using uv
+                click.secho("📦 Installing dependencies...", fg="yellow")
+                result = subprocess.run(
+                    ["uv", "sync"],
+                    cwd=str(crew_path),
+                    capture_output=True,
+                    text=True
+                )
                 
-                # Instantiate and run the crew
-                crew_instance = crew_class()
-                result = crew_instance.crew().kickoff()
+                if result.returncode != 0:
+                    click.secho(f"❌ Dependency installation failed: {result.stderr}", fg="red")
+                    click.secho(f"\nYou can install manually with:", fg="yellow")
+                    click.secho(f"  cd {folder_name}", fg="white")
+                    click.secho(f"  itak install", fg="white")
+                    return
                 
-                click.secho("\n" + "="*70, fg="cyan")
-                click.secho("✅ Build complete!", fg="green", bold=True)
+                click.secho("✅ Dependencies installed!", fg="green")
+                
+                # Step 2: Run the crew using uv
+                click.secho("\n🤖 Running crew...", fg="yellow", bold=True)
                 click.secho("="*70, fg="cyan")
-                click.secho(f"\n📁 Check the {folder_name} directory for generated files", fg="yellow")
-                click.secho(f"📊 View telemetry: http://145.79.2.67:3456/", fg="cyan")
                 
+                # Run crew and stream output to user
+                process = subprocess.Popen(
+                    ["uv", "run", "itak", "run"],
+                    cwd=str(crew_path),
+                    stdout=subprocess.PIPE,
+                    stderr=subprocess.STDOUT,
+                    text=True,
+                    bufsize=1
+                )
+                
+                # Stream output in real-time
+                for line in process.stdout:
+                    print(line, end='')
+                
+                process.wait()
+                
+                if process.returncode == 0:
+                    click.secho("\n" + "="*70, fg="cyan")
+                    click.secho("✅ Build complete!", fg="green", bold=True)
+                    click.secho("="*70, fg="cyan")
+                    click.secho(f"\n📁 Check the {folder_name} directory for generated files", fg="yellow")
+                    click.secho(f"📊 View telemetry: http://145.79.2.67:3456/", fg="cyan")
+                else:
+                    click.secho(f"\n❌ Crew execution failed with exit code {process.returncode}", fg="red")
+                    click.secho(f"\nYou can run manually with:", fg="yellow")
+                    click.secho(f"  cd {folder_name}", fg="white")
+                    click.secho(f"  itak run", fg="white")
+                
+            except FileNotFoundError:
+                click.secho("\n❌ Error: 'uv' command not found", fg="red")
+                click.secho("Please install uv: https://docs.astral.sh/uv/", fg="yellow")
+                click.secho(f"\nOr run manually with:", fg="yellow")
+                click.secho(f"  cd {folder_name}", fg="white")
+                click.secho(f"  itak install", fg="white")
+                click.secho(f"  itak run", fg="white")
             except Exception as e:
                 click.secho(f"\n❌ Error running crew: {e}", fg="red")
                 click.secho(f"\nYou can run manually with:", fg="yellow")
