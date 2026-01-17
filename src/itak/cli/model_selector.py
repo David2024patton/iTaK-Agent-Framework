@@ -14,7 +14,7 @@ from .system_detect import (
 )
 
 def display_model_menu(filter_incompatible=True):
-    """Display categorized model menu, optionally filtering by system compatibility"""
+    """Display categorized model menu with family groupings, optionally filtering by system compatibility"""
     
     # Detect system specs
     specs = get_system_specs()
@@ -32,64 +32,83 @@ def display_model_menu(filter_incompatible=True):
     hidden_count = 0
     
     for category_name, category_data in OLLAMA_MODEL_CATALOG.items():
-        # Collect compatible models for this category
-        compatible_models = []
+        # Check if this category has any compatible models
+        category_has_models = False
         
-        for model_name, model_info in category_data["models"].items():
-            compat = get_model_compatibility(model_info, specs)
-            if not filter_incompatible or compat != 'incompatible':
-                compatible_models.append((model_name, model_info, compat))
-            else:
-                hidden_count += 1
+        for family_name, family_data in category_data.get("families", {}).items():
+            for model_name, model_info in family_data["models"].items():
+                compat = get_model_compatibility(model_info, specs)
+                if not filter_incompatible or compat != 'incompatible':
+                    category_has_models = True
+                    break
+            if category_has_models:
+                break
         
-        if not compatible_models:
-            continue  # Skip empty categories
+        if not category_has_models:
+            continue
         
         # Category header
         click.secho(f"\n{category_name}", fg="yellow", bold=True)
         click.secho(f"   {category_data['description']}", fg="white", dim=True)
         click.secho("-" * 68, fg="white", dim=True)
         
-        for model_name, model_info, compat in compatible_models:
-            model_map[model_index] = model_name
+        # Iterate through families
+        for family_name, family_data in category_data.get("families", {}).items():
+            # Collect compatible models for this family
+            compatible_models = []
             
-            # Format: [index] model_name (size) - description
-            size_str = f"[{model_info['size']}]".ljust(10)
-            ctx_str = f"{model_info['ctx']}".ljust(5)
-            
-            # Check if it's a recommended model
-            is_recommended = model_name in RECOMMENDED_MODELS.values()
-            
-            # Compatibility indicator
-            model_size = parse_size_to_gb(model_info['size'])
-            can_cpu = model_size <= 2.5  # 3B and under can run on CPU
-            
-            if compat == 'gpu':
-                if can_cpu:
-                    compat_str = "[GPU][CPU OK]"
+            for model_name, model_info in family_data["models"].items():
+                compat = get_model_compatibility(model_info, specs)
+                if not filter_incompatible or compat != 'incompatible':
+                    compatible_models.append((model_name, model_info, compat))
                 else:
-                    compat_str = "[GPU]"
-                compat_color = "green"
-            elif compat == 'cpu':
-                compat_str = "[CPU]"
-                compat_color = "yellow"
-            elif compat == 'no_disk':
-                compat_str = "[DISK]"
-                compat_color = "red"
-            else:
-                compat_str = "[???]"
-                compat_color = "red"
+                    hidden_count += 1
             
-            star = "*" if is_recommended else " "
+            if not compatible_models:
+                continue
             
-            click.secho(f"   {star} ", nl=False)
-            click.secho(f"{str(model_index).rjust(2)}. ", fg="green", nl=False)
-            click.secho(f"{model_name.ljust(28)}", fg="bright_white", bold=True, nl=False)
-            click.secho(f" {size_str}", fg="cyan", nl=False)
-            click.secho(f" {compat_str}", fg=compat_color, nl=False)
-            click.secho(f" {model_info['desc']}", fg="white", dim=True)
+            # Family header
+            click.secho(f"   [{family_name}]", fg="magenta", bold=True)
             
-            model_index += 1
+            for model_name, model_info, compat in compatible_models:
+                model_map[model_index] = model_name
+                
+                # Format: [index] model_name (size) - description
+                size_str = f"[{model_info['size']}]".ljust(10)
+                
+                # Check if it's a recommended model
+                is_recommended = model_name in RECOMMENDED_MODELS.values()
+                
+                # Compatibility indicator
+                model_size = parse_size_to_gb(model_info['size'])
+                can_cpu = model_size <= 2.5  # 3B and under can run on CPU
+                
+                if compat == 'gpu':
+                    if can_cpu:
+                        compat_str = "[GPU][CPU OK]"
+                    else:
+                        compat_str = "[GPU]"
+                    compat_color = "green"
+                elif compat == 'cpu':
+                    compat_str = "[CPU]"
+                    compat_color = "yellow"
+                elif compat == 'no_disk':
+                    compat_str = "[DISK]"
+                    compat_color = "red"
+                else:
+                    compat_str = "[???]"
+                    compat_color = "red"
+                
+                star = "*" if is_recommended else " "
+                
+                click.secho(f"      {star} ", nl=False)
+                click.secho(f"{str(model_index).rjust(2)}. ", fg="green", nl=False)
+                click.secho(f"{model_name.ljust(28)}", fg="bright_white", bold=True, nl=False)
+                click.secho(f" {size_str}", fg="cyan", nl=False)
+                click.secho(f" {compat_str}", fg=compat_color, nl=False)
+                click.secho(f" {model_info['desc']}", fg="white", dim=True)
+                
+                model_index += 1
     
     click.secho("\n" + "="*70, fg="cyan")
     click.secho("* = Recommended | [GPU] = Fast | [CPU OK] = Can run without GPU", fg="white", dim=True)
