@@ -67,8 +67,13 @@ def display_model_menu(filter_incompatible=True):
             if not compatible_models:
                 continue
             
-            # Family header
-            click.secho(f"   [{family_name}]", fg="magenta", bold=True)
+            # Family header with description
+            family_desc = family_data.get("desc", "")
+            click.secho(f"   [{family_name}]", fg="magenta", bold=True, nl=False)
+            if family_desc:
+                click.secho(f" - {family_desc}", fg="white", dim=True)
+            else:
+                click.secho("")
             
             for model_name, model_info, compat in compatible_models:
                 model_map[model_index] = model_name
