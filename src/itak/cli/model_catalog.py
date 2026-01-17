@@ -390,6 +390,122 @@ OLLAMA_MODEL_CATALOG = {
             },
         }
     },
+    
+    # ============== INFRASTRUCTURE & UTILITY MODELS ==============
+    
+    "[EMBEDDINGS] RAG & Vector Search Models": {
+        "description": "Convert text to vectors for semantic search, RAG, and similarity matching",
+        "families": {
+            "Nomic Embed v2 MoE": {
+                "desc": "Best multilingual embeddings - MoE with 100 languages, 768-dim, fully open-source",
+                "models": {
+                    "nomic-embed-text-v2-moe:latest": {"size": "571MB", "ctx": "512", "desc": "SOTA multilingual, MoE"},
+                }
+            },
+            "Nomic Embed": {
+                "desc": "High-quality English embeddings for RAG and semantic search",
+                "models": {
+                    "nomic-embed-text:latest": {"size": "274MB", "ctx": "8K", "desc": "English embeddings"},
+                }
+            },
+            "BGE M3": {
+                "desc": "Multi-lingual, multi-functionality, multi-granularity embeddings",
+                "models": {
+                    "bge-m3:latest": {"size": "1.2GB", "ctx": "8K", "desc": "Multi-lingual dense+sparse"},
+                }
+            },
+            "MxBAI Embed": {
+                "desc": "High-quality sentence embeddings from Mixedbread AI",
+                "models": {
+                    "mxbai-embed-large:latest": {"size": "669MB", "ctx": "512", "desc": "Large embeddings"},
+                }
+            },
+        }
+    },
+    "[SECURITY] Cybersecurity & Safety Models": {
+        "description": "Content moderation, threat detection, and safety scanning",
+        "families": {
+            "ShieldGemma": {
+                "desc": "Google's safety classifier for content moderation",
+                "models": {
+                    "shieldgemma:2b": {"size": "1.5GB", "ctx": "8K", "desc": "Safety classifier"},
+                    "shieldgemma:9b": {"size": "5.4GB", "ctx": "8K", "desc": "Advanced safety"},
+                }
+            },
+            "Llama Guard": {
+                "desc": "Meta's safety model for input/output content moderation",
+                "models": {
+                    "llama-guard3:1b": {"size": "860MB", "ctx": "128K", "desc": "Fast safety guard"},
+                    "llama-guard3:8b": {"size": "4.9GB", "ctx": "128K", "desc": "Full safety guard"},
+                }
+            },
+        }
+    },
+    "[SCIENCE] Research & Scientific Models": {
+        "description": "Scientific reasoning, research assistance, and academic tasks",
+        "families": {
+            "Solar": {
+                "desc": "Upstage AI's model fine-tuned for scientific and research tasks",
+                "models": {
+                    "solar:10.7b": {"size": "6.1GB", "ctx": "4K", "desc": "Scientific reasoning"},
+                }
+            },
+            "Solar Pro": {
+                "desc": "Solar Pro with enhanced capabilities for research",
+                "models": {
+                    "solar-pro:22b": {"size": "12.9GB", "ctx": "4K", "desc": "Advanced research"},
+                }
+            },
+        }
+    },
+    "[EDUCATION] Teaching & Learning Models": {
+        "description": "Tutoring, education, and teaching assistance",
+        "families": {
+            "Orca": {
+                "desc": "Microsoft research model good for explanation and teaching",
+                "models": {
+                    "orca-mini:3b": {"size": "1.9GB", "ctx": "2K", "desc": "Compact teaching"},
+                    "orca2:7b": {"size": "4.1GB", "ctx": "4K", "desc": "Better explanations"},
+                }
+            },
+            "Everythinglm": {
+                "desc": "Model trained to explain complex topics simply",
+                "models": {
+                    "everythinglm:13b": {"size": "7.4GB", "ctx": "16K", "desc": "Explain everything"},
+                }
+            },
+        }
+    },
+    "[TRANSLATION] Multi-Language Models": {
+        "description": "Translation between languages and multilingual understanding",
+        "families": {
+            "Aya": {
+                "desc": "Cohere's multilingual model supporting 100+ languages",
+                "models": {
+                    "aya:8b": {"size": "4.8GB", "ctx": "8K", "desc": "100+ languages"},
+                    "aya:35b": {"size": "20GB", "ctx": "8K", "desc": "Strong multilingual"},
+                }
+            },
+        }
+    },
+    "[EXTRACTION] Data Extraction Models": {
+        "description": "Extract structured data from unstructured text and documents",
+        "families": {
+            "NuExtract": {
+                "desc": "Specialized model for extracting structured JSON from text",
+                "models": {
+                    "nuextract:3.8b": {"size": "2.3GB", "ctx": "8K", "desc": "JSON extraction"},
+                }
+            },
+            "Reader LM": {
+                "desc": "Convert HTML/documents to clean markdown for processing",
+                "models": {
+                    "reader-lm:0.5b": {"size": "393MB", "ctx": "256K", "desc": "HTML to markdown"},
+                    "reader-lm:1.5b": {"size": "989MB", "ctx": "256K", "desc": "Better conversion"},
+                }
+            },
+        }
+    },
 }
 
 # Recommended starter models for different use cases
@@ -407,6 +523,12 @@ RECOMMENDED_MODELS = {
     "math": "mathstral:7b",
     "writing": "mistral-nemo:12b",
     "roleplay": "dolphin3:8b",
+    "embedding": "nomic-embed-text-v2-moe:latest",
+    "security": "llama-guard3:8b",
+    "science": "solar:10.7b",
+    "education": "orca2:7b",
+    "translation": "aya:8b",
+    "extraction": "nuextract:3.8b",
 }
 
 # Domain categories for quick reference
@@ -425,6 +547,12 @@ DOMAIN_CATEGORIES = [
     ("FINANCE", "Trading, investing, market analysis"),
     ("LEGAL", "Law, contracts, legal research"),
     ("MEDICAL", "Healthcare, medical literature"),
+    ("EMBEDDINGS", "RAG, vector search, semantic matching"),
+    ("SECURITY", "Content moderation, threat detection"),
+    ("SCIENCE", "Research, scientific reasoning"),
+    ("EDUCATION", "Tutoring, teaching, explanations"),
+    ("TRANSLATION", "Multi-language translation"),
+    ("EXTRACTION", "Structured data from documents"),
 ]
 
 def get_all_model_names():
