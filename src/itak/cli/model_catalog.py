@@ -1,7 +1,10 @@
 # Model Catalog for iTaK Framework
 # Organized by category and family with descriptions and metadata
+# Order: Core use cases first, specialized/enterprise at bottom
 
 OLLAMA_MODEL_CATALOG = {
+    # ============== CORE CATEGORIES (Most Used) ==============
+    
     "[REASONING] Deep Thinking Models": {
         "description": "Models that think step-by-step to solve complex problems",
         "families": {
@@ -16,7 +19,7 @@ OLLAMA_MODEL_CATALOG = {
                 }
             },
             "Qwen3": {
-                "desc": "Alibaba's latest LLMs with both dense and mixture-of-experts variants",
+                "desc": "Alibaba's latest LLMs - fast and smart for everyday tasks",
                 "models": {
                     "qwen3:0.6b": {"size": "523MB", "ctx": "40K", "desc": "Ultra-lightweight, for phones"},
                     "qwen3:1.7b": {"size": "1.4GB", "ctx": "40K", "desc": "Light and fast general purpose"},
@@ -51,7 +54,7 @@ OLLAMA_MODEL_CATALOG = {
                 }
             },
             "Magicoder": {
-                "desc": "Trained on OSS-Instruct: learns from real open-source code for realistic coding",
+                "desc": "Trained on real open-source code - produces realistic, practical code",
                 "models": {
                     "magicoder:7b": {"size": "4.1GB", "ctx": "16K", "desc": "OSS-trained, low-bias code"},
                 }
@@ -95,24 +98,8 @@ OLLAMA_MODEL_CATALOG = {
                     "yi-coder-cline:9b": {"size": "5.0GB", "ctx": "128K", "desc": "Yi-based Cline agent"},
                 }
             },
-            "Qwen Abliterate": {
-                "desc": "Qwen with safety filters removed - uncensored for research",
-                "models": {
-                    "qwen2.5-coder-abliterate:0.5b": {"size": "398MB", "ctx": "32K", "desc": "Uncensored, ultra-light"},
-                    "qwen2.5-coder-abliterate:1.5b": {"size": "1.1GB", "ctx": "32K", "desc": "Uncensored, fast"},
-                    "qwen2.5-coder-abliterate:3b": {"size": "1.9GB", "ctx": "32K", "desc": "Uncensored, efficient"},
-                    "qwen2.5-coder-abliterate:7b": {"size": "4.7GB", "ctx": "32K", "desc": "Uncensored, balanced"},
-                    "qwen2.5-coder-abliterate:14b": {"size": "9.0GB", "ctx": "32K", "desc": "Uncensored, powerful"},
-                }
-            },
-            "DeepHermes Abliterate": {
-                "desc": "Nous Research DeepHermes with reasoning + safety filters removed",
-                "models": {
-                    "huihui_ai/deephermes3-abliterated:8b": {"size": "4.9GB", "ctx": "128K", "desc": "Reasoning + uncensored"},
-                }
-            },
             "Hermes": {
-                "desc": "Nous Research flagship LLM with strong function calling",
+                "desc": "Nous Research flagship - great for chat and calling external tools",
                 "models": {
                     "hermes3:3b": {"size": "2.0GB", "ctx": "128K", "desc": "Chat & function calling"},
                     "hermes3:8b": {"size": "4.7GB", "ctx": "128K", "desc": "Strong function calling"},
@@ -141,36 +128,65 @@ OLLAMA_MODEL_CATALOG = {
             },
         }
     },
-    "[MEDICAL] Healthcare Models": {
-        "description": "Models trained for medical and healthcare applications",
+    "[LIGHTWEIGHT] Phone & Tablet Models": {
+        "description": "Small models that run on phones, tablets, and low-power devices",
         "families": {
-            "Meditron": {
-                "desc": "Open-source medical LLM adapted from Llama 2 for healthcare",
+            "SmolLM2": {
+                "desc": "Compact models (135M-1.7B) that can run directly on your phone",
                 "models": {
-                    "meditron:7b": {"size": "4.1GB", "ctx": "4K", "desc": "Medical knowledge, diagnosis"},
+                    "smollm2:135m": {"size": "271MB", "ctx": "8K", "desc": "Tiny, runs on phone"},
+                    "smollm2:360m": {"size": "726MB", "ctx": "8K", "desc": "Small, fast on phone"},
+                    "smollm2:1.7b": {"size": "1.8GB", "ctx": "8K", "desc": "Compact balanced"},
                 }
             },
         }
     },
-    "[ENTERPRISE] Specialized Models": {
-        "description": "Enterprise-grade models for business and research",
+    
+    # ============== UNCENSORED MODELS ==============
+    
+    "[UNCENSORED] Abliterated Models": {
+        "description": "Safety filters mathematically removed - won't refuse requests (use responsibly)",
+        "families": {
+            "Qwen Abliterated": {
+                "desc": "Qwen coder with refusal behavior surgically removed via abliteration",
+                "models": {
+                    "qwen2.5-coder-abliterate:0.5b": {"size": "398MB", "ctx": "32K", "desc": "No refusals, ultra-light"},
+                    "qwen2.5-coder-abliterate:1.5b": {"size": "1.1GB", "ctx": "32K", "desc": "No refusals, fast"},
+                    "qwen2.5-coder-abliterate:3b": {"size": "1.9GB", "ctx": "32K", "desc": "No refusals, efficient"},
+                    "qwen2.5-coder-abliterate:7b": {"size": "4.7GB", "ctx": "32K", "desc": "No refusals, balanced"},
+                    "qwen2.5-coder-abliterate:14b": {"size": "9.0GB", "ctx": "32K", "desc": "No refusals, powerful"},
+                }
+            },
+            "DeepHermes Abliterated": {
+                "desc": "Nous Research DeepHermes with reasoning + refusal behavior removed",
+                "models": {
+                    "huihui_ai/deephermes3-abliterated:8b": {"size": "4.9GB", "ctx": "128K", "desc": "Reasoning, no refusals"},
+                }
+            },
+        }
+    },
+    
+    # ============== SPECIALIZED CATEGORIES (Less Common) ==============
+    
+    "[ENTERPRISE] Business Models": {
+        "description": "Enterprise-grade models from major companies (IBM, NVIDIA, Cohere)",
         "families": {
             "IBM Granite MoE": {
-                "desc": "IBM Mixture-of-Experts models for enterprise use",
+                "desc": "Mixture-of-Experts: uses multiple small expert networks for efficiency",
                 "models": {
-                    "granite3.1-moe:1b": {"size": "1.4GB", "ctx": "128K", "desc": "IBM MoE, efficient"},
-                    "granite3.1-moe:3b": {"size": "2.0GB", "ctx": "128K", "desc": "IBM MoE, balanced"},
-                    "granite3-moe:1b": {"size": "822MB", "ctx": "4K", "desc": "IBM MoE compact"},
-                    "granite3-moe:3b": {"size": "2.1GB", "ctx": "4K", "desc": "IBM MoE efficient"},
+                    "granite3.1-moe:1b": {"size": "1.4GB", "ctx": "128K", "desc": "MoE = fast + efficient"},
+                    "granite3.1-moe:3b": {"size": "2.0GB", "ctx": "128K", "desc": "MoE = fast + efficient"},
+                    "granite3-moe:1b": {"size": "822MB", "ctx": "4K", "desc": "MoE compact"},
+                    "granite3-moe:3b": {"size": "2.1GB", "ctx": "4K", "desc": "MoE efficient"},
                 }
             },
             "IBM Granite Dense": {
-                "desc": "IBM 128K context length models with improved reasoning",
+                "desc": "Dense = all neurons active (more accurate but slower than MoE)",
                 "models": {
-                    "granite3.3:2b": {"size": "1.5GB", "ctx": "128K", "desc": "IBM general purpose"},
-                    "granite3.3:8b": {"size": "4.9GB", "ctx": "128K", "desc": "IBM strong general"},
-                    "granite3-dense:2b": {"size": "1.6GB", "ctx": "4K", "desc": "IBM dense architecture"},
-                    "granite3-dense:8b": {"size": "4.9GB", "ctx": "4K", "desc": "IBM dense, strong"},
+                    "granite3.3:2b": {"size": "1.5GB", "ctx": "128K", "desc": "Dense = more accurate"},
+                    "granite3.3:8b": {"size": "4.9GB", "ctx": "128K", "desc": "Dense = more accurate"},
+                    "granite3-dense:2b": {"size": "1.6GB", "ctx": "4K", "desc": "Dense architecture"},
+                    "granite3-dense:8b": {"size": "4.9GB", "ctx": "4K", "desc": "Dense, strong"},
                 }
             },
             "IBM Granite 4": {
@@ -182,9 +198,9 @@ OLLAMA_MODEL_CATALOG = {
                 }
             },
             "Mixtral": {
-                "desc": "Mistral AI Sparse Mixture-of-Experts, strong math & coding",
+                "desc": "Mistral AI Mixture-of-Experts - 8 expert networks working together",
                 "models": {
-                    "mixtral:8x7b": {"size": "26GB", "ctx": "32K", "desc": "Mixture of experts, powerful"},
+                    "mixtral:8x7b": {"size": "26GB", "ctx": "32K", "desc": "8x7B experts, powerful"},
                 }
             },
             "Command R7B": {
@@ -206,22 +222,20 @@ OLLAMA_MODEL_CATALOG = {
                 }
             },
             "Essential AI": {
-                "desc": "8B dense models trained from scratch, optimized for code and STEM",
+                "desc": "Dense model trained from scratch, optimized for code and STEM",
                 "models": {
                     "rnj-1:8b": {"size": "5.1GB", "ctx": "32K", "desc": "Code + STEM optimized"},
                 }
             },
         }
     },
-    "[LIGHTWEIGHT] Phone & Tablet Models": {
-        "description": "Small models that run on phones, tablets, and low-power devices",
+    "[MEDICAL] Healthcare Models": {
+        "description": "Models trained on medical literature - for healthcare research only",
         "families": {
-            "SmolLM2": {
-                "desc": "Compact models (135M-1.7B) that can run directly on your phone",
+            "Meditron": {
+                "desc": "Open-source medical LLM adapted from Llama 2 for healthcare",
                 "models": {
-                    "smollm2:135m": {"size": "271MB", "ctx": "8K", "desc": "Tiny, runs on phone"},
-                    "smollm2:360m": {"size": "726MB", "ctx": "8K", "desc": "Small, fast on phone"},
-                    "smollm2:1.7b": {"size": "1.8GB", "ctx": "8K", "desc": "Compact balanced"},
+                    "meditron:7b": {"size": "4.1GB", "ctx": "4K", "desc": "Medical knowledge, research"},
                 }
             },
         }
