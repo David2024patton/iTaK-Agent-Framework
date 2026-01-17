@@ -278,7 +278,7 @@ iTaK-Agent-Framework/
 │   ├── vision_analysis.py       # Image analysis
 │   └── seo_analyzer.py          # SEO tools
 ├── licenses/
-│   └── CREWAI_MIT_LICENSE       # Original CrewAI license
+│   └── LICENSE       # license
 ├── pyproject.toml
 └── README.md
 ```

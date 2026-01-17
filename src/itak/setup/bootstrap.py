@@ -44,6 +44,43 @@ def print_error(text):
 def print_info(text):
     print(f"{C.B}ℹ️  {text}{C.E}")
 
+# Check and install Python dependencies
+def check_and_install_dependencies():
+    print_header("CHECKING PYTHON DEPENDENCIES")
+    
+    required_packages = {
+        'requests': 'requests',
+        'opentelemetry-api': 'opentelemetry',
+        'opentelemetry-sdk': 'opentelemetry.sdk',
+        'litellm': 'litellm',
+        'chromadb': 'chromadb',
+        'psutil': 'psutil'
+    }
+    
+    missing_packages = []
+    
+    for package_name, import_name in required_packages.items():
+        try:
+            __import__(import_name)
+            print_success(f"{package_name} installed")
+        except ImportError:
+            print_warning(f"{package_name} missing")
+            missing_packages.append(package_name)
+    
+    if missing_packages:
+        print_info(f"Installing {len(missing_packages)} missing packages...")
+        try:
+            subprocess.check_call([
+                sys.executable, '-m', 'pip', 'install', '--quiet'
+            ] + missing_packages)
+            print_success(f"Installed: {', '.join(missing_packages)}")
+        except subprocess.CalledProcessError as e:
+            print_error(f"Failed to install packages: {e}")
+            print_info("Please run manually: pip install " + " ".join(missing_packages))
+    else:
+        print_success("All Python dependencies installed")
+
+
 # Step 1: Identity
 def get_user_identity():
     print_header("STEP 1: IDENTITY SETUP")
@@ -268,6 +305,9 @@ def main():
     print(f"{C.E}\n")
     
     try:
+        # Step 0: Check and install dependencies
+        check_and_install_dependencies()
+        
         # Step 1: Identity
         user_name = get_user_identity()
         
