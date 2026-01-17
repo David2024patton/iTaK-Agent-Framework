@@ -29,6 +29,11 @@ from itak.cli.utils import build_env_with_tool_repository_credentials, read_toml
 from itak.memory.storage.kickoff_task_outputs_storage import (
     KickoffTaskOutputsSQLiteStorage,
 )
+from itak.cli.model_selector import (
+    display_model_menu,
+    select_models_interactive,
+    download_models,
+)
 
 
 @click.group()
@@ -111,6 +116,32 @@ def version(tools):
         except Exception:
             click.echo("iTaK tools not installed")
 
+
+@iTaK.command()
+@click.option("--list", "-l", "list_only", is_flag=True, help="Just list available models, don't download")
+@click.option("--recommended", "-r", is_flag=True, help="Download recommended model set")
+def models(list_only, recommended):
+    """Browse and download Ollama models for iTaK agents.
+    
+    Features:
+    - Categorized by use case (Coding, Reasoning, Vision, etc.)
+    - Download multiple models at once
+    - Quick recommendations for different tasks
+    """
+    if list_only:
+        display_model_menu()
+        return
+    
+    if recommended:
+        from itak.cli.model_catalog import RECOMMENDED_MODELS
+        click.secho("\n📥 Downloading recommended models...", fg="cyan", bold=True)
+        download_models(list(RECOMMENDED_MODELS.values()))
+        return
+    
+    # Interactive selection
+    selected = select_models_interactive()
+    if selected:
+        download_models(selected)
 
 @iTaK.command()
 @click.option(
