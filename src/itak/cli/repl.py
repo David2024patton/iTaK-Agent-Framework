@@ -26,7 +26,7 @@ from .banner import (
 class iTaKREPL:
     """Interactive REPL for iTaK CLI."""
     
-    def __init__(self, model: str = "qwen3-vl:4b"):
+    def __init__(self, model: str = "qwen3-vl:2b"):
         self.model = model
         self.running = True
         self.context_files = []
@@ -406,7 +406,7 @@ class iTaKREPL:
         )
 
 
-def run_repl(model: str = "qwen3-vl:4b"):
+def run_repl(model: str = "qwen3-vl:2b"):
     """Start the iTaK REPL."""
     repl = iTaKREPL(model=model)
     repl.start()

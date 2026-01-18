@@ -192,7 +192,7 @@ def setup(force):
 
 @iTaK.command()
 @click.argument("prompt", nargs=-1, required=True)
-@click.option("--model", "-m", default=None, help="Model to use (default: qwen3-vl:4b)")
+@click.option("--model", "-m", default=None, help="Model to use (default: qwen3-vl:2b)")
 @click.option("--output", "-o", default=".", help="Output directory for generated files")
 def auto(prompt, model, output):
     """Process a prompt with AI and generate code/files.
@@ -208,7 +208,7 @@ def auto(prompt, model, output):
     if isinstance(prompt, tuple):
         prompt = " ".join(prompt)
     
-    model = model or "qwen3-vl:4b"
+    model = model or "qwen3-vl:2b"
     
     # Check for project creation intent
     # If user wants to build a full project/app, route to wizard
