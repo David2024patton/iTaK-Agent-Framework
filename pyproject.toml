@@ -62,7 +62,10 @@ dev = [
 ]
 
 [project.scripts]
-itak = "itak.cli.cli:main"
+itak = "itak.cli.cli:iTaK"
+agent = "itak.cli.cli:iTaK"
+create = "itak.cli.cli:iTaK"
+build = "itak.cli.cli:iTaK"
 itak-setup = "itak.cli.post_install:post_install_launch"
 
 [project.urls]
