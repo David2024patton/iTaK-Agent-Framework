@@ -79,15 +79,11 @@ def print_banner(style: str = "large"):
 
 def print_welcome_tips():
     """Print getting started tips for Chat mode."""
-    print(f"{DIM}Chat mode - test models, ask questions, or just mess around:{RESET}")
+    print(f"{DIM}Try these prompts:{RESET}")
     print()
-    print(f"  {CYAN}>{RESET} {WHITE}Explain how async/await works in Python{RESET}")
-    print(f"  {CYAN}>{RESET} {WHITE}Write a regex to validate email addresses{RESET}")
-    print(f"  {CYAN}>{RESET} {WHITE}What's the difference between REST and GraphQL?{RESET}")
-    print()
-    print(f"  {CYAN}>{RESET} {WHITE}/menu{RESET} {DIM}back to main menu{RESET}")
-    print(f"  {CYAN}>{RESET} {WHITE}/models{RESET} {DIM}change AI model{RESET}")
-    print(f"  {CYAN}>{RESET} {WHITE}/help{RESET} {DIM}all commands{RESET}  {WHITE}/exit{RESET} {DIM}quit{RESET}")
+    print(f"  {CYAN}>{RESET} {WHITE}Explain async/await in Python{RESET}")
+    print(f"  {CYAN}>{RESET} {WHITE}Write a regex for email validation{RESET}")
+    print(f"  {CYAN}>{RESET} {WHITE}REST vs GraphQL differences?{RESET}")
     print()
 
 

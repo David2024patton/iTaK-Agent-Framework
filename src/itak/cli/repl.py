@@ -111,6 +111,9 @@ class iTaKREPL:
             
             # If user typed a message at the menu, process it immediately
             if initial_message:
+                # Show the prompt so user knows what was sent
+                print(f"{CYAN}>{RESET} {initial_message}")
+                print()
                 self.history.append(initial_message)
                 self.process_prompt(initial_message)
             
