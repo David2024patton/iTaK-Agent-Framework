@@ -176,23 +176,17 @@ def auto(prompt, model, output):
     
     model = model or "qwen3-vl:4b"
     
-    # iTaK system prompt - Few-Shot Code Generation
-    # We use examples to force the model to output code instead of chat
-    system_prompt = """User: Build a simple HTML button
-Assistant:
+    # iTaK system prompt - Code Completion Mode
+    system_prompt = """You are a code completion engine.
+Output only the code for the request.
+User: Build a button
+Code:
 ```html
-<button style="padding: 10px 20px; background: blue; color: white;">Click Me</button>
+<button>Click Me</button>
 ```
-
-User: Create a python script to hello world
-Assistant:
-```python
-print("Hello World")
-```
-
-User: """
+"""
     
-    full_prompt = f"{system_prompt}{prompt}\nAssistant:"
+    full_prompt = f"{system_prompt}User: {prompt}\nCode:"
     
     # Call Ollama API
     try:
@@ -201,7 +195,10 @@ User: """
             json={
                 "model": model,
                 "prompt": full_prompt,
-                "stream": True
+                "stream": True,
+                "options": {
+                    "temperature": 0.1
+                }
             },
             stream=True,
             timeout=120
