@@ -176,6 +176,29 @@ def auto(prompt, model, output):
     
     model = model or "qwen3-vl:4b"
     
+    # Check for project creation intent
+    # If user wants to build a full project/app, route to wizard
+    low_prompt = prompt.lower()
+    intent_keywords = ["create", "build", "new", "make", "scaffold", "generate", "start"]
+    project_keywords = ["project", "app", "application", "website", "site", "platform", "dashboard", "tool", "cli", "bot", "agent", "system", "blog", "saas"]
+    
+    is_creation = any(k in low_prompt for k in intent_keywords) and \
+                  any(k in low_prompt for k in project_keywords)
+                  
+    # Exclude obvious code snippets if possible (heuristic)
+    # e.g. "script", "function", "class", "snippet" might be code only
+    # But "create a python script" is ambiguous. Let's keep it simple.
+    
+    if is_creation:
+        click.secho(f"\n🚀 usage detected: '{prompt}'", fg="cyan")
+        click.secho("   Starting project creation wizard...", fg="dim")
+        try:
+            from .wizard import run_project_wizard
+            run_project_wizard(initial_prompt=prompt)
+            return
+        except ImportError:
+            pass
+            
     # iTaK system prompt - Raw Code Mode
     # Stripped of all "iTaK" identity to prevent conversational loop
     system_prompt = "Generate code for the following request. Output only the code in markdown blocks. Do not explain."
