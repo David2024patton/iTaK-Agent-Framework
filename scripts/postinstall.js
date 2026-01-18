@@ -180,8 +180,10 @@ async function downloadAndRunInstaller(url, filename, args = []) {
 // ============================================================================
 
 function checkWSL() {
-    const result = exec('wsl --status');
-    return result && result.includes('Default');
+    // Use 'wsl -l -v' which works more reliably
+    const result = exec('wsl -l -v');
+    // If we get output with distro names, WSL is installed
+    return result && (result.includes('Running') || result.includes('Stopped') || result.includes('Ubuntu') || result.includes('docker-desktop'));
 }
 
 function installWSL() {
@@ -209,16 +211,9 @@ function installWSL() {
 }
 
 function checkDockerDesktopWindows() {
-    // Check if Docker Desktop is installed
-    const dockerPath = path.join(process.env.ProgramFiles || 'C:\\Program Files', 'Docker', 'Docker', 'Docker Desktop.exe');
-    const dockerPathW = path.join(process.env['ProgramFiles(x86)'] || 'C:\\Program Files (x86)', 'Docker', 'Docker', 'Docker Desktop.exe');
-
-    if (fs.existsSync(dockerPath) || fs.existsSync(dockerPathW)) {
-        // Check if Docker is running
-        const result = exec('docker --version');
-        return result !== null;
-    }
-    return false;
+    // Simply check if Docker CLI works
+    const result = exec('docker --version');
+    return result !== null;
 }
 
 async function installDockerWindows() {
