@@ -29,10 +29,33 @@ const DOCKER_SERVICES = [
     { name: 'searxng', container: 'searxng', port: 8080, envVar: 'SEARXNG_URL' },
 ];
 
+// Architecture detection
+const ARCH = os.arch(); // 'x64', 'arm64', etc.
+const IS_ARM = ARCH === 'arm64';
+
+// Docker Desktop download URLs
+const DOCKER_URLS = {
+    win32: {
+        x64: 'https://desktop.docker.com/win/main/amd64/Docker%20Desktop%20Installer.exe',
+        arm64: 'https://desktop.docker.com/win/main/arm64/Docker%20Desktop%20Installer.exe'
+    },
+    darwin: {
+        x64: 'https://desktop.docker.com/mac/main/amd64/Docker.dmg',
+        arm64: 'https://desktop.docker.com/mac/main/arm64/Docker.dmg'
+    }
+};
+
+// Ollama download URLs
+const OLLAMA_URLS = {
+    win32: 'https://ollama.ai/download/OllamaSetup.exe',
+    darwin: 'https://ollama.ai/download/Ollama-darwin.zip'
+};
+
 console.log('\n' + '='.repeat(60));
 console.log('  iTaK Agent Framework - Cross-Platform Setup');
 console.log('='.repeat(60));
 console.log(`  Platform: ${PLATFORM === 'win32' ? 'Windows' : PLATFORM === 'darwin' ? 'macOS' : 'Linux'}`);
+console.log(`  Architecture: ${ARCH} ${IS_ARM ? '(ARM)' : '(x64)'}`);
 console.log('='.repeat(60) + '\n');
 
 // ============================================================================
@@ -65,6 +88,91 @@ function getPythonCommand() {
         if (exec(`${cmd} --version`)) return cmd;
     }
     return null;
+}
+
+// Download a file from URL
+function downloadFile(url, destPath) {
+    return new Promise((resolve, reject) => {
+        console.log(`  ⬇️  Downloading from ${url.split('/').pop().split('?')[0]}...`);
+
+        const file = fs.createWriteStream(destPath);
+
+        const request = (url.startsWith('https') ? require('https') : require('http'))
+            .get(url, { headers: { 'User-Agent': 'iTaK-Installer' } }, (response) => {
+                // Handle redirects
+                if (response.statusCode === 301 || response.statusCode === 302) {
+                    file.close();
+                    fs.unlinkSync(destPath);
+                    downloadFile(response.headers.location, destPath).then(resolve).catch(reject);
+                    return;
+                }
+
+                const totalSize = parseInt(response.headers['content-length'], 10);
+                let downloadedSize = 0;
+
+                response.on('data', (chunk) => {
+                    downloadedSize += chunk.length;
+                    if (totalSize) {
+                        const percent = Math.round((downloadedSize / totalSize) * 100);
+                        process.stdout.write(`\r  ⬇️  Downloading... ${percent}%   `);
+                    }
+                });
+
+                response.pipe(file);
+
+                file.on('finish', () => {
+                    file.close();
+                    console.log('\n  ✅ Download complete!');
+                    resolve(destPath);
+                });
+            });
+
+        request.on('error', (err) => {
+            fs.unlink(destPath, () => { });
+            reject(err);
+        });
+    });
+}
+
+// Download and run an installer
+async function downloadAndRunInstaller(url, filename, args = []) {
+    const tempDir = os.tmpdir();
+    const installerPath = path.join(tempDir, filename);
+
+    try {
+        await downloadFile(url, installerPath);
+
+        console.log(`  🚀 Running installer (you may need to approve admin access)...`);
+
+        if (PLATFORM === 'win32') {
+            // Run Windows installer
+            spawnSync(installerPath, args, {
+                stdio: 'inherit',
+                shell: true,
+                windowsHide: false
+            });
+        } else if (PLATFORM === 'darwin') {
+            if (filename.endsWith('.dmg')) {
+                // Mount DMG and run installer
+                console.log('  📦 Mounting DMG...');
+                exec(`hdiutil attach "${installerPath}" -nobrowse`);
+                console.log('  📦 Installing Docker.app...');
+                exec('cp -R "/Volumes/Docker/Docker.app" /Applications/');
+                exec('hdiutil detach "/Volumes/Docker"');
+            } else if (filename.endsWith('.zip')) {
+                // Unzip and install
+                exec(`unzip -o "${installerPath}" -d /Applications/`);
+            }
+        }
+
+        // Clean up
+        try { fs.unlinkSync(installerPath); } catch { }
+
+        return true;
+    } catch (e) {
+        console.log(`  ❌ Installation failed: ${e.message}`);
+        return false;
+    }
 }
 
 // ============================================================================
@@ -113,16 +221,22 @@ function checkDockerDesktopWindows() {
     return false;
 }
 
-function installDockerWindows() {
-    console.log('  📦 Docker Desktop not found.\n');
-    console.log('  Please install Docker Desktop manually:');
-    console.log('  → https://www.docker.com/products/docker-desktop/\n');
-    console.log('  After installing, run `npm install` again.\n');
+async function installDockerWindows() {
+    console.log('  📦 Docker Desktop not found. Installing...\n');
 
-    // Optionally open the download page
-    try {
-        exec('start https://www.docker.com/products/docker-desktop/');
-    } catch { }
+    const archKey = IS_ARM ? 'arm64' : 'x64';
+    const url = DOCKER_URLS.win32[archKey];
+    const filename = 'DockerDesktopInstaller.exe';
+
+    console.log(`  Downloading Docker Desktop for Windows (${archKey})...`);
+
+    const success = await downloadAndRunInstaller(url, filename, ['install', '--quiet']);
+
+    if (success) {
+        console.log('\n  ✅ Docker Desktop installed!');
+        console.log('  Please start Docker Desktop and run `npm install` again.\n');
+        return 'launch_required';
+    }
 
     return false;
 }
@@ -132,14 +246,18 @@ function checkOllamaWindows() {
     return result !== null;
 }
 
-function installOllamaWindows() {
-    console.log('  📦 Ollama not found.\n');
-    console.log('  Please install Ollama manually:');
-    console.log('  → https://ollama.ai/download\n');
+async function installOllamaWindows() {
+    console.log('  📦 Ollama not found. Installing...\n');
 
-    try {
-        exec('start https://ollama.ai/download');
-    } catch { }
+    const url = OLLAMA_URLS.win32;
+    const filename = 'OllamaSetup.exe';
+
+    const success = await downloadAndRunInstaller(url, filename, ['/SILENT']);
+
+    if (success) {
+        console.log('\n  ✅ Ollama installed!');
+        return true;
+    }
 
     return false;
 }
@@ -152,41 +270,62 @@ function checkBrewMac() {
     return exec('brew --version') !== null;
 }
 
-function installDockerMac() {
-    if (!checkBrewMac()) {
-        console.log('  📦 Docker not found. Homebrew not available.\n');
-        console.log('  Please install Docker Desktop manually:');
-        console.log('  → https://www.docker.com/products/docker-desktop/\n');
-        return false;
+async function installDockerMac() {
+    console.log('  📦 Docker Desktop not found. Installing...\n');
+
+    const archKey = IS_ARM ? 'arm64' : 'x64';
+    const url = DOCKER_URLS.darwin[archKey];
+    const filename = 'Docker.dmg';
+
+    console.log(`  Downloading Docker Desktop for macOS (${IS_ARM ? 'Apple Silicon' : 'Intel'})...`);
+
+    const success = await downloadAndRunInstaller(url, filename);
+
+    if (success) {
+        console.log('\n  ✅ Docker Desktop installed!');
+        console.log('  Please launch Docker Desktop from Applications.\n');
+        // Try to launch Docker
+        exec('open /Applications/Docker.app');
+        return 'launch_required';
     }
 
-    console.log('  📦 Installing Docker via Homebrew...\n');
-    try {
-        spawnSync('brew', ['install', '--cask', 'docker'], { stdio: 'inherit', shell: true });
-        console.log('\n  ✅ Docker Desktop installed!');
-        console.log('  Please launch Docker Desktop and run `npm install` again.\n');
-        return 'launch_required';
-    } catch (e) {
-        console.log(`  ❌ Failed to install Docker: ${e.message}`);
-        return false;
+    // Fallback to Homebrew
+    if (checkBrewMac()) {
+        console.log('  Trying Homebrew instead...');
+        try {
+            spawnSync('brew', ['install', '--cask', 'docker'], { stdio: 'inherit', shell: true });
+            return 'launch_required';
+        } catch { }
     }
+
+    return false;
 }
 
-function installOllamaMac() {
-    if (!checkBrewMac()) {
-        console.log('  Please install Ollama: https://ollama.ai/download\n');
-        return false;
+async function installOllamaMac() {
+    console.log('  📦 Ollama not found. Installing...\n');
+
+    // Try Homebrew first (preferred)
+    if (checkBrewMac()) {
+        console.log('  Installing via Homebrew...');
+        try {
+            spawnSync('brew', ['install', 'ollama'], { stdio: 'inherit', shell: true });
+            console.log('\n  ✅ Ollama installed!');
+            return true;
+        } catch { }
     }
 
-    console.log('  📦 Installing Ollama via Homebrew...\n');
-    try {
-        spawnSync('brew', ['install', 'ollama'], { stdio: 'inherit', shell: true });
+    // Fallback to download
+    const url = OLLAMA_URLS.darwin;
+    const filename = 'Ollama-darwin.zip';
+
+    const success = await downloadAndRunInstaller(url, filename);
+
+    if (success) {
         console.log('\n  ✅ Ollama installed!');
         return true;
-    } catch (e) {
-        console.log(`  ❌ Failed to install Ollama: ${e.message}`);
-        return false;
     }
+
+    return false;
 }
 
 // ============================================================================
@@ -244,6 +383,32 @@ function checkDocker() {
     return result !== null;
 }
 
+function isDockerRunning() {
+    const result = exec('docker info');
+    return result !== null;
+}
+
+async function waitForDocker(maxWaitSeconds = 60) {
+    console.log('  ⏳ Waiting for Docker to start...');
+
+    const startTime = Date.now();
+    const maxWaitMs = maxWaitSeconds * 1000;
+
+    while (Date.now() - startTime < maxWaitMs) {
+        if (isDockerRunning()) {
+            console.log('  ✅ Docker is running!');
+            return true;
+        }
+
+        // Wait 3 seconds before checking again
+        await new Promise(resolve => setTimeout(resolve, 3000));
+        process.stdout.write('.');
+    }
+
+    console.log('\n  ⚠️  Docker is not running. Please start Docker Desktop.');
+    return false;
+}
+
 function checkOllama() {
     const result = exec('ollama list');
     return result !== null;
@@ -277,6 +442,68 @@ function pullModel(model) {
     } catch {
         return false;
     }
+}
+
+// Container configurations
+const CONTAINER_CONFIGS = {
+    chromadb: {
+        name: 'shared-chromadb',
+        image: 'chromadb/chroma',
+        ports: '8000:8000',
+        required: true
+    },
+    ollama: {
+        name: 'ollama',
+        image: 'ollama/ollama',
+        ports: '11434:11434',
+        required: true,
+        volumes: PLATFORM === 'win32' ? 'ollama:/root/.ollama' : `${os.homedir()}/.ollama:/root/.ollama`
+    }
+};
+
+async function setupDockerContainers() {
+    console.log('  🐳 Setting up Docker containers...\n');
+
+    if (!isDockerRunning()) {
+        console.log('  ⚠️  Docker is not running. Cannot setup containers.\n');
+        return false;
+    }
+
+    const running = getRunningContainers();
+
+    for (const [serviceName, config] of Object.entries(CONTAINER_CONFIGS)) {
+        const isRunning = running.some(name =>
+            name === config.name || name.includes(serviceName)
+        );
+
+        if (isRunning) {
+            console.log(`  ✅ ${serviceName}: Already running`);
+            continue;
+        }
+
+        console.log(`  📦 Starting ${serviceName}...`);
+
+        let dockerCmd = `docker run -d --name ${config.name} -p ${config.ports}`;
+
+        if (config.volumes) {
+            dockerCmd += ` -v ${config.volumes}`;
+        }
+
+        dockerCmd += ` ${config.image}`;
+
+        try {
+            exec(dockerCmd);
+            console.log(`  ✅ ${serviceName}: Started`);
+        } catch (e) {
+            console.log(`  ⚠️  ${serviceName}: Failed to start`);
+            if (config.required) {
+                console.log(`      Try: ${dockerCmd}`);
+            }
+        }
+    }
+
+    console.log();
+    return true;
 }
 
 function generateEnvFile() {
@@ -472,16 +699,26 @@ async function main() {
         console.log('  ⚠️  Platform setup incomplete. Please install missing dependencies and retry.\n');
     }
 
-    // Step 2: Check Docker services
+    // Step 2: Wait for Docker to be running
+    if (checkDocker()) {
+        const dockerRunning = await waitForDocker(90); // Wait up to 90 seconds
+
+        if (dockerRunning) {
+            // Step 3: Setup Docker containers (in order)
+            await setupDockerContainers();
+        }
+    }
+
+    // Step 4: Check Docker services status
     checkDockerServices();
 
-    // Step 3: Generate .env file
+    // Step 5: Generate .env file
     generateEnvFile();
 
-    // Step 4: Install Python package
+    // Step 6: Install Python package
     const pythonOk = installPythonPackage();
 
-    // Step 5: Pull default model
+    // Step 7: Pull default model
     if (pythonOk && checkOllama()) {
         if (!checkModelInstalled(DEFAULT_MODEL)) {
             console.log(`\n  📥 Model ${DEFAULT_MODEL} not found.`);
@@ -491,7 +728,7 @@ async function main() {
         }
     }
 
-    // Step 6: Launch CLI
+    // Step 8: Launch CLI
     if (pythonOk) {
         launchCLI();
     } else {
