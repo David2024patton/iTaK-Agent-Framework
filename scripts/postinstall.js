@@ -4,11 +4,23 @@
  * 
  * Runs after `npm install itak` to:
  * 1. Install Python package via pip
- * 2. Launch the iTaK CLI with welcome screen
+ * 2. Check/setup Docker services (ChromaDB, Playwright, SearXNG)
+ * 3. Pull default LLM model via Ollama
+ * 4. Launch the iTaK CLI with welcome screen
  */
 
-const { execSync, spawn } = require('child_process');
+const { execSync, spawn, spawnSync } = require('child_process');
 const os = require('os');
+
+const DEFAULT_MODEL = 'qwen3-vl:2b';
+
+// Required Docker services
+const DOCKER_SERVICES = [
+    { name: 'chromadb', container: 'shared-chromadb', image: 'chromadb/chroma', required: true },
+    { name: 'ollama', container: 'ollama', image: 'ollama/ollama', required: true },
+    { name: 'playwright', container: 'playwright', image: 'mcr.microsoft.com/playwright', required: false },
+    { name: 'searxng', container: 'searxng', image: 'searxng/searxng', required: false },
+];
 
 console.log('\n' + '='.repeat(60));
 console.log('  iTaK Agent Framework - Installing...');
@@ -28,6 +40,115 @@ function getPythonCommand() {
     return null;
 }
 
+// Check if Docker is available
+function checkDocker() {
+    try {
+        execSync('docker --version', { stdio: 'ignore' });
+        return true;
+    } catch (e) {
+        return false;
+    }
+}
+
+// Get running Docker containers
+function getRunningContainers() {
+    try {
+        const result = execSync('docker ps --format "{{.Names}}"', { encoding: 'utf8' });
+        return result.split('\n').filter(n => n.trim());
+    } catch (e) {
+        return [];
+    }
+}
+
+// Check if Ollama is available (Docker or native)
+function checkOllama() {
+    try {
+        execSync('ollama list', { stdio: 'ignore', timeout: 5000 });
+        return true;
+    } catch (e) {
+        return false;
+    }
+}
+
+// Check if model is installed in Ollama
+function checkModelInstalled(model) {
+    try {
+        const result = execSync('ollama list', { encoding: 'utf8', timeout: 10000 });
+        const modelBase = model.split(':')[0];
+        return result.includes(modelBase);
+    } catch (e) {
+        return false;
+    }
+}
+
+// Pull model via Ollama
+function pullModel(model) {
+    console.log(`  📦 Pulling model: ${model}...`);
+    console.log('     (This may take a few minutes on first run)\n');
+
+    try {
+        spawnSync('ollama', ['pull', model], {
+            stdio: 'inherit',
+            shell: true,
+            timeout: 600000 // 10 minute timeout
+        });
+        return true;
+    } catch (e) {
+        console.log(`  ⚠️  Failed to pull model: ${e.message}`);
+        return false;
+    }
+}
+
+// Check Docker services
+function checkDockerServices() {
+    console.log('  🐳 Checking Docker services...\n');
+
+    if (!checkDocker()) {
+        console.log('  ⚠️  Docker not found. Some features may be limited.');
+        console.log('     Install Docker: https://docs.docker.com/get-docker/\n');
+        return;
+    }
+
+    const running = getRunningContainers();
+
+    for (const service of DOCKER_SERVICES) {
+        // Check both the expected container name and common variations
+        const isRunning = running.some(name =>
+            name.includes(service.name) ||
+            name === service.container
+        );
+
+        if (isRunning) {
+            console.log(`  ✅ ${service.name}: Running`);
+        } else if (service.required) {
+            console.log(`  ⚠️  ${service.name}: Not running (required)`);
+            console.log(`      → docker run -d --name ${service.container} ${service.image}`);
+        } else {
+            console.log(`  ⏭️  ${service.name}: Not running (optional)`);
+        }
+    }
+    console.log();
+}
+
+// Check and pull default LLM
+function setupDefaultModel() {
+    console.log('  🤖 Checking default LLM model...\n');
+
+    if (!checkOllama()) {
+        console.log('  ⚠️  Ollama not available. Cannot verify model.');
+        console.log('     Install Ollama: https://ollama.ai\n');
+        return;
+    }
+
+    if (checkModelInstalled(DEFAULT_MODEL)) {
+        console.log(`  ✅ Model ${DEFAULT_MODEL}: Installed\n`);
+        return;
+    }
+
+    console.log(`  📥 Model ${DEFAULT_MODEL}: Not found`);
+    pullModel(DEFAULT_MODEL);
+}
+
 // Install Python package
 function installPythonPackage() {
     const python = getPythonCommand();
@@ -43,21 +164,22 @@ function installPythonPackage() {
     console.log('  📦 Installing iTaK Python package...\n');
 
     try {
-        // Install from PyPI (when published) or local
-        execSync(`${python} -m pip install itak --quiet`, {
+        // Try local install first (editable mode for development)
+        execSync(`${python} -m pip install -e . --quiet`, {
             stdio: 'inherit',
+            cwd: __dirname.replace('/scripts', '').replace('\\scripts', ''),
             timeout: 300000 // 5 minute timeout
         });
         console.log('\n  ✅ Python package installed!');
         return true;
     } catch (e) {
-        console.log('  ⚠️  pip install failed, trying local install...');
+        console.log('  ⚠️  Local install failed, trying PyPI...');
         try {
-            execSync(`${python} -m pip install -e . --quiet`, {
+            execSync(`${python} -m pip install itak --quiet`, {
                 stdio: 'inherit',
-                cwd: __dirname.replace('/scripts', '').replace('\\scripts', '')
+                timeout: 300000
             });
-            console.log('\n  ✅ Python package installed (local)!');
+            console.log('\n  ✅ Python package installed (from PyPI)!');
             return true;
         } catch (e2) {
             console.log('\n  ❌ Failed to install Python package');
@@ -71,9 +193,6 @@ function launchCLI() {
     console.log('\n  🚀 Launching iTaK...\n');
 
     try {
-        // Just run itak command - it triggers auto_setup on first run
-        const { spawnSync } = require('child_process');
-
         spawnSync('itak', [], {
             stdio: 'inherit',
             shell: true
@@ -86,8 +205,18 @@ function launchCLI() {
 
 // Main
 async function main() {
+    // Step 1: Check Docker services
+    checkDockerServices();
+
+    // Step 2: Install Python package
     const success = installPythonPackage();
 
+    // Step 3: Setup default model
+    if (success) {
+        setupDefaultModel();
+    }
+
+    // Step 4: Launch CLI
     if (success) {
         launchCLI();
     } else {
