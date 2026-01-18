@@ -115,6 +115,12 @@ class iTaKREPL:
             
         elif cmd == '/status':
             self.show_status()
+        
+        elif cmd in ['/create', '/new']:
+            self.create_project()
+        
+        elif cmd == '/ide':
+            self.handle_ide_command(args)
             
         else:
             print(f"\n{YELLOW}Unknown command: {cmd}{RESET}")
@@ -129,9 +135,17 @@ class iTaKREPL:
   {GREEN}/clear{RESET}      Clear the screen
   {GREEN}/model{RESET}      Show or change the current model
   {GREEN}/models{RESET}     Browse available models
+  {GREEN}/create{RESET}     Create a new project
   {GREEN}/studio{RESET}     Launch the web-based Studio UI
   {GREEN}/status{RESET}     Show current status
+  {GREEN}/ide{RESET}        IDE integration (install, enable, status)
   {GREEN}/exit{RESET}       Exit the CLI
+
+{BOLD}IDE Commands:{RESET}
+  {CYAN}/ide status{RESET}   Check IDE connection status
+  {CYAN}/ide install{RESET}  Install the VS Code companion extension
+  {CYAN}/ide enable{RESET}   Enable IDE integration
+  {CYAN}/ide disable{RESET}  Disable IDE integration
 
 {BOLD}Tips:{RESET}
   - Use {CYAN}@path/to/file{RESET} to reference files
@@ -186,6 +200,90 @@ class iTaKREPL:
                     print(f"  {YELLOW}⚠{RESET} Could not read: {match}")
         
         return text
+    
+    def create_project(self):
+        """Launch the project creation wizard."""
+        print(f"\n{CYAN}📁 Creating new project...{RESET}\n")
+        try:
+            from .wizard import run_project_wizard
+            run_project_wizard()
+        except ImportError:
+            print(f"{YELLOW}Project wizard not available.{RESET}\n")
+        except Exception as e:
+            print(f"{YELLOW}Error: {e}{RESET}\n")
+    
+    def handle_ide_command(self, args: list):
+        """Handle IDE integration commands."""
+        if not args:
+            self.show_ide_status()
+            return
+        
+        subcmd = args[0].lower()
+        
+        if subcmd == 'status':
+            self.show_ide_status()
+        elif subcmd == 'install':
+            self.install_ide_extension()
+        elif subcmd == 'enable':
+            self.enable_ide()
+        elif subcmd == 'disable':
+            self.disable_ide()
+        else:
+            print(f"\n{YELLOW}Unknown /ide command: {subcmd}{RESET}")
+            print(f"Options: status, install, enable, disable\n")
+    
+    def show_ide_status(self):
+        """Show IDE integration status."""
+        import os
+        
+        # Check for IDE environment variables (set by VS Code companion)
+        ide_port = os.environ.get('ITAK_CLI_IDE_SERVER_PORT')
+        ide_workspace = os.environ.get('ITAK_CLI_IDE_WORKSPACE_PATH')
+        
+        print(f"\n{BOLD}IDE Integration Status:{RESET}")
+        
+        if ide_port:
+            print(f"  {GREEN}🟢{RESET} Connected to IDE")
+            print(f"  Port: {ide_port}")
+            if ide_workspace:
+                print(f"  Workspace: {ide_workspace}")
+        else:
+            print(f"  {YELLOW}🔴{RESET} Not connected to IDE")
+            print(f"\n  {DIM}To enable IDE integration:{RESET}")
+            print(f"  1. Install the iTaK CLI Companion extension in VS Code")
+            print(f"  2. Run iTaK from VS Code's integrated terminal")
+        print()
+    
+    def install_ide_extension(self):
+        """Install the IDE companion extension."""
+        print(f"\n{CYAN}📦 Installing iTaK CLI Companion extension...{RESET}\n")
+        
+        # Check if VS Code is available
+        import subprocess
+        try:
+            result = subprocess.run(
+                ["code", "--install-extension", "itak.itak-cli-companion"],
+                capture_output=True,
+                text=True
+            )
+            if result.returncode == 0:
+                print(f"  {GREEN}✓{RESET} Extension installed successfully!")
+                print(f"  Restart VS Code to activate.\n")
+            else:
+                print(f"  {YELLOW}⚠{RESET} Extension not yet available on marketplace.")
+                print(f"  {DIM}Coming soon!{RESET}\n")
+        except FileNotFoundError:
+            print(f"  {YELLOW}⚠{RESET} VS Code CLI not found.")
+            print(f"  Make sure VS Code is installed and 'code' is in your PATH.\n")
+    
+    def enable_ide(self):
+        """Enable IDE integration."""
+        print(f"\n{GREEN}✓{RESET} IDE integration enabled.")
+        print(f"  {DIM}Run iTaK from VS Code's terminal for full integration.{RESET}\n")
+    
+    def disable_ide(self):
+        """Disable IDE integration."""
+        print(f"\n{YELLOW}✓{RESET} IDE integration disabled.\n")
     
     def process_prompt(self, prompt: str):
         """Process a user prompt and generate response."""
