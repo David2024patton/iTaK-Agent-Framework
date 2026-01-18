@@ -60,6 +60,7 @@ def launch_studio(port=29501, no_browser=False):
         sys.executable, "-m", "streamlit", "run",
         str(studio_path),
         "--server.port", str(port),
+        "--server.headless", "true",  # Skip email prompt
         "--theme.primaryColor", "#FF6B35",  # iTaK orange
         "--theme.backgroundColor", "#0E1117",
         "--theme.secondaryBackgroundColor", "#262730",
