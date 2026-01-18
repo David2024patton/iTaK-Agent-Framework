@@ -444,7 +444,7 @@ function pullModel(model) {
     }
 }
 
-// Container configurations
+// Container configurations - auto-installed during setup
 const CONTAINER_CONFIGS = {
     chromadb: {
         name: 'shared-chromadb',
@@ -458,6 +458,20 @@ const CONTAINER_CONFIGS = {
         ports: '11434:11434',
         required: true,
         volumes: PLATFORM === 'win32' ? 'ollama:/root/.ollama' : `${os.homedir()}/.ollama:/root/.ollama`
+    },
+    playwright: {
+        name: 'playwright-server',
+        image: 'mcr.microsoft.com/playwright:v1.40.0-jammy',
+        ports: '39281:39281',
+        required: false,
+        command: 'npx -y playwright@1.40.0 run-server --port 39281'
+    },
+    searxng: {
+        name: 'searxng',
+        image: 'searxng/searxng:latest',
+        ports: '48192:8080',
+        required: false,
+        env: ['SEARXNG_BASE_URL=http://localhost:48192/']
     }
 };
 
@@ -489,7 +503,17 @@ async function setupDockerContainers() {
             dockerCmd += ` -v ${config.volumes}`;
         }
 
+        if (config.env) {
+            for (const e of config.env) {
+                dockerCmd += ` -e ${e}`;
+            }
+        }
+
         dockerCmd += ` ${config.image}`;
+
+        if (config.command) {
+            dockerCmd += ` ${config.command}`;
+        }
 
         try {
             exec(dockerCmd);

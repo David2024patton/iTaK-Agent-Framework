@@ -45,6 +45,7 @@ iTaK (Intelligent Task Automation Kernel) is a **production-ready multi-agent fr
 | **10-Layer Architecture** | Specialized agents for each phase of development |
 | **Circuit Breaker** | Prevents cascade failures with automatic recovery |
 | **Docker Sandbox** | Execute code safely in isolated containers |
+| **Remote Access** | Access local AI from anywhere via [VPS tunnels](docs/VPS_SETUP.md) or Cloudflare |
 | **Stacked Diffs** | Advanced Git workflow for complex changes |
 | **Vision Analysis** | Analyze images and screenshots with VLMs |
 | **SEO-First Development** | Research competitors before building |

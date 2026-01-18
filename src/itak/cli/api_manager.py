@@ -1,10 +1,11 @@
 """
 iTaK API Gateway Manager
-Handles FastAPI gateway installation and Cloudflare tunnel setup
+Handles FastAPI gateway installation, Cloudflare tunnel, and VPS/FRP setup
 """
 import os
 import subprocess
 import sys
+import json
 from pathlib import Path
 
 # ANSI colors
@@ -16,43 +17,70 @@ YELLOW = "\033[33m"
 CYAN = "\033[36m"
 MAGENTA = "\033[35m"
 WHITE = "\033[37m"
+RED = "\033[31m"
 
-# Docker compose for FastAPI gateway
-FASTAPI_COMPOSE = '''version: '3.9'
+# Configuration directory
+CONFIG_DIR = Path.home() / '.itak'
+DOCKER_DIR = CONFIG_DIR / 'docker'
+CONFIG_FILE = CONFIG_DIR / 'api_config.json'
+
+# Default ports
+PORTS = {
+    'gateway': 28934,
+    'ollama': 11434,
+    'chromadb': 8000,
+    'playwright': 39281,
+    'searxng': 48192,
+    'frp_control': 7000,
+}
+
+# FRP Client Configuration Template
+FRP_CLIENT_CONFIG = '''# FRP Client Configuration
+# Connects your local services to your VPS
+
+serverAddr = "{vps_ip}"
+serverPort = 7000
+auth.method = "token"
+auth.token = "{auth_token}"
+
+# Tunnel 1: API Gateway
+[[proxies]]
+name = "api-gateway"
+type = "tcp"
+localIP = "127.0.0.1"
+localPort = 28934
+remotePort = 28934
+
+# Tunnel 2: Ollama LLM
+[[proxies]]
+name = "ollama"
+type = "tcp"
+localIP = "host.docker.internal"
+localPort = 11434
+remotePort = 11434
+
+# Tunnel 3: Playwright Browser
+[[proxies]]
+name = "playwright"
+type = "tcp"
+localIP = "127.0.0.1"
+localPort = 39281
+remotePort = 39281
+'''
+
+# Docker Compose for FRP Client
+FRP_CLIENT_COMPOSE = '''version: '3.9'
 
 services:
-  itak-gateway:
-    image: python:3.11-slim
-    container_name: itak-gateway
-    working_dir: /app
-    command: >
-      bash -c "pip install fastapi uvicorn httpx && 
-               python -c \\"
-from fastapi import FastAPI
-import uvicorn
-
-app = FastAPI(title='iTaK API Gateway')
-
-@app.get('/')
-def root():
-    return {'status': 'ok', 'message': 'iTaK Gateway Running'}
-
-@app.get('/health')
-def health():
-    return {'healthy': True}
-
-if __name__ == '__main__':
-    uvicorn.run(app, host='0.0.0.0', port=8080)
-\\""
-    ports:
-      - "8080:8080"
+  frpc:
+    image: snowdreamtech/frpc
+    container_name: frpc
     restart: unless-stopped
-    networks:
-      - itak-network
-
-networks:
-  itak-network:
-    driver: bridge
+    volumes:
+      - ./frpc.toml:/etc/frp/frpc.toml
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    network_mode: host
 '''
 
 # Cloudflare tunnel compose (temporary - no account needed)
@@ -62,7 +90,7 @@ services:
   cloudflared:
     image: cloudflare/cloudflared:latest
     container_name: cloudflared-tunnel
-    command: tunnel --no-autoupdate --url http://host.docker.internal:8080
+    command: tunnel --no-autoupdate --url http://host.docker.internal:28934
     restart: unless-stopped
     extra_hosts:
       - "host.docker.internal:host-gateway"
@@ -86,24 +114,58 @@ def clear_screen():
     os.system('cls' if os.name == 'nt' else 'clear')
 
 
+def load_config():
+    """Load API configuration."""
+    if CONFIG_FILE.exists():
+        try:
+            return json.loads(CONFIG_FILE.read_text())
+        except:
+            pass
+    return {}
+
+
+def save_config(config):
+    """Save API configuration."""
+    CONFIG_FILE.parent.mkdir(parents=True, exist_ok=True)
+    CONFIG_FILE.write_text(json.dumps(config, indent=2))
+
+
 def print_api_menu():
     """Print the API submenu."""
     clear_screen()
-    print(f"\n  {BOLD}{CYAN}⚡ API Gateway Manager{RESET}")
-    print(f"  {DIM}Setup FastAPI gateway and remote access tunnels{RESET}\n")
+    config = load_config()
     
-    print(f"  {BOLD}Services:{RESET}")
-    print(f"    {GREEN}[1]{RESET} 🚀 {WHITE}Install FastAPI Gateway{RESET}")
-    print(f"        {DIM}Local API gateway on port 8080{RESET}")
+    print(f"\n  {BOLD}{CYAN}⚡ API Gateway Manager{RESET}")
+    print(f"  {DIM}Manage local services and remote access{RESET}\n")
+    
+    # Show current endpoints
+    print(f"  {BOLD}Local Endpoints:{RESET}")
+    print(f"    • API Gateway:  {CYAN}http://localhost:{PORTS['gateway']}{RESET}")
+    print(f"    • Ollama:       {CYAN}http://localhost:{PORTS['ollama']}{RESET}")
+    print(f"    • ChromaDB:     {CYAN}http://localhost:{PORTS['chromadb']}{RESET}")
+    print(f"    • Playwright:   {CYAN}ws://localhost:{PORTS['playwright']}{RESET}")
+    print(f"    • SearXNG:      {CYAN}http://localhost:{PORTS['searxng']}{RESET}")
+    
+    if config.get('vps_ip'):
+        print(f"\n  {BOLD}VPS Endpoints:{RESET} {GREEN}(Connected){RESET}")
+        vps = config['vps_ip']
+        print(f"    • API Gateway:  {CYAN}http://{vps}:{PORTS['gateway']}{RESET}")
+        print(f"    • Ollama:       {CYAN}http://{vps}:{PORTS['ollama']}{RESET}")
+        print(f"    • Playwright:   {CYAN}ws://{vps}:{PORTS['playwright']}{RESET}")
+    
+    print(f"\n  {BOLD}Options:{RESET}")
+    print(f"    {GREEN}[1]{RESET} 📊 {WHITE}Show Service Status{RESET}")
     print()
-    print(f"    {GREEN}[2]{RESET} 🌐 {WHITE}Cloudflare Tunnel (Temporary){RESET}")
-    print(f"        {DIM}Quick public URL, no account needed{RESET}")
+    print(f"    {GREEN}[2]{RESET} 🌐 {WHITE}Cloudflare Tunnel (Quick){RESET}")
+    print(f"        {DIM}Instant public URL, no account needed{RESET}")
     print()
     print(f"    {GREEN}[3]{RESET} 🔒 {WHITE}Cloudflare Tunnel (Permanent){RESET}")
     print(f"        {DIM}Custom domain, requires Cloudflare account{RESET}")
     print()
-    print(f"  {BOLD}Status:{RESET}")
-    print(f"    {GREEN}[4]{RESET} 📊 {WHITE}Show Service Status{RESET}")
+    print(f"    {GREEN}[4]{RESET} 🖥️  {WHITE}Configure VPS Connection{RESET}")
+    print(f"        {DIM}Connect to your own VPS via FRP tunnel{RESET}")
+    print()
+    print(f"    {GREEN}[5]{RESET} 🚀 {WHITE}Start/Stop FRP Tunnel{RESET}")
     print()
     print(f"    {GREEN}[0]{RESET} ↩️  {WHITE}Back to Main Menu{RESET}")
     print()
@@ -135,69 +197,60 @@ def get_container_status(name):
         return 'error', None
 
 
-def install_fastapi_gateway():
-    """Install the FastAPI gateway container."""
-    print(f"\n  {CYAN}📦 Installing FastAPI Gateway...{RESET}\n")
+def show_service_status():
+    """Show status of all API services."""
+    print(f"\n  {BOLD}📊 Service Status{RESET}\n")
+    
+    if not check_docker():
+        print(f"  {RED}❌ Docker is not running{RESET}\n")
+        return
+    
+    services = [
+        ('ollama', 'Ollama LLM', f'http://localhost:{PORTS["ollama"]}'),
+        ('shared-chromadb', 'ChromaDB', f'http://localhost:{PORTS["chromadb"]}'),
+        ('playwright-server', 'Playwright', f'ws://localhost:{PORTS["playwright"]}'),
+        ('searxng', 'SearXNG', f'http://localhost:{PORTS["searxng"]}'),
+        ('frpc', 'FRP Tunnel', 'VPS Connection'),
+        ('cloudflared-tunnel', 'Cloudflare Tunnel', 'Public URL'),
+    ]
+    
+    for container, name, url in services:
+        status, details = get_container_status(container)
+        
+        if status == 'running':
+            print(f"  {GREEN}✅{RESET} {name}: {GREEN}Running{RESET}")
+            print(f"     {DIM}{url}{RESET}")
+        elif status == 'stopped':
+            print(f"  {YELLOW}⏸️{RESET}  {name}: {YELLOW}Stopped{RESET}")
+        else:
+            print(f"  {DIM}⬜{RESET} {name}: {DIM}Not installed{RESET}")
+    
+    print()
+
+
+def install_cloudflare_temp():
+    """Install temporary Cloudflare tunnel (no account needed)."""
+    print(f"\n  {CYAN}🌐 Starting Cloudflare Tunnel (Temporary)...{RESET}\n")
     
     if not check_docker():
         print(f"  {YELLOW}⚠️  Docker is not running. Please start Docker first.{RESET}\n")
         return False
     
-    # Create compose directory
-    compose_dir = Path.home() / '.itak' / 'docker'
-    compose_dir.mkdir(parents=True, exist_ok=True)
+    DOCKER_DIR.mkdir(parents=True, exist_ok=True)
     
-    compose_file = compose_dir / 'fastapi-gateway.yml'
-    compose_file.write_text(FASTAPI_COMPOSE)
+    compose_file = DOCKER_DIR / 'cloudflare-temp.yml'
+    compose_file.write_text(CLOUDFLARE_TEMP_COMPOSE)
     
-    print(f"  Created: {compose_file}")
+    print(f"  {DIM}Starting tunnel to expose port {PORTS['gateway']}...{RESET}\n")
     
     try:
         subprocess.run(
             ['docker', 'compose', '-f', str(compose_file), 'up', '-d'],
             check=True
         )
-        print(f"\n  {GREEN}✅ FastAPI Gateway installed!{RESET}")
-        print(f"  {DIM}Access at: http://localhost:8080{RESET}\n")
-        return True
-    except subprocess.CalledProcessError as e:
-        print(f"  {YELLOW}⚠️  Failed to start gateway: {e}{RESET}\n")
-        return False
-
-
-def install_cloudflare_temp():
-    """Install temporary Cloudflare tunnel (no account needed)."""
-    print(f"\n  {CYAN}🌐 Setting up Cloudflare Tunnel (Temporary)...{RESET}\n")
-    
-    if not check_docker():
-        print(f"  {YELLOW}⚠️  Docker is not running. Please start Docker first.{RESET}\n")
-        return False
-    
-    # Check if gateway is running
-    status, _ = get_container_status('itak-gateway')
-    if status != 'running':
-        print(f"  {YELLOW}⚠️  FastAPI Gateway not running. Install it first (Option 1).{RESET}\n")
-        return False
-    
-    compose_dir = Path.home() / '.itak' / 'docker'
-    compose_dir.mkdir(parents=True, exist_ok=True)
-    
-    compose_file = compose_dir / 'cloudflare-temp.yml'
-    compose_file.write_text(CLOUDFLARE_TEMP_COMPOSE)
-    
-    print(f"  Created: {compose_file}")
-    print(f"  {DIM}Starting tunnel to expose port 8080...{RESET}\n")
-    
-    try:
-        # Start the tunnel
-        result = subprocess.run(
-            ['docker', 'compose', '-f', str(compose_file), 'up', '-d'],
-            check=True
-        )
         
-        # Wait a moment and get the URL
         import time
-        time.sleep(3)
+        time.sleep(5)
         
         logs = subprocess.run(
             ['docker', 'logs', 'cloudflared-tunnel'],
@@ -206,8 +259,9 @@ def install_cloudflare_temp():
         
         # Look for the trycloudflare.com URL in logs
         for line in logs.stdout.split('\n') + logs.stderr.split('\n'):
-            if 'trycloudflare.com' in line or '.cloudflare' in line:
-                print(f"  {GREEN}✅ Tunnel URL: {line.strip()}{RESET}")
+            if 'trycloudflare.com' in line.lower():
+                print(f"  {GREEN}✅ Tunnel URL found in logs!{RESET}")
+                print(f"  {CYAN}{line.strip()}{RESET}")
                 break
         else:
             print(f"  {GREEN}✅ Tunnel started! Check logs for URL:{RESET}")
@@ -242,19 +296,17 @@ def install_cloudflare_permanent():
         print(f"\n  {YELLOW}Skipped. Run this option again when you have a token.{RESET}\n")
         return False
     
-    compose_dir = Path.home() / '.itak' / 'docker'
-    compose_dir.mkdir(parents=True, exist_ok=True)
+    DOCKER_DIR.mkdir(parents=True, exist_ok=True)
     
     # Save token to .env
-    env_file = compose_dir / '.env'
+    env_file = DOCKER_DIR / '.env'
     env_content = f"CLOUDFLARE_TUNNEL_TOKEN={token}\n"
     env_file.write_text(env_content)
     
-    compose_file = compose_dir / 'cloudflare-permanent.yml'
+    compose_file = DOCKER_DIR / 'cloudflare-permanent.yml'
     compose_file.write_text(CLOUDFLARE_PERMANENT_COMPOSE)
     
-    print(f"\n  Created: {compose_file}")
-    print(f"  Token saved to: {env_file}")
+    print(f"\n  {DIM}Token saved. Starting tunnel...{RESET}")
     
     try:
         subprocess.run(
@@ -269,27 +321,102 @@ def install_cloudflare_permanent():
         return False
 
 
-def show_service_status():
-    """Show status of all API services."""
-    print(f"\n  {BOLD}📊 Service Status{RESET}\n")
+def configure_vps():
+    """Configure VPS connection via FRP."""
+    print(f"\n  {CYAN}🖥️  Configure VPS Connection{RESET}\n")
     
-    services = [
-        ('itak-gateway', 'FastAPI Gateway', 'http://localhost:8080'),
-        ('cloudflared-tunnel', 'Cloudflare Tunnel', 'Check logs for URL'),
-    ]
+    config = load_config()
     
-    for container, name, url in services:
-        status, details = get_container_status(container)
+    print(f"  This will set up an FRP tunnel to your VPS.")
+    print(f"  See docs/VPS_SETUP.md for VPS-side setup instructions.\n")
+    
+    import click
+    
+    vps_ip = click.prompt(
+        f"  VPS IP Address",
+        default=config.get('vps_ip', '')
+    )
+    
+    if not vps_ip:
+        print(f"\n  {YELLOW}Cancelled.{RESET}\n")
+        return
+    
+    auth_token = click.prompt(
+        f"  FRP Auth Token",
+        default=config.get('auth_token', ''),
+        hide_input=True,
+        show_default=False
+    )
+    
+    if not auth_token:
+        print(f"\n  {YELLOW}Auth token required.{RESET}\n")
+        return
+    
+    # Save config
+    config['vps_ip'] = vps_ip
+    config['auth_token'] = auth_token
+    save_config(config)
+    
+    # Generate FRP client config
+    DOCKER_DIR.mkdir(parents=True, exist_ok=True)
+    
+    frpc_config = FRP_CLIENT_CONFIG.format(vps_ip=vps_ip, auth_token=auth_token)
+    frpc_file = DOCKER_DIR / 'frpc.toml'
+    frpc_file.write_text(frpc_config)
+    
+    compose_file = DOCKER_DIR / 'frpc.yml'
+    compose_file.write_text(FRP_CLIENT_COMPOSE)
+    
+    print(f"\n  {GREEN}✅ VPS configuration saved!{RESET}")
+    print(f"  {DIM}Config: {frpc_file}{RESET}")
+    print(f"\n  Use option [5] to start the FRP tunnel.\n")
+
+
+def toggle_frp_tunnel():
+    """Start or stop FRP tunnel."""
+    if not check_docker():
+        print(f"\n  {YELLOW}⚠️  Docker is not running.{RESET}\n")
+        return
+    
+    config = load_config()
+    
+    if not config.get('vps_ip'):
+        print(f"\n  {YELLOW}VPS not configured. Use option [4] first.{RESET}\n")
+        return
+    
+    compose_file = DOCKER_DIR / 'frpc.yml'
+    
+    if not compose_file.exists():
+        print(f"\n  {YELLOW}FRP config not found. Use option [4] to configure.{RESET}\n")
+        return
+    
+    status, _ = get_container_status('frpc')
+    
+    if status == 'running':
+        print(f"\n  {CYAN}Stopping FRP tunnel...{RESET}")
+        subprocess.run(['docker', 'compose', '-f', str(compose_file), 'down'], check=True)
+        print(f"  {GREEN}✅ FRP tunnel stopped.{RESET}\n")
+    else:
+        print(f"\n  {CYAN}Starting FRP tunnel...{RESET}")
+        subprocess.run(['docker', 'compose', '-f', str(compose_file), 'up', '-d'], check=True)
         
-        if status == 'running':
-            print(f"  {GREEN}✅{RESET} {name}: {GREEN}Running{RESET}")
-            print(f"     {DIM}{url}{RESET}")
-        elif status == 'stopped':
-            print(f"  {YELLOW}⏸️{RESET}  {name}: {YELLOW}Stopped{RESET}")
+        import time
+        time.sleep(2)
+        
+        logs = subprocess.run(['docker', 'logs', 'frpc', '--tail', '10'], capture_output=True, text=True)
+        
+        if 'start proxy success' in logs.stdout or 'start proxy success' in logs.stderr:
+            print(f"  {GREEN}✅ FRP tunnel connected!{RESET}")
+            vps = config.get('vps_ip')
+            print(f"\n  {BOLD}Your VPS endpoints:{RESET}")
+            print(f"    • API:      http://{vps}:{PORTS['gateway']}")
+            print(f"    • Ollama:   http://{vps}:{PORTS['ollama']}")
+            print(f"    • Playwright: ws://{vps}:{PORTS['playwright']}")
         else:
-            print(f"  {DIM}⬜{RESET} {name}: {DIM}Not installed{RESET}")
-    
-    print()
+            print(f"  {YELLOW}⚠️  Connection may have issues. Check logs:{RESET}")
+            print(f"  {DIM}docker logs frpc{RESET}")
+        
+        print()
 
 
 def run_api_menu():
@@ -309,7 +436,7 @@ def run_api_menu():
             if choice == 0:
                 return  # Back to main menu
             elif choice == 1:
-                install_fastapi_gateway()
+                show_service_status()
                 click.pause("  Press any key to continue...")
             elif choice == 2:
                 install_cloudflare_temp()
@@ -318,10 +445,13 @@ def run_api_menu():
                 install_cloudflare_permanent()
                 click.pause("  Press any key to continue...")
             elif choice == 4:
-                show_service_status()
+                configure_vps()
+                click.pause("  Press any key to continue...")
+            elif choice == 5:
+                toggle_frp_tunnel()
                 click.pause("  Press any key to continue...")
             else:
-                print(f"  {YELLOW}Invalid choice. Please enter 0-4.{RESET}")
+                print(f"  {YELLOW}Invalid choice. Please enter 0-5.{RESET}")
                 
         except click.Abort:
             return
