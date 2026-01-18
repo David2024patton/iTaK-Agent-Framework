@@ -69,6 +69,13 @@ class iTaKREPL:
         # Print Chat Option [6]
         chat_desc = "Chat/test models" if term_width < 80 else "Interactive general coding assistance"
         print(f"    {GREEN}[6]{RESET} {MAGENTA}💬 Chat with AI{RESET} {DIM}- {chat_desc}{RESET}")
+        
+        # Blank line separator
+        print()
+        
+        # Print API Option [7]
+        api_desc = "Gateway & tunnels" if term_width < 80 else "FastAPI gateway and Cloudflare tunnels"
+        print(f"    {GREEN}[7]{RESET} {CYAN}⚡ API Gateway{RESET} {DIM}- {api_desc}{RESET}")
         print()
         
         # Get choice - smart input: numbers select menu, text goes to chat
@@ -88,9 +95,9 @@ class iTaKREPL:
                 # Try to parse as number
                 try:
                     choice = int(raw_input.strip())
-                    if 1 <= choice <= 6:
+                    if 1 <= choice <= 7:
                         break
-                    print(f"  {YELLOW}Please enter 1-6, or just type your question{RESET}")
+                    print(f"  {YELLOW}Please enter 1-7, or just type your question{RESET}")
                 except ValueError:
                     # Not a number - treat as chat message and auto-select option 6
                     choice = 6
@@ -131,6 +138,18 @@ class iTaKREPL:
                 except EOFError:
                     self.running = False
                     print(f"\n{YELLOW}Goodbye!{RESET}\n")
+        
+        elif choice == 7:
+            # API Gateway Mode
+            try:
+                from .api_manager import run_api_menu
+                run_api_menu()
+                # After returning from API menu, restart main menu
+                self.start()
+            except ImportError:
+                print(f"\n{YELLOW}API Manager module not available.{RESET}\n")
+            except Exception as e:
+                print(f"\n{YELLOW}Error running API manager: {e}{RESET}\n")
         
         else:
             # Wizard Mode [1-5] - Clear screen for fresh view
@@ -209,6 +228,14 @@ class iTaKREPL:
         elif cmd == '/ide':
             self.handle_ide_command(args)
         
+        elif cmd == '/api':
+            # Open API Gateway manager
+            try:
+                from .api_manager import run_api_menu
+                run_api_menu()
+            except ImportError:
+                print(f"\n{YELLOW}API Manager module not available.{RESET}\n")
+        
         elif cmd == '/menu':
             # Return to main menu
             self.running = False
@@ -230,6 +257,7 @@ class iTaKREPL:
   {GREEN}/model{RESET}      Show or change the current model
   {GREEN}/models{RESET}     Browse available models
   {GREEN}/create{RESET}     Create a new project
+  {GREEN}/api{RESET}        API Gateway and tunnel manager
   {GREEN}/studio{RESET}     Launch the web-based Studio UI
   {GREEN}/status{RESET}     Show current status
   {GREEN}/ide{RESET}        IDE integration (install, enable, status)
