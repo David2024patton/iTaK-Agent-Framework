@@ -53,6 +53,16 @@ def run_project_wizard(initial_prompt: str = None):
         default=default_name
     )
     
+    # Description (Skip if we already have it from initial_prompt)
+    if initial_prompt:
+        description = initial_prompt
+    else:
+        description = click.prompt(
+            click.style("  Description", fg="cyan"),
+            type=str,
+            default=default_desc
+        )
+    
     click.echo()
     
     # Project type
@@ -79,10 +89,13 @@ def run_project_wizard(initial_prompt: str = None):
     # Custom description if needed
     custom_prompt = None
     if project_type[1] == "custom":
-        custom_prompt = click.prompt(
-            click.style("  Describe what you want to build", fg="cyan"),
-            type=str
-        )
+        if initial_prompt:
+            custom_prompt = initial_prompt
+        else:
+            custom_prompt = click.prompt(
+                click.style("  Describe what you want to build", fg="cyan"),
+                type=str
+            )
     
     click.echo()
     
