@@ -44,15 +44,44 @@ if is_first_run():
     auto_setup()
 
 
-@click.group(invoke_without_command=True)
+class DefaultAutoGroup(click.Group):
+    """
+    A unified CLI group that intelligently routes commands:
+    1. If a known subcommand is given (e.g. 'deploy'), run it.
+    2. If text is given (e.g. 'Build a website'), route to 'auto' command.
+    3. If no args given, run the group function (which launches REPL).
+    """
+    def resolve_command(self, ctx, args):
+        if not args:
+            return super().resolve_command(ctx, args)
+            
+        cmd_name = args[0]
+        # Check if it matches a known command
+        cmd = self.get_command(ctx, cmd_name)
+        
+        # If not a command and not a flag, assume it's a prompt for 'auto'
+        if cmd is None and not cmd_name.startswith('-'):
+            auto_cmd = self.get_command(ctx, 'auto')
+            if auto_cmd:
+                return 'auto', auto_cmd, args
+        
+        return super().resolve_command(ctx, args)
+
+
+@click.group(cls=DefaultAutoGroup, invoke_without_command=True)
 @click.version_option(get_version("iTaK"))
 @click.pass_context
 def iTaK(ctx):
     """Top-level command group for iTaK."""
-    # If no subcommand given, show the interactive welcome menu
+    # If no subcommand given, launch the REPL (Interactive Mode)
     if ctx.invoked_subcommand is None:
+        # Run setup silently if needed, then launch REPL
         from itak.cli.auto_setup import auto_setup
         auto_setup(force=True)
+        
+        # Launch Interactive REPL
+        from itak.cli.repl import run_repl
+        run_repl()
 
 
 @iTaK.command(
@@ -161,18 +190,22 @@ def setup(force):
 
 
 @iTaK.command()
-@click.argument("prompt", required=True)
+@click.argument("prompt", nargs=-1, required=True)
 @click.option("--model", "-m", default=None, help="Model to use (default: qwen3-vl:4b)")
 @click.option("--output", "-o", default=".", help="Output directory for generated files")
 def auto(prompt, model, output):
     """Process a prompt with AI and generate code/files.
     
     Example:
-        itak auto "Build a todo app with HTML and JavaScript"
-        itak auto "Create a Python script to sort files" -o ./my-project
+        itak "Build a todo app"
+        itak auto "Create a script"
     """
     import requests
     import json
+    
+    # Handle tuple input (from nargs=-1)
+    if isinstance(prompt, tuple):
+        prompt = " ".join(prompt)
     
     model = model or "qwen3-vl:4b"
     
