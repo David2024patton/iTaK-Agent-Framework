@@ -24,11 +24,11 @@ CONFIG_DIR = Path.home() / '.itak'
 DOCKER_DIR = CONFIG_DIR / 'docker'
 CONFIG_FILE = CONFIG_DIR / 'api_config.json'
 
-# Default ports
+# Default ports (5-digit to avoid conflicts)
 PORTS = {
     'gateway': 28934,
     'ollama': 11434,
-    'chromadb': 8000,
+    'chromadb': 29800,
     'playwright': 39281,
     'searxng': 48192,
     'frp_control': 7000,

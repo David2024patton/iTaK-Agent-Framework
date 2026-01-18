@@ -177,7 +177,7 @@ After `npm install`, these containers run under the `api-gateway` project:
 | Service | Port | Description |
 |---------|------|-------------|
 | **Ollama** | 11434 | Local LLM server |
-| **ChromaDB** | 8000 | Vector memory database |
+| **ChromaDB** | 29800 | Vector memory database |
 | **Playwright** | 39281 | Browser automation |
 | **SearXNG** | 48192 | Private search engine |
 

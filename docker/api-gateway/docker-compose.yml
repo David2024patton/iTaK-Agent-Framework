@@ -26,7 +26,7 @@ services:
     container_name: shared-chromadb
     restart: unless-stopped
     ports:
-      - "8000:8000"
+      - "29800:8000"
     volumes:
       - chromadb-data:/chroma/chroma
 

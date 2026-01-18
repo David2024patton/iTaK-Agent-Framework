@@ -444,7 +444,7 @@ const CONTAINER_CONFIGS = {
     chromadb: {
         name: 'shared-chromadb',
         image: 'chromadb/chroma',
-        ports: '8000:8000',
+        ports: '29800:8000',
         required: true
     },
     ollama: {
