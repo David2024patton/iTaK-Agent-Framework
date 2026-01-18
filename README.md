@@ -114,19 +114,32 @@ Gets you a public URL like `https://random-name.trycloudflare.com`
 
 For permanent remote access with your own domain:
 
+**First-time setup:**
+
 1. **Set up VPS** → [docs/VPS_SETUP.md](docs/VPS_SETUP.md)
-2. **Configure in iTaK:**
+2. **Copy your auth token** from `.env` → `FRP_AUTH_TOKEN=xxx`
+3. **Configure VPS in iTaK:**
    ```bash
    itak
    > /api
    # Select [4] Configure VPS Connection
+   # Enter your VPS IP and auth token
    ```
-3. **Start tunnel:**
+4. **Start tunnel:**
    ```bash
    # Select [5] Start/Stop FRP Tunnel
    ```
 
-Your local services are now accessible at `http://YOUR_VPS_IP:PORT`
+**Auto-reconnect:** Once configured, the FRP tunnel will **automatically start** on every `npm install` or Docker restart. No need to manually start it again!
+
+**Your VPS endpoints:**
+
+| Service | URL |
+|---------|-----|
+| Ollama LLM | `http://YOUR_VPS_IP:11434` |
+| ChromaDB | `http://YOUR_VPS_IP:29800` |
+| Playwright | `http://YOUR_VPS_IP:39281` |
+| SearXNG | `http://YOUR_VPS_IP:48192` |
 
 ---
 

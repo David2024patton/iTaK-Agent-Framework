@@ -532,6 +532,23 @@ async function setupDockerContainers() {
             if (result.status === 0) {
                 console.log('\n  ✅ api-gateway stack started!');
                 console.log('  📦 Containers grouped under: api-gateway\n');
+
+                // Auto-start FRP tunnel if frpc.toml exists
+                const frpcConfig = path.join(path.dirname(composeFile), 'frpc.toml');
+                if (fs.existsSync(frpcConfig)) {
+                    console.log('  🔗 Found frpc.toml - auto-starting VPS tunnel...');
+                    const tunnelResult = spawnSync('docker', ['compose', '-f', composeFile, '-p', 'api-gateway', '--profile', 'tunnel', 'up', '-d', 'frpc'], {
+                        stdio: 'inherit',
+                        shell: true,
+                        cwd: path.dirname(composeFile)
+                    });
+                    if (tunnelResult.status === 0) {
+                        console.log('  ✅ FRP tunnel connected to VPS!\n');
+                    } else {
+                        console.log('  ⚠️  FRP tunnel failed to start\n');
+                    }
+                }
+
                 return true;
             }
         } catch (e) {
