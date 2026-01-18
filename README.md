@@ -63,9 +63,21 @@ iTaK (Intelligent Task Automation Kernel) is a **production-ready multi-agent fr
 git clone https://github.com/David2024patton/iTaK-Agent-Framework.git
 cd iTaK-Agent-Framework
 
-# Install in development mode
-pip install -e .
+# One command installs everything
+npm install
 ```
+
+**`npm install` automatically:**
+- ✅ Detects your OS (Windows/Mac/Linux)
+- ✅ Installs Docker Desktop (if needed)
+- ✅ Installs Ollama (if needed)
+- ✅ Starts all Docker containers (Ollama, ChromaDB, Playwright, SearXNG)
+- ✅ Pulls the default LLM model (`qwen3-vl:2b`)
+- ✅ Generates `.env` with service URLs
+- ✅ Installs Python package
+- ✅ Launches `itak` CLI
+
+> **Note:** You may need to approve admin prompts for Docker/WSL installation.
 
 ### Basic Usage
 
