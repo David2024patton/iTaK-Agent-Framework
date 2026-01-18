@@ -102,7 +102,11 @@ class iTaKREPL:
         
         # Handle Choice
         if choice == 6:
-            # Chat Mode (Default behavior)
+            # Clear screen for fresh Chat mode view
+            os.system('cls' if os.name == 'nt' else 'clear')
+            print(f"\n  {BOLD}{MAGENTA}💬 Chat Mode{RESET}")
+            print(f"  {DIM}Type your questions, or /menu to go back{RESET}\n")
+            
             print_welcome_tips()
             
             # If user typed a message at the menu, process it immediately
@@ -126,7 +130,8 @@ class iTaKREPL:
                     print(f"\n{YELLOW}Goodbye!{RESET}\n")
         
         else:
-            # Wizard Mode [1-5]
+            # Wizard Mode [1-5] - Clear screen for fresh view
+            os.system('cls' if os.name == 'nt' else 'clear')
             try:
                 from .wizard import run_project_wizard
                 run_project_wizard(project_type_idx=choice)
