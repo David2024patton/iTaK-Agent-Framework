@@ -2,235 +2,325 @@
 /**
  * iTaK npm postinstall script
  * 
- * Runs after `npm install itak` to:
- * 1. Install Python package via pip
- * 2. Check/setup Docker services (ChromaDB, Playwright, SearXNG)
- * 3. Pull default LLM model via Ollama
- * 4. Launch the iTaK CLI with welcome screen
+ * Cross-platform auto-setup that:
+ * 1. Detects OS (Windows/Mac/Linux)
+ * 2. Installs WSL on Windows if needed
+ * 3. Installs Docker Desktop/Engine
+ * 4. Installs Ollama
+ * 5. Pulls default LLM model
+ * 6. Generates .env file
+ * 7. Launches iTaK CLI
  */
 
 const { execSync, spawn, spawnSync } = require('child_process');
 const fs = require('fs');
 const path = require('path');
 const os = require('os');
+const https = require('https');
 
 const DEFAULT_MODEL = 'qwen3-vl:2b';
+const PLATFORM = os.platform(); // 'win32', 'darwin', 'linux'
 
-// Required Docker services with their default ports
+// Docker service ports
 const DOCKER_SERVICES = [
-    { name: 'chromadb', container: 'shared-chromadb', image: 'chromadb/chroma', port: 8000, envVar: 'CHROMADB_URL', required: true },
-    { name: 'ollama', container: 'ollama', image: 'ollama/ollama', port: 11434, envVar: 'OLLAMA_URL', required: true },
-    { name: 'playwright', container: 'playwright', image: 'mcr.microsoft.com/playwright', port: 3000, envVar: 'PLAYWRIGHT_URL', required: false },
-    { name: 'searxng', container: 'searxng', image: 'searxng/searxng', port: 8080, envVar: 'SEARXNG_URL', required: false },
+    { name: 'chromadb', container: 'shared-chromadb', port: 8000, envVar: 'CHROMADB_URL' },
+    { name: 'ollama', container: 'ollama', port: 11434, envVar: 'OLLAMA_URL' },
+    { name: 'playwright', container: 'playwright', port: 3000, envVar: 'PLAYWRIGHT_URL' },
+    { name: 'searxng', container: 'searxng', port: 8080, envVar: 'SEARXNG_URL' },
 ];
 
 console.log('\n' + '='.repeat(60));
-console.log('  iTaK Agent Framework - Installing...');
+console.log('  iTaK Agent Framework - Cross-Platform Setup');
+console.log('='.repeat(60));
+console.log(`  Platform: ${PLATFORM === 'win32' ? 'Windows' : PLATFORM === 'darwin' ? 'macOS' : 'Linux'}`);
 console.log('='.repeat(60) + '\n');
 
-// Detect Python command
+// ============================================================================
+// UTILITY FUNCTIONS
+// ============================================================================
+
+function exec(cmd, options = {}) {
+    try {
+        return execSync(cmd, { encoding: 'utf8', stdio: 'pipe', ...options });
+    } catch (e) {
+        return null;
+    }
+}
+
+function isAdmin() {
+    if (PLATFORM === 'win32') {
+        try {
+            execSync('net session', { stdio: 'ignore' });
+            return true;
+        } catch {
+            return false;
+        }
+    }
+    return process.getuid && process.getuid() === 0;
+}
+
 function getPythonCommand() {
     const commands = ['python3', 'python', 'py'];
     for (const cmd of commands) {
-        try {
-            execSync(`${cmd} --version`, { stdio: 'ignore' });
-            return cmd;
-        } catch (e) {
-            continue;
-        }
+        if (exec(`${cmd} --version`)) return cmd;
     }
     return null;
 }
 
-// Check if Docker is available
-function checkDocker() {
+// ============================================================================
+// WINDOWS-SPECIFIC FUNCTIONS
+// ============================================================================
+
+function checkWSL() {
+    const result = exec('wsl --status');
+    return result && result.includes('Default');
+}
+
+function installWSL() {
+    console.log('  📦 WSL2 not found. Installing...\n');
+
+    if (!isAdmin()) {
+        console.log('  ⚠️  Admin privileges required to install WSL.');
+        console.log('  Please run this command in an admin terminal:\n');
+        console.log('    wsl --install\n');
+        console.log('  Then restart your computer and run `npm install` again.\n');
+        return false;
+    }
+
     try {
-        execSync('docker --version', { stdio: 'ignore' });
-        return true;
+        console.log('  Running: wsl --install');
+        spawnSync('wsl', ['--install'], { stdio: 'inherit', shell: true });
+        console.log('\n  ✅ WSL installation initiated.');
+        console.log('  ⚠️  A RESTART IS REQUIRED to complete WSL setup.');
+        console.log('  After restart, run `npm install` again.\n');
+        return 'restart_required';
     } catch (e) {
+        console.log(`  ❌ Failed to install WSL: ${e.message}`);
         return false;
     }
 }
 
-// Get running Docker containers
+function checkDockerDesktopWindows() {
+    // Check if Docker Desktop is installed
+    const dockerPath = path.join(process.env.ProgramFiles || 'C:\\Program Files', 'Docker', 'Docker', 'Docker Desktop.exe');
+    const dockerPathW = path.join(process.env['ProgramFiles(x86)'] || 'C:\\Program Files (x86)', 'Docker', 'Docker', 'Docker Desktop.exe');
+
+    if (fs.existsSync(dockerPath) || fs.existsSync(dockerPathW)) {
+        // Check if Docker is running
+        const result = exec('docker --version');
+        return result !== null;
+    }
+    return false;
+}
+
+function installDockerWindows() {
+    console.log('  📦 Docker Desktop not found.\n');
+    console.log('  Please install Docker Desktop manually:');
+    console.log('  → https://www.docker.com/products/docker-desktop/\n');
+    console.log('  After installing, run `npm install` again.\n');
+
+    // Optionally open the download page
+    try {
+        exec('start https://www.docker.com/products/docker-desktop/');
+    } catch { }
+
+    return false;
+}
+
+function checkOllamaWindows() {
+    const result = exec('ollama --version');
+    return result !== null;
+}
+
+function installOllamaWindows() {
+    console.log('  📦 Ollama not found.\n');
+    console.log('  Please install Ollama manually:');
+    console.log('  → https://ollama.ai/download\n');
+
+    try {
+        exec('start https://ollama.ai/download');
+    } catch { }
+
+    return false;
+}
+
+// ============================================================================
+// MACOS-SPECIFIC FUNCTIONS
+// ============================================================================
+
+function checkBrewMac() {
+    return exec('brew --version') !== null;
+}
+
+function installDockerMac() {
+    if (!checkBrewMac()) {
+        console.log('  📦 Docker not found. Homebrew not available.\n');
+        console.log('  Please install Docker Desktop manually:');
+        console.log('  → https://www.docker.com/products/docker-desktop/\n');
+        return false;
+    }
+
+    console.log('  📦 Installing Docker via Homebrew...\n');
+    try {
+        spawnSync('brew', ['install', '--cask', 'docker'], { stdio: 'inherit', shell: true });
+        console.log('\n  ✅ Docker Desktop installed!');
+        console.log('  Please launch Docker Desktop and run `npm install` again.\n');
+        return 'launch_required';
+    } catch (e) {
+        console.log(`  ❌ Failed to install Docker: ${e.message}`);
+        return false;
+    }
+}
+
+function installOllamaMac() {
+    if (!checkBrewMac()) {
+        console.log('  Please install Ollama: https://ollama.ai/download\n');
+        return false;
+    }
+
+    console.log('  📦 Installing Ollama via Homebrew...\n');
+    try {
+        spawnSync('brew', ['install', 'ollama'], { stdio: 'inherit', shell: true });
+        console.log('\n  ✅ Ollama installed!');
+        return true;
+    } catch (e) {
+        console.log(`  ❌ Failed to install Ollama: ${e.message}`);
+        return false;
+    }
+}
+
+// ============================================================================
+// LINUX-SPECIFIC FUNCTIONS
+// ============================================================================
+
+function installDockerLinux() {
+    console.log('  📦 Installing Docker Engine...\n');
+
+    // Try the official install script
+    try {
+        console.log('  Running Docker install script...');
+        spawnSync('sh', ['-c', 'curl -fsSL https://get.docker.com | sh'], {
+            stdio: 'inherit',
+            shell: true
+        });
+
+        // Add user to docker group
+        const user = process.env.USER || process.env.USERNAME;
+        if (user) {
+            exec(`sudo usermod -aG docker ${user}`);
+            console.log(`  Added ${user} to docker group (logout/login to take effect)`);
+        }
+
+        console.log('\n  ✅ Docker installed!');
+        return true;
+    } catch (e) {
+        console.log(`  ❌ Failed to install Docker: ${e.message}`);
+        console.log('  Please install Docker manually: https://docs.docker.com/engine/install/\n');
+        return false;
+    }
+}
+
+function installOllamaLinux() {
+    console.log('  📦 Installing Ollama...\n');
+    try {
+        spawnSync('sh', ['-c', 'curl -fsSL https://ollama.ai/install.sh | sh'], {
+            stdio: 'inherit',
+            shell: true
+        });
+        console.log('\n  ✅ Ollama installed!');
+        return true;
+    } catch (e) {
+        console.log(`  ❌ Failed to install Ollama: ${e.message}`);
+        return false;
+    }
+}
+
+// ============================================================================
+// CROSS-PLATFORM FUNCTIONS
+// ============================================================================
+
+function checkDocker() {
+    const result = exec('docker --version');
+    return result !== null;
+}
+
+function checkOllama() {
+    const result = exec('ollama list');
+    return result !== null;
+}
+
 function getRunningContainers() {
     try {
         const result = execSync('docker ps --format "{{.Names}}"', { encoding: 'utf8' });
         return result.split('\n').filter(n => n.trim());
-    } catch (e) {
+    } catch {
         return [];
     }
 }
 
-// Check if Ollama is available (Docker or native)
-function checkOllama() {
-    try {
-        execSync('ollama list', { stdio: 'ignore', timeout: 5000 });
-        return true;
-    } catch (e) {
-        return false;
-    }
-}
-
-// Check if model is installed in Ollama
 function checkModelInstalled(model) {
     try {
-        const result = execSync('ollama list', { encoding: 'utf8', timeout: 10000 });
-        const modelBase = model.split(':')[0];
-        return result.includes(modelBase);
-    } catch (e) {
+        const result = exec('ollama list');
+        return result && result.includes(model.split(':')[0]);
+    } catch {
         return false;
     }
 }
 
-// Pull model via Ollama
 function pullModel(model) {
     console.log(`  📦 Pulling model: ${model}...`);
-    console.log('     (This may take a few minutes on first run)\n');
+    console.log('     (This may take a few minutes)\n');
 
     try {
-        spawnSync('ollama', ['pull', model], {
-            stdio: 'inherit',
-            shell: true,
-            timeout: 600000 // 10 minute timeout
-        });
+        spawnSync('ollama', ['pull', model], { stdio: 'inherit', shell: true });
         return true;
-    } catch (e) {
-        console.log(`  ⚠️  Failed to pull model: ${e.message}`);
+    } catch {
         return false;
     }
 }
 
-// Check Docker services
-function checkDockerServices() {
-    console.log('  🐳 Checking Docker services...\n');
-
-    if (!checkDocker()) {
-        console.log('  ⚠️  Docker not found. Some features may be limited.');
-        console.log('     Install Docker: https://docs.docker.com/get-docker/\n');
-        return;
-    }
-
-    const running = getRunningContainers();
-
-    for (const service of DOCKER_SERVICES) {
-        // Check both the expected container name and common variations
-        const isRunning = running.some(name =>
-            name.includes(service.name) ||
-            name === service.container
-        );
-
-        if (isRunning) {
-            console.log(`  ✅ ${service.name}: Running`);
-        } else if (service.required) {
-            console.log(`  ⚠️  ${service.name}: Not running (required)`);
-            console.log(`      → docker run -d --name ${service.container} ${service.image}`);
-        } else {
-            console.log(`  ⏭️  ${service.name}: Not running (optional)`);
-        }
-    }
-    console.log();
-}
-
-// Generate .env file with Docker service URLs
 function generateEnvFile() {
     console.log('  📝 Generating .env file...\n');
 
     const projectRoot = __dirname.replace('/scripts', '').replace('\\scripts', '');
     const envPath = path.join(projectRoot, '.env');
 
-    // Check if .env already exists
-    let existingEnv = {};
-    if (fs.existsSync(envPath)) {
-        const content = fs.readFileSync(envPath, 'utf8');
-        content.split('\n').forEach(line => {
-            const [key, ...valueParts] = line.split('=');
-            if (key && valueParts.length > 0) {
-                existingEnv[key.trim()] = valueParts.join('=').trim();
-            }
-        });
-    }
-
     const running = getRunningContainers();
 
-    // Build env vars for running services
-    const envVars = {
-        '# iTaK Agent Framework Environment Configuration': '',
-        '# Auto-generated by npm install': '',
-        '': '',
-        '# Default LLM Model': '',
-        'ITAK_DEFAULT_MODEL': DEFAULT_MODEL,
-        '': '',
-        '# Docker Service URLs': '',
-    };
+    let content = `# iTaK Agent Framework Environment Configuration
+# Auto-generated by npm install
+# Platform: ${PLATFORM}
+
+# Default LLM Model
+ITAK_DEFAULT_MODEL=${DEFAULT_MODEL}
+
+# Docker Service URLs
+`;
 
     for (const service of DOCKER_SERVICES) {
         const isRunning = running.some(name =>
-            name.includes(service.name) ||
-            name === service.container
+            name.includes(service.name) || name === service.container
         );
 
         if (isRunning) {
-            // Use localhost for local Docker containers
-            envVars[service.envVar] = `http://localhost:${service.port}`;
+            content += `${service.envVar}=http://localhost:${service.port}\n`;
             console.log(`  ✅ ${service.envVar}=http://localhost:${service.port}`);
         } else {
-            // Comment out if not running
-            envVars[`# ${service.envVar}`] = `http://localhost:${service.port}  # Not running`;
-            console.log(`  ⏭️  ${service.envVar} (service not running)`);
+            content += `# ${service.envVar}=http://localhost:${service.port}  # Not running\n`;
+            console.log(`  ⏭️  ${service.envVar} (not running)`);
         }
     }
 
-    // Add any existing custom vars that aren't being overwritten
-    envVars[''] = '';
-    envVars['# Custom Configuration'] = '';
-    for (const [key, value] of Object.entries(existingEnv)) {
-        if (!key.startsWith('#') && !DOCKER_SERVICES.some(s => s.envVar === key) && key !== 'ITAK_DEFAULT_MODEL') {
-            envVars[key] = value;
-        }
-    }
-
-    // Write .env file
-    const envContent = Object.entries(envVars)
-        .map(([key, value]) => {
-            if (key === '' || key.startsWith('#')) {
-                return key;
-            }
-            return `${key}=${value}`;
-        })
-        .join('\n');
-
-    fs.writeFileSync(envPath, envContent + '\n');
-    console.log(`\n  ✅ .env file created at: ${envPath}\n`);
+    fs.writeFileSync(envPath, content);
+    console.log(`\n  ✅ .env file created\n`);
 }
 
-// Check and pull default LLM
-function setupDefaultModel() {
-    console.log('  🤖 Checking default LLM model...\n');
-
-    if (!checkOllama()) {
-        console.log('  ⚠️  Ollama not available. Cannot verify model.');
-        console.log('     Install Ollama: https://ollama.ai\n');
-        return;
-    }
-
-    if (checkModelInstalled(DEFAULT_MODEL)) {
-        console.log(`  ✅ Model ${DEFAULT_MODEL}: Installed\n`);
-        return;
-    }
-
-    console.log(`  📥 Model ${DEFAULT_MODEL}: Not found`);
-    pullModel(DEFAULT_MODEL);
-}
-
-// Install Python package
 function installPythonPackage() {
     const python = getPythonCommand();
 
     if (!python) {
         console.log('  ⚠️  Python not found!');
-        console.log('  Please install Python 3.10+ first:');
-        console.log('  → https://www.python.org/downloads/\n');
+        console.log('  Please install Python 3.10+: https://www.python.org/downloads/\n');
         return false;
     }
 
@@ -238,67 +328,175 @@ function installPythonPackage() {
     console.log('  📦 Installing iTaK Python package...\n');
 
     try {
-        // Try local install first (editable mode for development)
         execSync(`${python} -m pip install -e . --quiet`, {
             stdio: 'inherit',
-            cwd: __dirname.replace('/scripts', '').replace('\\scripts', ''),
-            timeout: 300000 // 5 minute timeout
+            cwd: __dirname.replace('/scripts', '').replace('\\scripts', '')
         });
         console.log('\n  ✅ Python package installed!');
         return true;
-    } catch (e) {
-        console.log('  ⚠️  Local install failed, trying PyPI...');
-        try {
-            execSync(`${python} -m pip install itak --quiet`, {
-                stdio: 'inherit',
-                timeout: 300000
-            });
-            console.log('\n  ✅ Python package installed (from PyPI)!');
-            return true;
-        } catch (e2) {
-            console.log('\n  ❌ Failed to install Python package');
-            return false;
+    } catch {
+        console.log('  ⚠️  Failed to install Python package');
+        return false;
+    }
+}
+
+function checkDockerServices() {
+    console.log('  🐳 Checking Docker services...\n');
+
+    if (!checkDocker()) {
+        console.log('  ⚠️  Docker not available\n');
+        return;
+    }
+
+    const running = getRunningContainers();
+
+    for (const service of DOCKER_SERVICES) {
+        const isRunning = running.some(name =>
+            name.includes(service.name) || name === service.container
+        );
+
+        if (isRunning) {
+            console.log(`  ✅ ${service.name}: Running`);
+        } else {
+            console.log(`  ⏭️  ${service.name}: Not running`);
         }
     }
+    console.log();
 }
 
-// Launch iTaK CLI
 function launchCLI() {
     console.log('\n  🚀 Launching iTaK...\n');
-
     try {
-        spawnSync('itak', [], {
-            stdio: 'inherit',
-            shell: true
-        });
-    } catch (e) {
-        console.log('\n  ✅ Installation complete!');
-        console.log('  Run `itak` to start the iTaK Agent Framework\n');
+        spawnSync('itak', [], { stdio: 'inherit', shell: true });
+    } catch {
+        console.log('  ✅ Setup complete! Run `itak` to start.\n');
     }
 }
 
-// Main
-async function main() {
-    // Step 1: Check Docker services
-    checkDockerServices();
+// ============================================================================
+// MAIN SETUP FLOW
+// ============================================================================
 
-    // Step 2: Generate .env file with service URLs
-    generateEnvFile();
+async function setupWindows() {
+    console.log('  🪟 Running Windows setup...\n');
 
-    // Step 3: Install Python package
-    const success = installPythonPackage();
-
-    // Step 4: Setup default model
-    if (success) {
-        setupDefaultModel();
+    // Step 1: Check/Install WSL
+    if (!checkWSL()) {
+        const result = installWSL();
+        if (result === 'restart_required') {
+            process.exit(0);
+        }
+        if (!result) return false;
+    } else {
+        console.log('  ✅ WSL2: Installed');
     }
 
-    // Step 5: Launch CLI
-    if (success) {
+    // Step 2: Check/Install Docker
+    if (!checkDockerDesktopWindows()) {
+        const result = installDockerWindows();
+        if (!result) return false;
+    } else {
+        console.log('  ✅ Docker Desktop: Installed');
+    }
+
+    // Step 3: Check/Install Ollama
+    if (!checkOllamaWindows()) {
+        installOllamaWindows();
+    } else {
+        console.log('  ✅ Ollama: Installed');
+    }
+
+    console.log();
+    return true;
+}
+
+async function setupMac() {
+    console.log('  🍎 Running macOS setup...\n');
+
+    // Step 1: Check/Install Docker
+    if (!checkDocker()) {
+        const result = installDockerMac();
+        if (result === 'launch_required') {
+            process.exit(0);
+        }
+        if (!result) return false;
+    } else {
+        console.log('  ✅ Docker: Installed');
+    }
+
+    // Step 2: Check/Install Ollama
+    if (!checkOllama()) {
+        installOllamaMac();
+    } else {
+        console.log('  ✅ Ollama: Installed');
+    }
+
+    console.log();
+    return true;
+}
+
+async function setupLinux() {
+    console.log('  🐧 Running Linux setup...\n');
+
+    // Step 1: Check/Install Docker
+    if (!checkDocker()) {
+        installDockerLinux();
+    } else {
+        console.log('  ✅ Docker: Installed');
+    }
+
+    // Step 2: Check/Install Ollama
+    if (!checkOllama()) {
+        installOllamaLinux();
+    } else {
+        console.log('  ✅ Ollama: Installed');
+    }
+
+    console.log();
+    return true;
+}
+
+async function main() {
+    // Step 1: Platform-specific setup
+    let platformReady = false;
+
+    if (PLATFORM === 'win32') {
+        platformReady = await setupWindows();
+    } else if (PLATFORM === 'darwin') {
+        platformReady = await setupMac();
+    } else {
+        platformReady = await setupLinux();
+    }
+
+    if (!platformReady) {
+        console.log('  ⚠️  Platform setup incomplete. Please install missing dependencies and retry.\n');
+    }
+
+    // Step 2: Check Docker services
+    checkDockerServices();
+
+    // Step 3: Generate .env file
+    generateEnvFile();
+
+    // Step 4: Install Python package
+    const pythonOk = installPythonPackage();
+
+    // Step 5: Pull default model
+    if (pythonOk && checkOllama()) {
+        if (!checkModelInstalled(DEFAULT_MODEL)) {
+            console.log(`\n  📥 Model ${DEFAULT_MODEL} not found.`);
+            pullModel(DEFAULT_MODEL);
+        } else {
+            console.log(`  ✅ Model ${DEFAULT_MODEL}: Installed`);
+        }
+    }
+
+    // Step 6: Launch CLI
+    if (pythonOk) {
         launchCLI();
     } else {
-        console.log('\n  Manual install:');
-        console.log('  pip install itak');
+        console.log('\n  Manual steps:');
+        console.log('  pip install -e .');
         console.log('  itak\n');
     }
 }
