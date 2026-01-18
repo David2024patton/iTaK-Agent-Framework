@@ -191,7 +191,7 @@ def auto(prompt, model, output):
     
     if is_creation:
         click.secho(f"\n🚀 usage detected: '{prompt}'", fg="cyan")
-        click.secho("   Starting project creation wizard...", fg="dim")
+        click.secho("   Starting project creation wizard...", dim=True)
         try:
             from .wizard import run_project_wizard
             run_project_wizard(initial_prompt=prompt)
