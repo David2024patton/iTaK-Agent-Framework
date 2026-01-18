@@ -327,8 +327,13 @@ def configure_vps():
     
     config = load_config()
     
-    print(f"  This will set up an FRP tunnel to your VPS.")
-    print(f"  See docs/VPS_SETUP.md for VPS-side setup instructions.\n")
+    print(f"  {BOLD}Prerequisites:{RESET}")
+    print(f"  1. VPS with FRP server running (see docs/VPS_SETUP.md)")
+    print(f"  2. Your auth token from the VPS frps.toml file")
+    print()
+    print(f"  {DIM}Don't have a token yet? Generate one with:{RESET}")
+    print(f"    {CYAN}openssl rand -hex 16{RESET}")
+    print(f"  {DIM}Use the SAME token on your VPS and here.{RESET}\n")
     
     import click
     
@@ -341,6 +346,7 @@ def configure_vps():
         print(f"\n  {YELLOW}Cancelled.{RESET}\n")
         return
     
+    print(f"\n  {DIM}Enter the auth token from your VPS frps.toml file:{RESET}")
     auth_token = click.prompt(
         f"  FRP Auth Token",
         default=config.get('auth_token', ''),
@@ -349,7 +355,7 @@ def configure_vps():
     )
     
     if not auth_token:
-        print(f"\n  {YELLOW}Auth token required.{RESET}\n")
+        print(f"\n  {YELLOW}Auth token is required. Get it from your VPS frps.toml.{RESET}\n")
         return
     
     # Save config

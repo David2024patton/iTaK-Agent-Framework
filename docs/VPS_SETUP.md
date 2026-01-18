@@ -90,14 +90,27 @@ mkdir -p /root/frp-server
 cd /root/frp-server
 ```
 
-### Step 3: Generate Auth Token
+### Step 3: Generate Your Auth Token
 
+> [!IMPORTANT]
+> The auth token is like a password that YOU create. It must be the **exact same** on both your VPS and your local machine.
+
+**Generate a random token:**
 ```bash
-# Generate a secure random token
 openssl rand -hex 16
 ```
 
-Save this token - you'll need it for both server and client configuration.
+**Example output:**
+```
+83b958b5efbb4f8a8d521cde16e2c9d3
+```
+
+**Copy this token** - you'll use it in BOTH places:
+1. VPS `frps.toml`: `auth.token = "83b958b5efbb4f8a8d521cde16e2c9d3"`
+2. Local iTaK: Enter when prompted in `/api` → Configure VPS Connection
+
+> [!WARNING]
+> If the tokens don't match exactly, the tunnel will fail to connect!
 
 ### Step 4: Create Configuration Files
 
@@ -108,11 +121,11 @@ cat > frps.toml << 'EOF'
 # FRP Server Configuration
 bindPort = 7000
 auth.method = "token"
-auth.token = "YOUR_TOKEN_HERE"
+auth.token = "PASTE_YOUR_TOKEN_HERE"
 EOF
 ```
 
-> Replace `YOUR_TOKEN_HERE` with your generated token.
+> Replace `PASTE_YOUR_TOKEN_HERE` with your generated token from Step 3.
 
 #### File: `docker-compose.yml`
 
