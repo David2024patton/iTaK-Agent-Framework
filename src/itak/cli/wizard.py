@@ -21,7 +21,7 @@ PROJECT_TYPES = [
 ]
 
 
-def run_project_wizard():
+def run_project_wizard(initial_prompt: str = None):
     """Run the interactive project creation wizard."""
     click.echo()
     click.secho("╔" + "═" * 62 + "╗", fg="magenta")
@@ -31,21 +31,26 @@ def run_project_wizard():
     click.secho("╚" + "═" * 62 + "╝", fg="magenta")
     click.echo()
     
+    # Infer defaults from initial prompt
+    default_name = "my-project"
+    default_desc = "A new iTaK project"
+    
+    if initial_prompt:
+        # Simple heuristic to extract potential name
+        # e.g. "Build a finance dashboard" -> "finance-dashboard"
+        words = initial_prompt.lower().split()
+        ignored = {'build', 'create', 'make', 'a', 'an', 'new', 'with', 'using', 'for'}
+        meaningful = [w for w in words if w not in ignored]
+        if meaningful:
+            default_name = "-".join(meaningful[:3])
+            
+        default_desc = initial_prompt
+    
     # Project name
     project_name = click.prompt(
         click.style("  Project name", fg="cyan"),
         type=str,
-        default="my-project"
-    )
-    
-    # Sanitize project name
-    project_name = project_name.lower().replace(" ", "-")
-    
-    # Description
-    description = click.prompt(
-        click.style("  Description", fg="cyan"),
-        type=str,
-        default="A new iTaK project"
+        default=default_name
     )
     
     click.echo()
