@@ -67,10 +67,13 @@ npm install
 **`npm install` automatically:**
 - ✅ Detects your OS (Windows/Mac/Linux)
 - ✅ Installs Docker Desktop and Ollama (if needed)
-- ✅ Starts all containers (Ollama, ChromaDB, Playwright, SearXNG)
+- ✅ Starts all containers (Ollama, ChromaDB, Playwright, SearXNG, etc.)
 - ✅ Pulls the default LLM model (`qwen3-vl:2b`)
 - ✅ Generates `.env` with service URLs
 - ✅ Launches `itak` CLI
+
+> [!NOTE]
+> **Your data is safe!** Running `npm install` will never delete existing containers or their data. It only starts missing containers and leaves your existing ones untouched.
 
 ### Using iTaK
 
