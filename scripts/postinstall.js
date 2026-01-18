@@ -478,7 +478,7 @@ async function setupDockerContainers() {
         return false;
     }
 
-    // Check if containers are already running
+    // Check if containers are already running under api-gateway project
     const running = getRunningContainers();
     const requiredContainers = ['ollama', 'shared-chromadb', 'playwright-server', 'searxng'];
     const allRunning = requiredContainers.every(name =>
@@ -491,59 +491,68 @@ async function setupDockerContainers() {
     }
 
     // Use docker-compose from the api-gateway directory
-    const projectRoot = __dirname.replace('/scripts', '').replace('\\\\scripts', '');
+    const projectRoot = path.resolve(__dirname, '..');
     const composeFile = path.join(projectRoot, 'docker', 'api-gateway', 'docker-compose.yml');
 
-    if (!fs.existsSync(composeFile)) {
-        console.log('  ⚠️  docker-compose.yml not found. Using standalone containers.\n');
-        // Fallback to individual containers
-        for (const [serviceName, config] of Object.entries(CONTAINER_CONFIGS)) {
-            const isRunning = running.some(name =>
-                name === config.name || name.includes(serviceName)
-            );
-
-            if (isRunning) {
-                console.log(`  ✅ ${serviceName}: Already running`);
-                continue;
-            }
-
-            console.log(`  📦 Starting ${serviceName}...`);
-            let dockerCmd = `docker run -d --name ${config.name} -p ${config.ports}`;
-            if (config.volumes) dockerCmd += ` -v ${config.volumes}`;
-            if (config.env) {
-                for (const e of config.env) dockerCmd += ` -e ${e}`;
-            }
-            dockerCmd += ` ${config.image}`;
-            if (config.command) dockerCmd += ` ${config.command}`;
-
-            try {
-                exec(dockerCmd);
-                console.log(`  ✅ ${serviceName}: Started`);
-            } catch (e) {
-                console.log(`  ⚠️  ${serviceName}: Failed to start`);
-            }
-        }
-        return true;
-    }
-
-    console.log('  📦 Starting api-gateway stack...');
+    console.log(`  📦 Starting api-gateway stack...`);
     console.log(`     (ollama, chromadb, playwright, searxng)\n`);
 
-    try {
-        // Run docker compose up
-        spawnSync('docker', ['compose', '-f', composeFile, '-p', 'api-gateway', 'up', '-d'], {
-            stdio: 'inherit',
-            shell: true,
-            cwd: path.dirname(composeFile)
-        });
+    if (fs.existsSync(composeFile)) {
+        try {
+            // Stop any existing standalone containers first
+            for (const container of requiredContainers) {
+                try {
+                    exec(`docker stop ${container} 2>nul`);
+                    exec(`docker rm ${container} 2>nul`);
+                } catch (e) { /* ignore */ }
+            }
 
-        console.log('\n  ✅ api-gateway stack started!');
-        console.log('  📦 Containers grouped under: api-gateway\n');
-        return true;
-    } catch (e) {
-        console.log(`  ⚠️  Failed to start api-gateway stack: ${e.message}\n`);
-        return false;
+            // Run docker compose up with project name api-gateway
+            const result = spawnSync('docker', ['compose', '-f', composeFile, '-p', 'api-gateway', 'up', '-d'], {
+                stdio: 'inherit',
+                shell: true,
+                cwd: path.dirname(composeFile)
+            });
+
+            if (result.status === 0) {
+                console.log('\n  ✅ api-gateway stack started!');
+                console.log('  📦 Containers grouped under: api-gateway\n');
+                return true;
+            }
+        } catch (e) {
+            console.log(`  ⚠️  Docker compose failed, using standalone containers...\n`);
+        }
     }
+
+    // Fallback to individual containers (only if compose fails)
+    console.log('  ⚠️  Using standalone containers (not grouped)...\n');
+    for (const [serviceName, config] of Object.entries(CONTAINER_CONFIGS)) {
+        const isRunning = running.some(name =>
+            name === config.name || name.includes(serviceName)
+        );
+
+        if (isRunning) {
+            console.log(`  ✅ ${serviceName}: Already running`);
+            continue;
+        }
+
+        console.log(`  📦 Starting ${serviceName}...`);
+        let dockerCmd = `docker run -d --name ${config.name} -p ${config.ports}`;
+        if (config.volumes) dockerCmd += ` -v ${config.volumes}`;
+        if (config.env) {
+            for (const e of config.env) dockerCmd += ` -e ${e}`;
+        }
+        dockerCmd += ` ${config.image}`;
+        if (config.command) dockerCmd += ` ${config.command}`;
+
+        try {
+            exec(dockerCmd);
+            console.log(`  ✅ ${serviceName}: Started`);
+        } catch (e) {
+            console.log(`  ⚠️  ${serviceName}: Failed to start`);
+        }
+    }
+    return true;
 }
 
 function generateEnvFile() {
