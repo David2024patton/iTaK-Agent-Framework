@@ -130,6 +130,52 @@ Your local services are now accessible at `http://YOUR_VPS_IP:PORT`
 
 ---
 
+## 🔌 Use in Your IDE
+
+Your local Ollama is **OpenAI-compatible**! Use it with any IDE that supports custom OpenAI endpoints.
+
+### Settings for Any IDE
+
+| Setting | Value |
+|---------|-------|
+| **Base URL** | `http://localhost:11434/v1` |
+| **API Key** | `ollama` (any string works) |
+| **Model** | `qwen3-vl:2b` |
+
+### VS Code / Cursor / Continue.dev
+
+```json
+{
+  "openai.baseUrl": "http://localhost:11434/v1",
+  "openai.apiKey": "ollama",
+  "openai.model": "qwen3-vl:2b"
+}
+```
+
+### JetBrains AI Assistant
+
+1. Settings → AI Assistant → Custom Provider
+2. Enter Base URL: `http://localhost:11434/v1`
+3. Model: `qwen3-vl:2b`
+
+### Test with cURL
+
+```bash
+curl http://localhost:11434/v1/chat/completions \
+  -H "Content-Type: application/json" \
+  -d '{"model":"qwen3-vl:2b","messages":[{"role":"user","content":"Hello!"}]}'
+```
+
+Works with: **VS Code, Cursor, JetBrains, Neovim, Emacs, Obsidian, and any OpenAI client!**
+
+---
+
+## 🎮 GPU Acceleration
+
+If you have an NVIDIA GPU, Ollama will **automatically use CUDA** for faster inference. The setup script detects your GPU and confirms acceleration in the `.env` file.
+
+---
+
 ## 🏗️ Architecture
 
 iTaK uses a **10-layer architecture** where each layer has a specific role:
