@@ -159,6 +159,12 @@ class iTaKREPL:
         
         elif cmd == '/ide':
             self.handle_ide_command(args)
+        
+        elif cmd == '/menu':
+            # Return to main menu
+            self.running = False
+            print(f"\n{CYAN}Returning to main menu...{RESET}\n")
+            self.start()  # Restart the startup menu
             
         else:
             print(f"\n{YELLOW}Unknown command: {cmd}{RESET}")
@@ -170,6 +176,7 @@ class iTaKREPL:
 {BOLD}Available Commands:{RESET}
 
   {GREEN}/help{RESET}       Show this help message
+  {GREEN}/menu{RESET}       Return to main menu
   {GREEN}/clear{RESET}      Clear the screen
   {GREEN}/model{RESET}      Show or change the current model
   {GREEN}/models{RESET}     Browse available models
