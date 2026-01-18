@@ -23,19 +23,19 @@ YELLOW = "\033[93m"
 WHITE = "\033[97m"
 MAGENTA = "\033[95m"
 
-# iTaK ASCII Art Logo (pixel-style like Gemini)
+# iTaK ASCII Art Logo (small)
 ITAK_LOGO = [
     "▀█▀ ▀█▀ █▀█ █▄▀",
     " █   █  █▀█ █ █",
 ]
 
-# Outlined pixel-art logo matching reference (red top, orange bottom)
+# Main pixel-art logo (solid blocks matching reference)
 ITAK_LOGO_LARGE = [
-    "▀█▀ ████████  ▄█████▄  ██   ██",
-    " █     ██    ██     ██ ██  ██ ",
-    " █     ██    █████████ █████  ",
-    " █     ██    ██     ██ ██ ██  ",
-    " █     ██    ██     ██ ██  ██ ",
+    "██ ████████  ▄█████▄  ██   ██",
+    "██    ██    ██     ██ ██  ██ ",
+    "██    ██    █████████ █████  ",
+    "██    ██    ██     ██ ██  ██ ",
+    "██    ██    ██     ██ ██   ██",
 ]
 
 # Block style logo
