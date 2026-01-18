@@ -1,0 +1,178 @@
+"""
+iTaK Project Creation Wizard
+
+Interactive CLI wizard for creating new projects.
+"""
+
+import os
+import subprocess
+from pathlib import Path
+from typing import Optional
+
+import click
+
+
+PROJECT_TYPES = [
+    ("🌐 Web App", "web", "HTML/CSS/JavaScript web application"),
+    ("🐍 Python Script", "python", "Python script or automation"),
+    ("⚡ API/Backend", "api", "REST API or backend service"),
+    ("🤖 AI Agent", "agent", "AI agent or automation workflow"),
+    ("📝 Custom", "custom", "Describe your project freely"),
+]
+
+
+def run_project_wizard():
+    """Run the interactive project creation wizard."""
+    click.echo()
+    click.secho("╔" + "═" * 62 + "╗", fg="magenta")
+    click.secho("║   📁 ", fg="magenta", nl=False)
+    click.secho("Create New Project", fg="white", bold=True, nl=False)
+    click.secho(" " * 36 + "║", fg="magenta")
+    click.secho("╚" + "═" * 62 + "╝", fg="magenta")
+    click.echo()
+    
+    # Project name
+    project_name = click.prompt(
+        click.style("  Project name", fg="cyan"),
+        type=str,
+        default="my-project"
+    )
+    
+    # Sanitize project name
+    project_name = project_name.lower().replace(" ", "-")
+    
+    # Description
+    description = click.prompt(
+        click.style("  Description", fg="cyan"),
+        type=str,
+        default="A new iTaK project"
+    )
+    
+    click.echo()
+    
+    # Project type
+    click.secho("  What type of project?", fg="white", bold=True)
+    click.echo()
+    for i, (name, _, desc) in enumerate(PROJECT_TYPES, 1):
+        click.secho(f"    [{i}] ", fg="green", nl=False)
+        click.secho(name, fg="white", nl=False)
+        click.secho(f" - {desc}", fg="bright_black")
+    click.echo()
+    
+    while True:
+        type_choice = click.prompt(
+            click.style("  Choice", fg="cyan"),
+            type=int,
+            default=1
+        )
+        if 1 <= type_choice <= len(PROJECT_TYPES):
+            break
+        click.secho("  Please enter a valid number", fg="yellow")
+    
+    project_type = PROJECT_TYPES[type_choice - 1]
+    
+    # Custom description if needed
+    custom_prompt = None
+    if project_type[1] == "custom":
+        custom_prompt = click.prompt(
+            click.style("  Describe what you want to build", fg="cyan"),
+            type=str
+        )
+    
+    click.echo()
+    
+    # Output directory
+    default_dir = f"./{project_name}"
+    output_dir = click.prompt(
+        click.style("  Output directory", fg="cyan"),
+        type=str,
+        default=default_dir
+    )
+    
+    # Confirm
+    click.echo()
+    click.secho("  ─" * 30, fg="bright_black")
+    click.echo()
+    click.secho("  📋 Project Summary:", fg="white", bold=True)
+    click.echo(f"      Name: {project_name}")
+    click.echo(f"      Type: {project_type[0]}")
+    click.echo(f"      Description: {description}")
+    click.echo(f"      Output: {output_dir}")
+    click.echo()
+    
+    if not click.confirm(click.style("  Start building?", fg="cyan"), default=True):
+        click.secho("  Cancelled.", fg="yellow")
+        return
+    
+    click.echo()
+    
+    # Build the prompt
+    if custom_prompt:
+        full_prompt = custom_prompt
+    else:
+        full_prompt = build_prompt(project_name, description, project_type)
+    
+    # Run iTaK auto
+    start_build(full_prompt, output_dir)
+
+
+def build_prompt(name: str, description: str, project_type: tuple) -> str:
+    """Build the prompt for the AI based on project type."""
+    type_name, type_key, _ = project_type
+    
+    prompts = {
+        "web": f"Build a {description}. Create a complete web application with HTML, CSS, and JavaScript. Include a modern, attractive design with responsive layout. Name: {name}",
+        
+        "python": f"Create a Python script for: {description}. Include proper error handling, docstrings, and a main function. Make it production-ready. Name: {name}",
+        
+        "api": f"Build a REST API for: {description}. Use FastAPI or Flask. Include proper endpoints, error handling, and basic documentation. Name: {name}",
+        
+        "agent": f"Create an AI agent workflow for: {description}. Use iTaK's multi-agent architecture with appropriate agents for the task. Name: {name}",
+    }
+    
+    return prompts.get(type_key, description)
+
+
+def start_build(prompt: str, output_dir: str):
+    """Start the build process with iTaK auto."""
+    click.secho("  🚀 Starting build...", fg="cyan", bold=True)
+    click.echo()
+    click.secho(f"  Prompt: ", fg="white", nl=False)
+    click.secho(prompt[:80] + "..." if len(prompt) > 80 else prompt, fg="bright_black")
+    click.echo()
+    
+    # Create output directory
+    Path(output_dir).mkdir(parents=True, exist_ok=True)
+    
+    # Run itak auto command
+    try:
+        # For now, just show what would be run
+        click.secho("  Running: ", fg="white", nl=False)
+        click.secho(f'itak auto "{prompt[:50]}..." --output {output_dir}', fg="cyan")
+        click.echo()
+        
+        # Import and run the auto command
+        from .main import auto_command
+        
+        # Change to output directory
+        original_dir = os.getcwd()
+        os.chdir(output_dir)
+        
+        try:
+            # This will run the full CrewAI pipeline
+            auto_command.callback(prompt=prompt, image=None, model=None)
+        finally:
+            os.chdir(original_dir)
+        
+    except ImportError:
+        click.secho("  ⚠️ Auto command not available yet", fg="yellow")
+        click.echo()
+        click.echo("  To run manually:")
+        click.secho(f'  cd {output_dir}', fg="cyan")
+        click.secho(f'  itak auto "{prompt}"', fg="cyan")
+    except Exception as e:
+        click.secho(f"  ❌ Error: {e}", fg="red")
+
+
+if __name__ == "__main__":
+    run_project_wizard()

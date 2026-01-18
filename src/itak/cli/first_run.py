@@ -1,30 +1,28 @@
-# iTaK First-Run Auto-Setup
-# Automatically installs all dependencies and default model on first run
+"""
+iTaK First-Run Experience
+
+Handles:
+- First-run detection
+- Welcome screen display
+- Default model installation
+- Interactive menu
+"""
 
 import subprocess
 import sys
-import os
 import json
+import webbrowser
 from pathlib import Path
+from typing import Optional
 
 import click
 
+
 # Configuration
-SETUP_MARKER = Path.home() / ".itak" / ".setup_complete"
-CONFIG_FILE = Path.home() / ".itak" / "config.json"
 DEFAULT_MODEL = "qwen3-vl:4b"
 DEFAULT_MODEL_SIZE = "3.3GB"
-
-
-def is_first_run():
-    """Check if this is the first time running iTaK"""
-    return not SETUP_MARKER.exists()
-
-
-def mark_setup_complete():
-    """Mark that setup has been completed"""
-    SETUP_MARKER.parent.mkdir(parents=True, exist_ok=True)
-    SETUP_MARKER.write_text("1")
+CONFIG_DIR = Path.home() / ".itak"
+CONFIG_FILE = CONFIG_DIR / "config.json"
 
 
 def get_config() -> dict:
@@ -39,28 +37,14 @@ def get_config() -> dict:
 
 def save_config(config: dict):
     """Save config to file."""
-    CONFIG_FILE.parent.mkdir(parents=True, exist_ok=True)
+    CONFIG_DIR.mkdir(parents=True, exist_ok=True)
     CONFIG_FILE.write_text(json.dumps(config, indent=2))
 
 
-def check_and_install_package(package_name, import_name=None, quiet=False):
-    """Check if a package is installed, install if missing"""
-    import_name = import_name or package_name
-    try:
-        __import__(import_name)
-        return True
-    except ImportError:
-        if not quiet:
-            print(f"  Installing {package_name}...")
-        try:
-            subprocess.check_call(
-                [sys.executable, "-m", "pip", "install", "--quiet", package_name],
-                stdout=subprocess.DEVNULL if quiet else None,
-                stderr=subprocess.DEVNULL if quiet else None
-            )
-            return True
-        except:
-            return False
+def is_first_run() -> bool:
+    """Check if this is the first run."""
+    config = get_config()
+    return not config.get("first_run_complete", False)
 
 
 def check_ollama_installed() -> bool:
@@ -194,6 +178,33 @@ def show_menu() -> int:
         click.secho("  Please enter 1, 2, 3, or 4", fg="yellow")
 
 
+def handle_menu_choice(choice: int):
+    """Handle the user's menu selection."""
+    if choice == 1:
+        # Open Studio
+        click.echo()
+        click.secho("  🌐 Opening Studio in browser...", fg="cyan")
+        click.secho("  → http://localhost:3000", fg="bright_black")
+        click.echo()
+        click.secho("  Note: Studio is coming soon!", fg="yellow")
+        click.secho("  For now, use the CLI with: itak auto \"your prompt\"", fg="white")
+        
+    elif choice == 2:
+        # Continue to project wizard
+        from .wizard import run_project_wizard
+        run_project_wizard()
+        
+    elif choice == 3:
+        # Show model catalog
+        from .model_selector import display_model_menu
+        click.echo()
+        display_model_menu()
+        
+    elif choice == 4:
+        # Show help
+        show_help()
+
+
 def show_help():
     """Display help information."""
     click.echo()
@@ -215,58 +226,9 @@ def show_help():
     click.echo()
 
 
-def handle_menu_choice(choice: int):
-    """Handle the user's menu selection."""
-    if choice == 1:
-        # Open Studio
-        click.echo()
-        click.secho("  🌐 Opening Studio...", fg="cyan")
-        try:
-            from itak.cli.studio_launcher import launch_studio
-            launch_studio()
-        except ImportError:
-            click.secho("  Note: Studio is coming soon!", fg="yellow")
-            click.secho("  For now, use the CLI with: itak auto \"your prompt\"", fg="white")
-        
-    elif choice == 2:
-        # Continue to project wizard
-        try:
-            from itak.cli.wizard import run_project_wizard
-            run_project_wizard()
-        except ImportError:
-            click.echo()
-            click.secho("  💻 Ready to build!", fg="green")
-            click.echo()
-            click.echo("  Run: itak auto \"describe what you want to build\"")
-            click.echo()
-        
-    elif choice == 3:
-        # Show model catalog
-        try:
-            from itak.cli.model_selector import display_model_menu
-            click.echo()
-            display_model_menu()
-        except ImportError:
-            click.secho("  Model catalog not available", fg="yellow")
-        
-    elif choice == 4:
-        # Show help
-        show_help()
-
-
-def auto_setup(force=False):
-    """
-    Auto-install all iTaK dependencies on first run.
-    Called automatically when any itak command is run.
-    """
-    if not force and not is_first_run():
-        return True
-    
-    # Show fancy welcome screen
+def run_first_time_setup():
+    """Run the complete first-time setup flow."""
     show_welcome_screen()
-    
-    click.secho("  🔧 First-time setup...", fg="cyan", bold=True)
-    click.echo()
     
     # Check Ollama
     if not check_ollama_installed():
@@ -276,56 +238,32 @@ def auto_setup(force=False):
         click.secho("  → https://ollama.com/download", fg="cyan")
         click.echo()
         click.echo("  Then run 'itak' again.")
-        click.echo()
-        mark_setup_complete()  # Still mark complete to not block
-        return True
-    
-    click.secho("  ✅ Ollama detected", fg="green")
-    
-    # Install dependencies silently
-    success = True
-    core_packages = [
-        ("click", "click"),
-        ("rich", "rich"),
-        ("pyyaml", "yaml"),
-        ("requests", "requests"),
-        ("httpx", "httpx"),
-    ]
-    
-    for package, import_name in core_packages:
-        try:
-            __import__(import_name)
-        except ImportError:
-            if not check_and_install_package(package, import_name, quiet=True):
-                success = False
+        return
     
     # Check/install default model
     if not check_model_installed(DEFAULT_MODEL):
         install_default_model()
     else:
-        click.secho(f"  ✅ Default model ({DEFAULT_MODEL}) ready", fg="green")
+        click.secho(f"  ✅ Default model ({DEFAULT_MODEL}) already installed", fg="green")
     
     click.echo()
     
-    # Save config
+    # Show menu
+    choice = show_menu()
+    
+    # Mark first run complete
     config = get_config()
     config["first_run_complete"] = True
     config["default_model"] = DEFAULT_MODEL
     save_config(config)
     
-    # Mark setup complete
-    mark_setup_complete()
-    
-    # Show menu
-    choice = show_menu()
+    # Handle choice
     handle_menu_choice(choice)
-    
-    return success
 
 
-def reset_setup():
-    """Reset the setup marker to force re-run on next command"""
-    if SETUP_MARKER.exists():
-        SETUP_MARKER.unlink()
+def check_first_run():
+    """Check if first run and show welcome if needed."""
+    if is_first_run():
+        run_first_time_setup()
         return True
     return False
