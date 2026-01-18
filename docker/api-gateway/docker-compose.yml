@@ -57,6 +57,25 @@ services:
       - INSTANCE_NAME=itak-search
 
   # ============================================
+  # ComfyUI - AI Image Generation (GPU accelerated)
+  # ============================================
+  comfyui:
+    image: yanwk/comfyui-boot:cu124-cn
+    container_name: comfyui
+    restart: unless-stopped
+    ports:
+      - "58127:8188"
+    volumes:
+      - comfyui-data:/root
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [ gpu ]
+
+  # ============================================
   # FRP Client - VPS Tunnel (starts when configured)
   # ============================================
   frpc:
@@ -74,3 +93,6 @@ services:
 volumes:
   ollama-data:
   chromadb-data:
+  comfyui-data:
+
+

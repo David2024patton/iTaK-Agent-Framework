@@ -239,6 +239,7 @@ After `npm install`, these containers run under the `api-gateway` project:
 | **ChromaDB** | 29800 | Vector memory database |
 | **Playwright** | 39281 | Browser automation |
 | **SearXNG** | 48192 | Private search engine |
+| **ComfyUI** | 58127 | AI image generation (GPU) |
 
 ---
 

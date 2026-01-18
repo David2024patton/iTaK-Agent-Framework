@@ -29,6 +29,7 @@ const DOCKER_SERVICES = [
     { name: 'ollama', container: 'ollama', port: 11434, envVar: 'OLLAMA_URL' },
     { name: 'playwright', container: 'playwright', port: 39281, envVar: 'PLAYWRIGHT_URL' },
     { name: 'searxng', container: 'searxng', port: 48192, envVar: 'SEARXNG_URL' },
+    { name: 'comfyui', container: 'comfyui', port: 58127, envVar: 'COMFYUI_URL' },
 ];
 
 // Architecture detection
@@ -495,7 +496,7 @@ async function setupDockerContainers() {
 
     // Check if containers are already running under api-gateway project
     const running = getRunningContainers();
-    const requiredContainers = ['ollama', 'chromadb', 'playwright', 'searxng'];
+    const requiredContainers = ['ollama', 'chromadb', 'playwright', 'searxng', 'comfyui'];
     const allRunning = requiredContainers.every(name =>
         running.some(r => r.includes(name) || r === name)
     );
