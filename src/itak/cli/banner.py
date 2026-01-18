@@ -79,14 +79,15 @@ def print_banner(style: str = "large"):
 
 def print_welcome_tips():
     """Print getting started tips like Gemini CLI."""
-    print(f"{DIM}Just start typing to chat with AI, or try:{RESET}")
+    print(f"{DIM}Just start typing to chat, or try these prompts:{RESET}")
     print()
-    print(f"  {CYAN}>{RESET} {WHITE}Build me a todo app{RESET}")
-    print(f"  {CYAN}>{RESET} {WHITE}Explain how this code works @file.py{RESET}")
-    print(f"  {CYAN}>{RESET} {WHITE}/create{RESET} {DIM}to start a new project{RESET}")
-    print(f"  {CYAN}>{RESET} {WHITE}/models{RESET} {DIM}to change AI model{RESET}")
-    print(f"  {CYAN}>{RESET} {WHITE}/help{RESET} {DIM}for all commands{RESET}")
-    print(f"  {CYAN}>{RESET} {WHITE}/exit{RESET} {DIM}to quit{RESET}")
+    print(f"  {CYAN}>{RESET} {WHITE}Build a finance SaaS dashboard with charts{RESET}")
+    print(f"  {CYAN}>{RESET} {WHITE}Create a company landing page with contact form{RESET}")
+    print(f"  {CYAN}>{RESET} {WHITE}Build a blog with SEO optimization{RESET}")
+    print()
+    print(f"  {CYAN}>{RESET} {WHITE}/create{RESET} {DIM}start a new project{RESET}")
+    print(f"  {CYAN}>{RESET} {WHITE}/models{RESET} {DIM}change AI model{RESET}")
+    print(f"  {CYAN}>{RESET} {WHITE}/help{RESET} {DIM}all commands{RESET}  {WHITE}/exit{RESET} {DIM}quit{RESET}")
     print()
 
 
