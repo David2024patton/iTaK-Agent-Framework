@@ -74,17 +74,19 @@ function launchCLI() {
     if (!python) return;
 
     try {
-        // Run the CLI
-        const child = spawn(python, ['-m', 'itak.cli.cli'], {
+        // Directly call auto_setup to show the welcome screen
+        const { spawnSync } = require('child_process');
+
+        spawnSync(python, [
+            '-c',
+            'from itak.cli.auto_setup import auto_setup; auto_setup(force=True)'
+        ], {
             stdio: 'inherit',
             shell: true
         });
-
-        child.on('error', (err) => {
-            console.log(`  Note: Run 'itak' manually to start\n`);
-        });
     } catch (e) {
-        console.log('  Note: Run `itak` to start the iTaK Agent Framework\n');
+        console.log('\n  ✅ Installation complete!');
+        console.log('  Run `itak` to start the iTaK Agent Framework\n');
     }
 }
 
