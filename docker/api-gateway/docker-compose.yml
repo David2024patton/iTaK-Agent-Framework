@@ -1,0 +1,76 @@
+version: '3.9'
+
+# iTaK API Gateway Stack
+# All local services organized under one compose project
+
+services:
+  # ============================================
+  # Ollama - Local LLM Server
+  # ============================================
+  ollama:
+    image: ollama/ollama
+    container_name: ollama
+    restart: unless-stopped
+    ports:
+      - "11434:11434"
+    volumes:
+      - ollama-data:/root/.ollama
+    environment:
+      - OLLAMA_HOST=0.0.0.0
+
+  # ============================================
+  # ChromaDB - Vector Memory Database
+  # ============================================
+  chromadb:
+    image: chromadb/chroma
+    container_name: shared-chromadb
+    restart: unless-stopped
+    ports:
+      - "8000:8000"
+    volumes:
+      - chromadb-data:/chroma/chroma
+
+  # ============================================
+  # Playwright - Browser Automation Server
+  # ============================================
+  playwright-server:
+    image: mcr.microsoft.com/playwright:v1.40.0-jammy
+    container_name: playwright-server
+    restart: unless-stopped
+    command: npx -y playwright@1.40.0 run-server --port 39281
+    ports:
+      - "39281:39281"
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+
+  # ============================================
+  # SearXNG - Private Search Engine
+  # ============================================
+  searxng:
+    image: searxng/searxng:latest
+    container_name: searxng
+    restart: unless-stopped
+    ports:
+      - "48192:8080"
+    environment:
+      - SEARXNG_BASE_URL=http://localhost:48192/
+      - INSTANCE_NAME=itak-search
+
+  # ============================================
+  # FRP Client - VPS Tunnel (starts when configured)
+  # ============================================
+  frpc:
+    image: snowdreamtech/frpc
+    container_name: frpc
+    restart: unless-stopped
+    profiles:
+      - tunnel # Only starts when explicitly requested
+    volumes:
+      - ./frpc.toml:/etc/frp/frpc.toml
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    network_mode: host
+
+volumes:
+  ollama-data:
+  chromadb-data:
