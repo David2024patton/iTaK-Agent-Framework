@@ -290,7 +290,7 @@ iTaK-Agent-Framework/
 iTaK follows 14 operating principles for autonomous operation:
 
 1. **Ingestion Before Invention** - Research before building
-2. **Skills Over Scripts** - Reuse verified solutions
+2. **Skills Over Scripts** - Reuse solutions
 3. **Monitoring is Testing** - Log everything
 4. **Progressive Trust** - Sandbox first, production later
 5. **Deployment-First** - Think about deployment from the start
@@ -314,7 +314,7 @@ iTaK Agent Framework is built upon [CrewAI](https://github.com/crewAIInc/crewAI)
 
 ## 🤖 Model Catalog
 
-iTaK includes a curated catalog of **100+ verified models** across **20 domain categories**. All models have been tested and verified to work correctly with domain-specific prompts.
+iTaK includes a curated catalog of **100+ models** across **20 domain categories**. All models have been tested and to work correctly with domain-specific prompts.
 
 > **Note**: Models are optimized for local execution via [Ollama](https://ollama.com). Run `itak models --list` to see all available models with your system's compatibility ratings.
 
@@ -329,20 +329,20 @@ Models that think step-by-step to solve complex problems.
 
 | Model | Size | Context | Description | Status |
 |-------|------|---------|-------------|--------|
-| `deepseek-r1:1.5b` | 1.1GB | 128K | Fast reasoning, lightweight | ✅ Verified |
-| `deepseek-r1:7b` | 4.7GB | 128K | Balanced reasoning power | ✅ Verified |
-| `deepseek-r1:8b` | 5.2GB | 128K | Enhanced reasoning (default) | ✅ Verified |
-| `deepseek-r1:14b` | 9.0GB | 128K | Strong reasoning, mid-size | ✅ Verified |
-| `deepseek-r1:32b` | 20GB | 128K | Very deep reasoning | ✅ Verified |
-| `qwen3:0.6b` | 523MB | 40K | Ultra-lightweight | ✅ Verified |
-| `qwen3:1.7b` | 1.4GB | 40K | Light and fast | ✅ Verified |
-| `qwen3:4b` | 2.5GB | 256K | Efficient general purpose | ✅ Verified |
-| `qwen3:8b` | 5.2GB | 40K | Balanced (default) | ✅ Verified |
-| `qwen3:14b` | 9.3GB | 40K | High capability | ✅ Verified |
-| `qwen3:30b` | 19GB | 256K | Very high capability | ✅ Verified |
-| `cogito:3b` | 2.2GB | 128K | Thinking model, compact | ✅ Verified |
-| `cogito:8b` | 4.9GB | 128K | Thinking model, balanced | ✅ Verified |
-| `cogito:14b` | 9.0GB | 128K | Thinking model, powerful | ✅ Verified |
+| `deepseek-r1:1.5b` | 1.1GB | 128K | Fast reasoning, lightweight | ✅ |
+| `deepseek-r1:7b` | 4.7GB | 128K | Balanced reasoning power | ✅ |
+| `deepseek-r1:8b` | 5.2GB | 128K | Enhanced reasoning (default) | ✅ |
+| `deepseek-r1:14b` | 9.0GB | 128K | Strong reasoning, mid-size | ✅ |
+| `deepseek-r1:32b` | 20GB | 128K | Very deep reasoning | ✅ |
+| `qwen3:0.6b` | 523MB | 40K | Ultra-lightweight | ✅ |
+| `qwen3:1.7b` | 1.4GB | 40K | Light and fast | ✅ |
+| `qwen3:4b` | 2.5GB | 256K | Efficient general purpose | ✅ |
+| `qwen3:8b` | 5.2GB | 40K | Balanced (default) | ✅ |
+| `qwen3:14b` | 9.3GB | 40K | High capability | ✅ |
+| `qwen3:30b` | 19GB | 256K | Very high capability | ✅ |
+| `cogito:3b` | 2.2GB | 128K | Thinking model, compact | ✅ |
+| `cogito:8b` | 4.9GB | 128K | Thinking model, balanced | ✅ |
+| `cogito:14b` | 9.0GB | 128K | Thinking model, powerful | ✅ |
 
 </details>
 
@@ -353,14 +353,14 @@ Models specialized for writing, fixing, and understanding code.
 
 | Model | Size | Context | Description | Status |
 |-------|------|---------|-------------|--------|
-| `qwen2.5-coder:0.5b` | 398MB | 32K | Ultra-fast code completion | ✅ Verified |
-| `qwen2.5-coder:1.5b` | 986MB | 32K | Quick code assistance | ✅ Verified |
-| `qwen2.5-coder:3b` | 1.9GB | 32K | Efficient coding | ✅ Verified |
-| `qwen2.5-coder:7b` | 4.7GB | 32K | Strong coding (default) | ✅ Verified |
-| `qwen2.5-coder:14b` | 9.0GB | 32K | Advanced code generation | ✅ Verified |
-| `qwen2.5-coder:32b` | 20GB | 32K | Expert-level coding | ✅ Verified |
-| `magicoder:7b` | 4.1GB | 16K | OSS-trained, low-bias code | ✅ Verified |
-| `yi-coder:9b` | 5.0GB | 128K | SOTA code, long context | ✅ Verified |
+| `qwen2.5-coder:0.5b` | 398MB | 32K | Ultra-fast code completion | ✅ |
+| `qwen2.5-coder:1.5b` | 986MB | 32K | Quick code assistance | ✅ |
+| `qwen2.5-coder:3b` | 1.9GB | 32K | Efficient coding | ✅ |
+| `qwen2.5-coder:7b` | 4.7GB | 32K | Strong coding (default) | ✅ |
+| `qwen2.5-coder:14b` | 9.0GB | 32K | Advanced code generation | ✅ |
+| `qwen2.5-coder:32b` | 20GB | 32K | Expert-level coding | ✅ |
+| `magicoder:7b` | 4.1GB | 16K | OSS-trained, low-bias code | ✅ |
+| `yi-coder:9b` | 5.0GB | 128K | SOTA code, long context | ✅ |
 
 </details>
 
@@ -371,11 +371,11 @@ Models that can use tools, call functions, and work as AI agents.
 
 | Model | Size | Context | Description | Status |
 |-------|------|---------|-------------|--------|
-| `qwen2.5-coder-cline:7b` | 4.7GB | 32K | Cline-optimized coding agent | ✅ Verified |
-| `qwen2.5-coder-cline:14b` | 9.0GB | 32K | Advanced Cline agent | ✅ Verified |
-| `yi-coder-cline:9b` | 5.0GB | 128K | Yi-based Cline agent | ✅ Verified |
-| `hermes3:3b` | 2.0GB | 128K | Chat & function calling | ✅ Verified |
-| `hermes3:8b` | 4.7GB | 128K | Strong function calling | ✅ Verified |
+| `qwen2.5-coder-cline:7b` | 4.7GB | 32K | Cline-optimized coding agent | ✅ |
+| `qwen2.5-coder-cline:14b` | 9.0GB | 32K | Advanced Cline agent | ✅ |
+| `yi-coder-cline:9b` | 5.0GB | 128K | Yi-based Cline agent | ✅ |
+| `hermes3:3b` | 2.0GB | 128K | Chat & function calling | ✅ |
+| `hermes3:8b` | 4.7GB | 128K | Strong function calling | ✅ |
 
 </details>
 
@@ -386,13 +386,13 @@ Models that can see and understand images along with text.
 
 | Model | Size | Context | Description | Status |
 |-------|------|---------|-------------|--------|
-| `qwen3-vl:2b` | 1.9GB | 256K | Fast vision, lightweight | ✅ Verified |
-| `qwen3-vl:4b` | 3.3GB | 256K | Efficient vision analysis | ✅ Verified |
-| `qwen3-vl:8b` | 6.1GB | 256K | Balanced vision (default) | ✅ Verified |
-| `qwen3-vl:30b` | 20GB | 256K | High-quality vision | ✅ Verified |
-| `qwen3-vl:32b` | 21GB | 256K | Expert vision analysis | ✅ Verified |
-| `moondream:1.8b` | 1.7GB | 8K | Tiny vision, runs anywhere | ✅ Verified |
-| `granite3.2-vision:2b` | 2.4GB | 16K | IBM vision model | ✅ Verified |
+| `qwen3-vl:2b` | 1.9GB | 256K | Fast vision, lightweight | ✅ |
+| `qwen3-vl:4b` | 3.3GB | 256K | Efficient vision analysis | ✅ |
+| `qwen3-vl:8b` | 6.1GB | 256K | Balanced vision (default) | ✅ |
+| `qwen3-vl:30b` | 20GB | 256K | High-quality vision | ✅ |
+| `qwen3-vl:32b` | 21GB | 256K | Expert vision analysis | ✅ |
+| `moondream:1.8b` | 1.7GB | 8K | Tiny vision, runs anywhere | ✅ |
+| `granite3.2-vision:2b` | 2.4GB | 16K | IBM vision model | ✅ |
 
 </details>
 
@@ -403,9 +403,9 @@ Small models that run on phones, tablets, and low-power devices.
 
 | Model | Size | Context | Description | Status |
 |-------|------|---------|-------------|--------|
-| `smollm2:135m` | 271MB | 8K | Tiny, runs on phone | ✅ Verified |
-| `smollm2:360m` | 726MB | 8K | Small, fast on phone | ✅ Verified |
-| `smollm2:1.7b` | 1.8GB | 8K | Compact balanced | ✅ Verified |
+| `smollm2:135m` | 271MB | 8K | Tiny, runs on phone | ✅ |
+| `smollm2:360m` | 726MB | 8K | Small, fast on phone | ✅ |
+| `smollm2:1.7b` | 1.8GB | 8K | Compact balanced | ✅ |
 
 </details>
 
@@ -420,9 +420,9 @@ Generate SQL queries from natural language - talk to your database.
 
 | Model | Size | Context | Description | Status |
 |-------|------|---------|-------------|--------|
-| `sqlcoder:7b` | 4.1GB | 8K | Text-to-SQL, accurate | ✅ Verified |
-| `sqlcoder:15b` | 8.9GB | 8K | Text-to-SQL, powerful | ✅ Verified |
-| `duckdb-nsql:7b` | 4.1GB | 8K | DuckDB optimized SQL | ✅ Verified |
+| `sqlcoder:7b` | 4.1GB | 8K | Text-to-SQL, accurate | ✅ |
+| `sqlcoder:15b` | 8.9GB | 8K | Text-to-SQL, powerful | ✅ |
+| `duckdb-nsql:7b` | 4.1GB | 8K | DuckDB optimized SQL | ✅ |
 
 </details>
 
@@ -433,9 +433,9 @@ Specialized for solving math problems and equations.
 
 | Model | Size | Context | Description | Status |
 |-------|------|---------|-------------|--------|
-| `mathstral:7b` | 4.1GB | 32K | Math reasoning expert | ✅ Verified |
-| `wizard-math:7b` | 4.1GB | 8K | Math problem solver | ✅ Verified |
-| `qwen2-math:7b` | 4.4GB | 4K | Qwen math specialist | ✅ Verified |
+| `mathstral:7b` | 4.1GB | 32K | Math reasoning expert | ✅ |
+| `wizard-math:7b` | 4.1GB | 8K | Math problem solver | ✅ |
+| `qwen2-math:7b` | 4.4GB | 4K | Qwen math specialist | ✅ |
 
 </details>
 
@@ -446,11 +446,11 @@ Creative writing, storytelling, and character roleplay.
 
 | Model | Size | Context | Description | Status |
 |-------|------|---------|-------------|--------|
-| `dolphin3:8b` | 4.9GB | 128K | Creative, uncensored | ✅ Verified |
-| `dolphin-llama3:8b` | 4.7GB | 8K | Llama3-based creative | ✅ Verified |
-| `dolphin-mixtral:8x7b` | 26GB | 32K | Powerful creative MoE | ✅ Verified |
-| `openhermes:7b` | 4.1GB | 8K | Creative, helpful | ✅ Verified |
-| `neural-chat:7b` | 4.1GB | 8K | Natural conversation | ✅ Verified |
+| `dolphin3:8b` | 4.9GB | 128K | Creative, uncensored | ✅ |
+| `dolphin-llama3:8b` | 4.7GB | 8K | Llama3-based creative | ✅ |
+| `dolphin-mixtral:8x7b` | 26GB | 32K | Powerful creative MoE | ✅ |
+| `openhermes:7b` | 4.1GB | 8K | Creative, helpful | ✅ |
+| `neural-chat:7b` | 4.1GB | 8K | Natural conversation | ✅ |
 
 </details>
 
@@ -461,9 +461,9 @@ Content writing, editing, summarization, and documentation.
 
 | Model | Size | Context | Description | Status |
 |-------|------|---------|-------------|--------|
-| `mistral-nemo:12b` | 7.1GB | 128K | Writing expert, long ctx | ✅ Verified |
-| `stable-beluga:7b` | 4.1GB | 4K | Instruction + writing | ✅ Verified |
-| `stable-beluga:13b` | 7.4GB | 4K | Stronger writing | ✅ Verified |
+| `mistral-nemo:12b` | 7.1GB | 128K | Writing expert, long ctx | ✅ |
+| `stable-beluga:7b` | 4.1GB | 4K | Instruction + writing | ✅ |
+| `stable-beluga:13b` | 7.4GB | 4K | Stronger writing | ✅ |
 
 </details>
 
@@ -478,15 +478,15 @@ Content writing, editing, summarization, and documentation.
 
 | Model | Size | Context | Description | Status |
 |-------|------|---------|-------------|--------|
-| `qwen2.5-coder-abliterate:0.5b` | 398MB | 32K | No refusals, ultra-light | ✅ Verified |
-| `qwen2.5-coder-abliterate:1.5b` | 1.1GB | 32K | No refusals, fast | ✅ Verified |
-| `qwen2.5-coder-abliterate:3b` | 1.9GB | 32K | No refusals, efficient | ✅ Verified |
-| `qwen2.5-coder-abliterate:7b` | 4.7GB | 32K | No refusals, balanced | ✅ Verified |
-| `qwen2.5-coder-abliterate:14b` | 9.0GB | 32K | No refusals, powerful | ✅ Verified |
-| `huihui_ai/deephermes3-abliterated:8b` | 4.9GB | 128K | Reasoning, no refusals | ✅ Verified |
-| `wizard-vicuna-uncensored:7b` | 4.1GB | 4K | Classic uncensored | ✅ Verified |
-| `wizard-vicuna-uncensored:13b` | 7.4GB | 4K | Stronger uncensored | ✅ Verified |
-| `llama2-uncensored:7b` | 3.8GB | 4K | Llama2 uncensored | ✅ Verified |
+| `qwen2.5-coder-abliterate:0.5b` | 398MB | 32K | No refusals, ultra-light | ✅ |
+| `qwen2.5-coder-abliterate:1.5b` | 1.1GB | 32K | No refusals, fast | ✅ |
+| `qwen2.5-coder-abliterate:3b` | 1.9GB | 32K | No refusals, efficient | ✅ |
+| `qwen2.5-coder-abliterate:7b` | 4.7GB | 32K | No refusals, balanced | ✅ |
+| `qwen2.5-coder-abliterate:14b` | 9.0GB | 32K | No refusals, powerful | ✅ |
+| `huihui_ai/deephermes3-abliterated:8b` | 4.9GB | 128K | Reasoning, no refusals | ✅ |
+| `wizard-vicuna-uncensored:7b` | 4.1GB | 4K | Classic uncensored | ✅ |
+| `wizard-vicuna-uncensored:13b` | 7.4GB | 4K | Stronger uncensored | ✅ |
+| `llama2-uncensored:7b` | 3.8GB | 4K | Llama2 uncensored | ✅ |
 
 </details>
 
@@ -501,19 +501,19 @@ Enterprise-grade models from major companies.
 
 | Model | Size | Context | Description | Status |
 |-------|------|---------|-------------|--------|
-| `granite3.1-moe:1b` | 1.4GB | 128K | IBM MoE = fast + efficient | ✅ Verified |
-| `granite3.1-moe:3b` | 2.0GB | 128K | IBM MoE = fast + efficient | ✅ Verified |
-| `granite3.3:2b` | 1.5GB | 128K | IBM Dense = more accurate | ✅ Verified |
-| `granite3.3:8b` | 4.9GB | 128K | IBM Dense = more accurate | ✅ Verified |
-| `granite4:350m` | 708MB | 32K | Ultra-light IBM | ✅ Verified |
-| `granite4:1b` | 3.3GB | 128K | IBM compact powerful | ✅ Verified |
-| `granite4:3b` | 2.1GB | 128K | IBM efficient | ✅ Verified |
-| `mixtral:8x7b` | 26GB | 32K | 8x7B experts, powerful | ✅ Verified |
-| `c4ai-command-r7b:7b` | 5.1GB | 128K | RAG + agentic + multilingual | ✅ Verified |
-| `command-r-plus:latest` | 63GB | 128K | Most powerful enterprise | ✅ Verified |
-| `aya-expanse:8b` | 5.1GB | 8K | Multilingual, 23+ languages | ✅ Verified |
-| `nemotron-mini:4b` | 2.7GB | 4K | NVIDIA efficient model | ✅ Verified |
-| `rnj-1:8b` | 5.1GB | 32K | Code + STEM optimized | ✅ Verified |
+| `granite3.1-moe:1b` | 1.4GB | 128K | IBM MoE = fast + efficient | ✅ |
+| `granite3.1-moe:3b` | 2.0GB | 128K | IBM MoE = fast + efficient | ✅ |
+| `granite3.3:2b` | 1.5GB | 128K | IBM Dense = more accurate | ✅ |
+| `granite3.3:8b` | 4.9GB | 128K | IBM Dense = more accurate | ✅ |
+| `granite4:350m` | 708MB | 32K | Ultra-light IBM | ✅ |
+| `granite4:1b` | 3.3GB | 128K | IBM compact powerful | ✅ |
+| `granite4:3b` | 2.1GB | 128K | IBM efficient | ✅ |
+| `mixtral:8x7b` | 26GB | 32K | 8x7B experts, powerful | ✅ |
+| `c4ai-command-r7b:7b` | 5.1GB | 128K | RAG + agentic + multilingual | ✅ |
+| `command-r-plus:latest` | 63GB | 128K | Most powerful enterprise | ✅ |
+| `aya-expanse:8b` | 5.1GB | 8K | Multilingual, 23+ languages | ✅ |
+| `nemotron-mini:4b` | 2.7GB | 4K | NVIDIA efficient model | ✅ |
+| `rnj-1:8b` | 5.1GB | 32K | Code + STEM optimized | ✅ |
 
 </details>
 
@@ -524,8 +524,8 @@ Models for finance, trading, investing, and market psychology.
 
 | Model | Size | Context | Description | Status |
 |-------|------|---------|-------------|--------|
-| `mychen76/Fin-R1:Q6` | 5.9GB | 8K | Financial reasoning | ✅ Verified |
-| `0xroyce/plutus:latest` | 4.9GB | 128K | Finance + psychology + trading | ✅ Verified |
+| `mychen76/Fin-R1:Q6` | 5.9GB | 8K | Financial reasoning | ✅ |
+| `0xroyce/plutus:latest` | 4.9GB | 128K | Finance + psychology + trading | ✅ |
 
 </details>
 
@@ -536,10 +536,10 @@ Models trained on legal texts for research and drafting.
 
 | Model | Size | Context | Description | Status |
 |-------|------|---------|-------------|--------|
-| `initium/law_model:Q2_K` | 2.7GB | 8K | Legal assistant, smallest | ✅ Verified |
-| `initium/law_model:Q3_K_M` | 3.3GB | 8K | Legal assistant, balanced | ✅ Verified |
-| `initium/law_model:Q5_0` | 4.4GB | 8K | Legal assistant, quality | ✅ Verified |
-| `initium/law_model:Q8_0` | 7.2GB | 8K | Legal assistant, best quality | ✅ Verified |
+| `initium/law_model:Q2_K` | 2.7GB | 8K | Legal assistant, smallest | ✅ |
+| `initium/law_model:Q3_K_M` | 3.3GB | 8K | Legal assistant, balanced | ✅ |
+| `initium/law_model:Q5_0` | 4.4GB | 8K | Legal assistant, quality | ✅ |
+| `initium/law_model:Q8_0` | 7.2GB | 8K | Legal assistant, best quality | ✅ |
 
 </details>
 
@@ -550,8 +550,8 @@ Models trained on medical literature - for healthcare research only.
 
 | Model | Size | Context | Description | Status |
 |-------|------|---------|-------------|--------|
-| `meditron:7b` | 4.1GB | 4K | Medical knowledge, research | ✅ Verified |
-| `medllama2:7b` | 3.8GB | 4K | Medical conversations | ✅ Verified |
+| `meditron:7b` | 4.1GB | 4K | Medical knowledge, research | ✅ |
+| `medllama2:7b` | 3.8GB | 4K | Medical conversations | ✅ |
 
 </details>
 
@@ -566,10 +566,10 @@ Convert text to vectors for semantic search and RAG.
 
 | Model | Size | Context | Description | Status |
 |-------|------|---------|-------------|--------|
-| `nomic-embed-text-v2-moe:latest` | 571MB | 512 | SOTA multilingual MoE | ✅ Verified |
-| `nomic-embed-text:latest` | 274MB | 8K | English embeddings | ✅ Verified |
-| `bge-m3:latest` | 1.2GB | 8K | Multi-lingual dense+sparse | ✅ Verified |
-| `mxbai-embed-large:latest` | 669MB | 512 | Large embeddings | ✅ Verified |
+| `nomic-embed-text-v2-moe:latest` | 571MB | 512 | SOTA multilingual MoE | ✅ |
+| `nomic-embed-text:latest` | 274MB | 8K | English embeddings | ✅ |
+| `bge-m3:latest` | 1.2GB | 8K | Multi-lingual dense+sparse | ✅ |
+| `mxbai-embed-large:latest` | 669MB | 512 | Large embeddings | ✅ |
 
 </details>
 
@@ -580,10 +580,10 @@ Content moderation, threat detection, and safety scanning.
 
 | Model | Size | Context | Description | Status |
 |-------|------|---------|-------------|--------|
-| `shieldgemma:2b` | 1.5GB | 8K | Safety classifier | ✅ Verified |
-| `shieldgemma:9b` | 5.4GB | 8K | Advanced safety | ✅ Verified |
-| `llama-guard3:1b` | 860MB | 128K | Fast safety guard | ✅ Verified |
-| `llama-guard3:8b` | 4.9GB | 128K | Full safety guard | ✅ Verified |
+| `shieldgemma:2b` | 1.5GB | 8K | Safety classifier | ✅ |
+| `shieldgemma:9b` | 5.4GB | 8K | Advanced safety | ✅ |
+| `llama-guard3:1b` | 860MB | 128K | Fast safety guard | ✅ |
+| `llama-guard3:8b` | 4.9GB | 128K | Full safety guard | ✅ |
 
 </details>
 
@@ -594,8 +594,8 @@ Scientific reasoning and research assistance.
 
 | Model | Size | Context | Description | Status |
 |-------|------|---------|-------------|--------|
-| `solar:10.7b` | 6.1GB | 4K | Scientific reasoning | ✅ Verified |
-| `solar-pro:22b` | 12.9GB | 4K | Advanced research | ✅ Verified |
+| `solar:10.7b` | 6.1GB | 4K | Scientific reasoning | ✅ |
+| `solar-pro:22b` | 12.9GB | 4K | Advanced research | ✅ |
 
 </details>
 
@@ -606,9 +606,9 @@ Tutoring, education, and teaching assistance.
 
 | Model | Size | Context | Description | Status |
 |-------|------|---------|-------------|--------|
-| `orca-mini:3b` | 1.9GB | 2K | Compact teaching | ✅ Verified |
-| `orca2:7b` | 4.1GB | 4K | Better explanations | ✅ Verified |
-| `everythinglm:13b` | 7.4GB | 16K | Explain everything | ✅ Verified |
+| `orca-mini:3b` | 1.9GB | 2K | Compact teaching | ✅ |
+| `orca2:7b` | 4.1GB | 4K | Better explanations | ✅ |
+| `everythinglm:13b` | 7.4GB | 16K | Explain everything | ✅ |
 
 </details>
 
@@ -619,8 +619,8 @@ Translation between languages and multilingual understanding.
 
 | Model | Size | Context | Description | Status |
 |-------|------|---------|-------------|--------|
-| `aya:8b` | 4.8GB | 8K | 100+ languages | ✅ Verified |
-| `aya:35b` | 20GB | 8K | Strong multilingual | ✅ Verified |
+| `aya:8b` | 4.8GB | 8K | 100+ languages | ✅ |
+| `aya:35b` | 20GB | 8K | Strong multilingual | ✅ |
 
 </details>
 
@@ -631,9 +631,9 @@ Extract structured data from unstructured text.
 
 | Model | Size | Context | Description | Status |
 |-------|------|---------|-------------|--------|
-| `nuextract:3.8b` | 2.3GB | 8K | JSON extraction | ✅ Verified |
-| `reader-lm:0.5b` | 393MB | 256K | HTML to markdown | ✅ Verified |
-| `reader-lm:1.5b` | 989MB | 256K | Better conversion | ✅ Verified |
+| `nuextract:3.8b` | 2.3GB | 8K | JSON extraction | ✅ |
+| `reader-lm:0.5b` | 393MB | 256K | HTML to markdown | ✅ |
+| `reader-lm:1.5b` | 989MB | 256K | Better conversion | ✅ |
 
 </details>
 
@@ -641,7 +641,7 @@ Extract structured data from unstructured text.
 
 ### 📊 Test Results - Real Q&A Examples
 
-All models were verified with domain-specific prompts. Here are actual test results:
+All models were with domain-specific prompts. Here are actual test results:
 
 <details>
 <summary><b>🧠 REASONING - deepseek-r1:8b</b></summary>
@@ -660,7 +660,7 @@ Okay, so I need to explain why the sky is blue step-by-step...
 5. Our eyes are more sensitive to blue than violet
 6. We see the scattered blue light making the sky appear blue
 ```
-✅ **PASSED** - Shows chain-of-thought reasoning
+✅Shows chain-of-thought reasoning
 
 </details>
 
@@ -677,7 +677,7 @@ def factorial(n):
     else:
         return n * factorial(n-1)
 ```
-✅ **PASSED** - Correct recursive implementation
+✅Correct recursive implementation
 
 </details>
 
@@ -692,7 +692,7 @@ SELECT u.id, u.name, u.age, u.email
 FROM users AS u 
 WHERE age > 30;
 ```
-✅ **PASSED** - Correct SQL syntax
+✅Correct SQL syntax
 
 </details>
 
@@ -710,7 +710,7 @@ WHERE age > 30;
 
 Thus, the integral of x² is: x³/3 + C
 ```
-✅ **PASSED** - Correct mathematical solution with LaTeX
+✅Correct mathematical solution with LaTeX
 
 </details>
 
@@ -726,7 +726,7 @@ filled with gold doubloons and jewels. We fought off rival pirates along
 the way, but now we're celebrating our victory on the deck of me ship, 
 The Black Swan. Yarr!
 ```
-✅ **PASSED** - Perfect character voice and storytelling
+✅Perfect character voice and storytelling
 
 </details>
 
@@ -742,7 +742,7 @@ The Black Swan. Yarr!
 **Test 3:** "Classify: What are some good study tips for my math exam"
 → `safe` ✅
 
-✅ **PASSED** - Correctly classifies safe/unsafe content
+✅Correctly classifies safe/unsafe content
 
 </details>
 
@@ -755,7 +755,7 @@ The Black Swan. Yarr!
 ```
 Hoy hace buen tiempo y quiero ir a la playa.
 ```
-✅ **PASSED** - Perfect translation
+✅Perfect translation
 
 </details>
 
@@ -773,7 +773,7 @@ Hoy hace buen tiempo y quiero ir a la playa.
     "occupation": "software engineer"
 }
 ```
-✅ **PASSED** - Correct JSON extraction
+✅Correct JSON extraction
 
 </details>
 
@@ -790,7 +790,7 @@ precisely cut or modify them. This enables scientists to fix genetic disorders,
 remove diseases, or enhance traits in living beings, with potential applications 
 in medicine, agriculture, and research.
 ```
-✅ **PASSED** - Clear scientific explanation
+✅Clear scientific explanation
 
 </details>
 
@@ -806,7 +806,7 @@ They take in carbon dioxide from the air and water from the soil. Air also helps
 with gas exchange. Plants are amazing! They can make their own food without eating 
 anything.
 ```
-✅ **PASSED** - Kid-friendly explanation
+✅Kid-friendly explanation
 
 </details>
 
