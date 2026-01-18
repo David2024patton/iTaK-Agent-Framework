@@ -26,10 +26,15 @@ const API_GATEWAY_PORT = 28934;
 const DOCKER_SERVICES = [
     { name: 'api-gateway', container: 'fastapi', port: API_GATEWAY_PORT, envVar: 'API_GATEWAY_URL' },
     { name: 'chromadb', container: 'chromadb', port: 29800, envVar: 'CHROMADB_URL' },
+    { name: 'redis', container: 'redis', port: 63790, envVar: 'REDIS_URL' },
     { name: 'ollama', container: 'ollama', port: 11434, envVar: 'OLLAMA_URL' },
+    { name: 'whisper', container: 'whisper', port: 69247, envVar: 'WHISPER_URL' },
     { name: 'playwright', container: 'playwright', port: 39281, envVar: 'PLAYWRIGHT_URL' },
     { name: 'searxng', container: 'searxng', port: 48192, envVar: 'SEARXNG_URL' },
+    { name: 'crawl4ai', container: 'crawl4ai', port: 47836, envVar: 'CRAWL4AI_URL' },
     { name: 'comfyui', container: 'comfyui', port: 58127, envVar: 'COMFYUI_URL' },
+    { name: 'supabase', container: 'supabase-db', port: 54321, envVar: 'SUPABASE_DB_URL' },
+    { name: 'supabase-studio', container: 'supabase-studio', port: 54323, envVar: 'SUPABASE_STUDIO_URL' },
 ];
 
 // Architecture detection
@@ -496,7 +501,7 @@ async function setupDockerContainers() {
 
     // Check if containers are already running under api-gateway project
     const running = getRunningContainers();
-    const requiredContainers = ['ollama', 'chromadb', 'playwright', 'searxng', 'comfyui'];
+    const requiredContainers = ['ollama', 'chromadb', 'redis', 'whisper', 'playwright', 'searxng', 'crawl4ai', 'comfyui', 'supabase-db'];
     const allRunning = requiredContainers.every(name =>
         running.some(r => r.includes(name) || r === name)
     );

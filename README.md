@@ -237,9 +237,16 @@ After `npm install`, these containers run under the `api-gateway` project:
 |---------|------|-------------|
 | **Ollama** | 11434 | Local LLM server |
 | **ChromaDB** | 29800 | Vector memory database |
+| **Redis** | 63790 | Caching, queues, sessions |
+| **Whisper** | 69247 | Speech-to-text (GPU) |
 | **Playwright** | 39281 | Browser automation |
-| **SearXNG** | 48192 | Private search engine |
+| **SearXNG** | 48192 | Meta-search (finds URLs) |
+| **Crawl4AI** | 47836 | Web scraper (content for LLMs) |
 | **ComfyUI** | 58127 | AI image generation (GPU) |
+| **Supabase DB** | 54321 | PostgreSQL database |
+| **Supabase Studio** | 54323 | Database admin UI |
+
+> **SearXNG vs Crawl4AI:** SearXNG finds URLs from search queries. Crawl4AI extracts full page content as markdown for LLMs.
 
 ---
 
