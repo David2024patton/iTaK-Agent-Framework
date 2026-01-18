@@ -55,6 +55,7 @@ dev = [
 
 [project.scripts]
 itak = "itak.cli.cli:main"
+itak-setup = "itak.cli.post_install:post_install_launch"
 
 [project.urls]
 Homepage = "https://github.com/David2024patton/iTaK-Agent-Framework"
