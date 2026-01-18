@@ -176,15 +176,23 @@ def auto(prompt, model, output):
     
     model = model or "qwen3-vl:4b"
     
-    # iTaK system prompt - Strict Code Generation
-    system_prompt = """You are iTaK, an expert autonomous coding agent.
-Your ONLY goal is to write code.
-- If the user asks to build/create something, output the FILE CONTENT immediately.
-- DO NOT suggest using /create, /studio, or other commands.
-- DO NOT ask clarifying questions. Make assumptions and BUILD IT.
-- Output code in markdown blocks (e.g., ```html ... ```)."""
+    # iTaK system prompt - Few-Shot Code Generation
+    # We use examples to force the model to output code instead of chat
+    system_prompt = """User: Build a simple HTML button
+Assistant:
+```html
+<button style="padding: 10px 20px; background: blue; color: white;">Click Me</button>
+```
+
+User: Create a python script to hello world
+Assistant:
+```python
+print("Hello World")
+```
+
+User: """
     
-    full_prompt = f"{system_prompt}\n\nUser: {prompt}\n\nAssistant:"
+    full_prompt = f"{system_prompt}{prompt}\nAssistant:"
     
     # Call Ollama API
     try:
