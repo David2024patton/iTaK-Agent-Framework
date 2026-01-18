@@ -84,7 +84,9 @@ def print_welcome_tips():
     print(f"  {CYAN}>{RESET} {WHITE}Build me a todo app{RESET}")
     print(f"  {CYAN}>{RESET} {WHITE}Explain how this code works @file.py{RESET}")
     print(f"  {CYAN}>{RESET} {WHITE}/create{RESET} {DIM}to start a new project{RESET}")
+    print(f"  {CYAN}>{RESET} {WHITE}/models{RESET} {DIM}to change AI model{RESET}")
     print(f"  {CYAN}>{RESET} {WHITE}/help{RESET} {DIM}for all commands{RESET}")
+    print(f"  {CYAN}>{RESET} {WHITE}/exit{RESET} {DIM}to quit{RESET}")
     print()
 
 
