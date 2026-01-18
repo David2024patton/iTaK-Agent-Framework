@@ -164,13 +164,15 @@ class iTaKREPL:
 """)
     
     def show_models(self):
-        """Show available models."""
+        """Browse and select models from categories."""
         try:
-            from .model_selector import display_model_menu
-            display_model_menu()
+            from .model_browser import browse_models
+            selected = browse_models(self.model)
+            if selected != self.model:
+                self.model = selected
+                print(f"  {DIM}Model changed to {CYAN}{self.model}{RESET}")
         except ImportError:
-            print(f"\n{YELLOW}Model catalog not available.{RESET}")
-            print(f"Run: {CYAN}itak models --list{RESET}\n")
+            print(f"\n{YELLOW}Model browser not available.{RESET}\n")
     
     def launch_studio(self):
         """Launch the Studio web UI."""
