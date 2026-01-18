@@ -44,10 +44,15 @@ if is_first_run():
     auto_setup()
 
 
-@click.group()
+@click.group(invoke_without_command=True)
 @click.version_option(get_version("iTaK"))
-def iTaK():
+@click.pass_context
+def iTaK(ctx):
     """Top-level command group for iTaK."""
+    # If no subcommand given, show the interactive welcome menu
+    if ctx.invoked_subcommand is None:
+        from itak.cli.auto_setup import auto_setup
+        auto_setup(force=True)
 
 
 @iTaK.command(
