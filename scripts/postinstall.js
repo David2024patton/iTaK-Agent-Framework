@@ -68,25 +68,19 @@ function installPythonPackage() {
 
 // Launch iTaK CLI
 function launchCLI() {
-    console.log('\n  🚀 Launching iTaK...\n');
-
-    const python = getPythonCommand();
-    if (!python) return;
+    console.log('\n  🚀 Launching iTaK...\\n');
 
     try {
-        // Directly call auto_setup to show the welcome screen
+        // Just run itak command - it triggers auto_setup on first run
         const { spawnSync } = require('child_process');
 
-        spawnSync(python, [
-            '-c',
-            'from itak.cli.auto_setup import auto_setup; auto_setup(force=True)'
-        ], {
+        spawnSync('itak', [], {
             stdio: 'inherit',
             shell: true
         });
     } catch (e) {
-        console.log('\n  ✅ Installation complete!');
-        console.log('  Run `itak` to start the iTaK Agent Framework\n');
+        console.log('\\n  ✅ Installation complete!');
+        console.log('  Run `itak` to start the iTaK Agent Framework\\n');
     }
 }
 
