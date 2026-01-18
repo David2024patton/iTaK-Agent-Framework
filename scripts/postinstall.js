@@ -68,7 +68,7 @@ function installPythonPackage() {
 
 // Launch iTaK CLI
 function launchCLI() {
-    console.log('\n  🚀 Launching iTaK...\\n');
+    console.log('\n  🚀 Launching iTaK...\n');
 
     try {
         // Just run itak command - it triggers auto_setup on first run
@@ -79,8 +79,8 @@ function launchCLI() {
             shell: true
         });
     } catch (e) {
-        console.log('\\n  ✅ Installation complete!');
-        console.log('  Run `itak` to start the iTaK Agent Framework\\n');
+        console.log('\n  ✅ Installation complete!');
+        console.log('  Run `itak` to start the iTaK Agent Framework\n');
     }
 }
 
