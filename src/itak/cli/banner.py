@@ -6,12 +6,12 @@ Displays the iTaK logo with gradient colors on startup.
 
 from typing import List, Tuple
 
-# Color codes for gradient effect (cyan → blue → magenta)
+# Color codes for gradient effect (red → orange → yellow)
 GRADIENT_COLORS = [
-    "\033[96m",  # Bright Cyan
-    "\033[94m",  # Bright Blue  
-    "\033[95m",  # Bright Magenta
-    "\033[35m",  # Magenta
+    "\033[91m",  # Bright Red
+    "\033[33m",  # Orange/Brown
+    "\033[93m",  # Bright Yellow
+    "\033[91m",  # Bright Red
 ]
 
 RESET = "\033[0m"
@@ -82,8 +82,8 @@ def print_welcome_tips():
     print(f"{DIM}Just start typing to chat, or try these prompts:{RESET}")
     print()
     print(f"  {CYAN}>{RESET} {WHITE}Build a finance SaaS dashboard with charts{RESET}")
-    print(f"  {CYAN}>{RESET} {WHITE}Create a company landing page with contact form{RESET}")
-    print(f"  {CYAN}>{RESET} {WHITE}Build a blog with SEO optimization{RESET}")
+    print(f"  {CYAN}>{RESET} {WHITE}Build a corporate website with index, about, FAQs, contact{RESET}")
+    print(f"  {CYAN}>{RESET} {WHITE}Create a blog platform with SEO and analytics{RESET}")
     print()
     print(f"  {CYAN}>{RESET} {WHITE}/create{RESET} {DIM}start a new project{RESET}")
     print(f"  {CYAN}>{RESET} {WHITE}/models{RESET} {DIM}change AI model{RESET}")
