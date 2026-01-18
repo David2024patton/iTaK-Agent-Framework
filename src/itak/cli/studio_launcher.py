@@ -90,6 +90,10 @@ def launch_studio(port=29501, no_browser=False):
     if "OLLAMA_HOST" not in env:
         env["OLLAMA_HOST"] = "http://localhost:11434"
     
+    # Set USER_AGENT to identify requests
+    if "USER_AGENT" not in env:
+        env["USER_AGENT"] = "iTaK-Agent-Framework/0.1.0"
+    
     # Launch streamlit
     try:
         process = subprocess.Popen(
