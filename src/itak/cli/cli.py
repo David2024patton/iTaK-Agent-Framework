@@ -39,9 +39,9 @@ from itak.cli.studio_launcher import launch_studio
 from itak.cli.auto_setup import auto_setup, is_first_run
 
 
-# Run auto-setup on first use
-if is_first_run():
-    auto_setup()
+# Run auto-setup on first use - REMOVED GLOBAL CALL to prevent side effects on import
+# if is_first_run():
+#     auto_setup()
 
 
 class DefaultAutoGroup(click.Group):
@@ -73,12 +73,13 @@ class DefaultAutoGroup(click.Group):
 @click.pass_context
 def iTaK(ctx):
     """Top-level command group for iTaK."""
+    # Ensure setup is done before anything else (but only once)
+    from itak.cli.auto_setup import auto_setup, is_first_run
+    if is_first_run():
+        auto_setup()
+
     # If no subcommand given, launch the REPL (Interactive Mode)
-    if ctx.invoked_subcommand is None:
-        # Run setup silently if needed, then launch REPL
-        from itak.cli.auto_setup import auto_setup
-        auto_setup(force=True)
-        
+    if ctx.invoked_subcommand is None:        
         # Launch Interactive REPL
         from itak.cli.repl import run_repl
         run_repl()

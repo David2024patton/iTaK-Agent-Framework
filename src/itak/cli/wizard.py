@@ -21,7 +21,7 @@ PROJECT_TYPES = [
 ]
 
 
-def run_project_wizard(initial_prompt: str = None):
+def run_project_wizard(initial_prompt: str = None, project_type_idx: int = None):
     """Run the interactive project creation wizard."""
     click.echo()
     click.secho("╔" + "═" * 62 + "╗", fg="magenta")
@@ -66,25 +66,31 @@ def run_project_wizard(initial_prompt: str = None):
     click.echo()
     
     # Project type
-    click.secho("  What type of project?", fg="white", bold=True)
-    click.echo()
-    for i, (name, _, desc) in enumerate(PROJECT_TYPES, 1):
-        click.secho(f"    [{i}] ", fg="green", nl=False)
-        click.secho(name, fg="white", nl=False)
-        click.secho(f" - {desc}", fg="bright_black")
-    click.echo()
-    
-    while True:
-        type_choice = click.prompt(
-            click.style("  Choice", fg="cyan"),
-            type=int,
-            default=1
-        )
-        if 1 <= type_choice <= len(PROJECT_TYPES):
-            break
-        click.secho("  Please enter a valid number", fg="yellow")
-    
-    project_type = PROJECT_TYPES[type_choice - 1]
+    if project_type_idx is None:
+        click.secho("  What type of project?", fg="white", bold=True)
+        click.echo()
+        for i, (name, _, desc) in enumerate(PROJECT_TYPES, 1):
+            click.secho(f"    [{i}] ", fg="green", nl=False)
+            click.secho(name, fg="white", nl=False)
+            click.secho(f" - {desc}", fg="bright_black")
+        click.echo()
+        
+        while True:
+            type_choice = click.prompt(
+                click.style("  Choice", fg="cyan"),
+                type=int,
+                default=1
+            )
+            if 1 <= type_choice <= len(PROJECT_TYPES):
+                break
+            click.secho("  Please enter a valid number", fg="yellow")
+        
+        project_type = PROJECT_TYPES[type_choice - 1]
+    else:
+        # Use pre-selected type (adjusted for 0-index if passing from menu that might use 1-index)
+        # But wait, let's assume valid PROJECT_TYPES index + 1 is passed or just index
+        project_type = PROJECT_TYPES[project_type_idx - 1]
+        click.secho(f"  Selected: {project_type[0]}", fg="green")
     
     # Custom description if needed
     custom_prompt = None

@@ -39,22 +39,60 @@ class iTaKREPL:
         
         # Print banner
         print_banner("large")
-        print_welcome_tips()
         
-        # Main loop
-        while self.running:
+        # Startup Menu - "What type of project would you like to build?"
+        print(f"\n  {BOLD}What type of project would you like to build?{RESET}\n")
+        
+        from .wizard import PROJECT_TYPES
+        
+        # Print Wizard Options [1-5]
+        for i, (name, _, desc) in enumerate(PROJECT_TYPES, 1):
+            print(f"    {GREEN}[{i}]{RESET} {name} {DIM}- {desc}{RESET}")
+            
+        # Print Chat Option [6]
+        print(f"    {GREEN}[6]{RESET} {MAGENTA}💬 Chat with AI{RESET} {DIM}- Interactive general coding assistance{RESET}")
+        print()
+        
+        # Get choice
+        import click
+        while True:
             try:
-                self.run_once()
-            except KeyboardInterrupt:
-                print(f"\n\n{DIM}Use /exit to quit or Ctrl+C again to force exit.{RESET}")
+                choice = click.prompt(click.style("  Choice", fg="cyan"), type=int, default=6)
+                if 1 <= choice <= 6:
+                    break
+                print(f"  {YELLOW}Please enter a number between 1 and 6{RESET}")
+            except click.Abort:
+                return
+        
+        # Handle Choice
+        if choice == 6:
+            # Chat Mode (Default behavior)
+            print_welcome_tips()
+            
+            # Main loop
+            while self.running:
                 try:
                     self.run_once()
                 except KeyboardInterrupt:
+                    print(f"\n\n{DIM}Use /exit to quit or Ctrl+C again to force exit.{RESET}")
+                    try:
+                        self.run_once()
+                    except KeyboardInterrupt:
+                        self.running = False
+                        print(f"\n{YELLOW}Goodbye!{RESET}\n")
+                except EOFError:
                     self.running = False
                     print(f"\n{YELLOW}Goodbye!{RESET}\n")
-            except EOFError:
-                self.running = False
-                print(f"\n{YELLOW}Goodbye!{RESET}\n")
+        
+        else:
+            # Wizard Mode [1-5]
+            try:
+                from .wizard import run_project_wizard
+                run_project_wizard(project_type_idx=choice)
+            except ImportError:
+                print(f"\n{YELLOW}Wizard module not available.{RESET}\n")
+            except Exception as e:
+                print(f"\n{YELLOW}Error running wizard: {e}{RESET}\n")
     
     def run_once(self):
         """Run one iteration of the REPL."""
