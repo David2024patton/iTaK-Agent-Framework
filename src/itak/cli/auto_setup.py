@@ -316,9 +316,18 @@ def auto_setup(force=False):
     # Mark setup complete
     mark_setup_complete()
     
-    # Show menu
-    choice = show_menu()
-    handle_menu_choice(choice)
+    # Launch Gemini-style REPL
+    try:
+        from itak.cli.repl import run_repl
+        run_repl(model=DEFAULT_MODEL)
+    except ImportError:
+        # Fallback to old menu if REPL not available
+        choice = show_menu()
+        handle_menu_choice(choice)
+    except Exception as e:
+        click.secho(f"  Error launching REPL: {e}", fg="yellow")
+        choice = show_menu()
+        handle_menu_choice(choice)
     
     return success
 
