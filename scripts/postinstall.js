@@ -558,7 +558,7 @@ async function setupDockerContainers() {
 function generateEnvFile() {
     console.log('  📝 Generating .env file...\n');
 
-    const projectRoot = __dirname.replace('/scripts', '').replace('\\scripts', '');
+    const projectRoot = path.resolve(__dirname, '..');
     const envPath = path.join(projectRoot, '.env');
 
     const running = getRunningContainers();
@@ -586,6 +586,13 @@ ITAK_DEFAULT_MODEL=${DEFAULT_MODEL}
             console.log(`  ⏭️  ${service.envVar} (not running)`);
         }
     }
+
+    // Add VPS/FRP configuration section
+    content += `
+# VPS Remote Access (configure via /api menu or edit here)
+# VPS_IP=your.vps.ip.address
+# FRP_AUTH_TOKEN=your_frp_auth_token_here
+`;
 
     fs.writeFileSync(envPath, content);
     console.log(`\n  ✅ .env file created\n`);

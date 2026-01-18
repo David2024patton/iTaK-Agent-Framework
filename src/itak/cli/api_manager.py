@@ -115,19 +115,73 @@ def clear_screen():
 
 
 def load_config():
-    """Load API configuration."""
+    """Load API configuration from JSON and/or .env file."""
+    config = {}
+    
+    # Load from JSON config
     if CONFIG_FILE.exists():
         try:
-            return json.loads(CONFIG_FILE.read_text())
+            config = json.loads(CONFIG_FILE.read_text())
         except:
             pass
-    return {}
+    
+    # Also check .env file for VPS settings
+    env_file = Path.cwd() / '.env'
+    if env_file.exists():
+        try:
+            for line in env_file.read_text().splitlines():
+                line = line.strip()
+                if line.startswith('VPS_IP=') and not line.startswith('#'):
+                    config['vps_ip'] = line.split('=', 1)[1]
+                elif line.startswith('FRP_AUTH_TOKEN=') and not line.startswith('#'):
+                    config['auth_token'] = line.split('=', 1)[1]
+        except:
+            pass
+    
+    return config
 
 
 def save_config(config):
-    """Save API configuration."""
+    """Save API configuration to JSON and update .env file."""
     CONFIG_FILE.parent.mkdir(parents=True, exist_ok=True)
     CONFIG_FILE.write_text(json.dumps(config, indent=2))
+    
+    # Also update .env file
+    env_file = Path.cwd() / '.env'
+    if env_file.exists():
+        try:
+            lines = env_file.read_text().splitlines()
+            new_lines = []
+            vps_written = False
+            token_written = False
+            
+            for line in lines:
+                # Update existing VPS_IP line
+                if line.strip().startswith('VPS_IP=') or line.strip().startswith('# VPS_IP='):
+                    if config.get('vps_ip'):
+                        new_lines.append(f"VPS_IP={config['vps_ip']}")
+                        vps_written = True
+                    else:
+                        new_lines.append(line)
+                # Update existing FRP_AUTH_TOKEN line
+                elif line.strip().startswith('FRP_AUTH_TOKEN=') or line.strip().startswith('# FRP_AUTH_TOKEN='):
+                    if config.get('auth_token'):
+                        new_lines.append(f"FRP_AUTH_TOKEN={config['auth_token']}")
+                        token_written = True
+                    else:
+                        new_lines.append(line)
+                else:
+                    new_lines.append(line)
+            
+            # Append if not found
+            if config.get('vps_ip') and not vps_written:
+                new_lines.append(f"VPS_IP={config['vps_ip']}")
+            if config.get('auth_token') and not token_written:
+                new_lines.append(f"FRP_AUTH_TOKEN={config['auth_token']}")
+            
+            env_file.write_text('\n'.join(new_lines) + '\n')
+        except:
+            pass
 
 
 def print_api_menu():
