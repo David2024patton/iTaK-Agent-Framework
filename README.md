@@ -810,6 +810,132 @@ anything.
 
 </details>
 
+<details>
+<summary><b>⚖️ LEGAL - initium/law_model:Q5_0</b></summary>
+
+**Question:** "Explain the difference between civil and criminal law in 50 words."
+
+**Answer:**
+```
+Civil law deals with non-criminal disputes between individuals or organizations, 
+focusing on restitution and compensation. Criminal law addresses offenses against 
+society and is enforced by the state through penalties such as fines, imprisonment, 
+or probation.
+```
+
+</details>
+
+<details>
+<summary><b>🏥 MEDICAL - meditron:7b</b></summary>
+
+**Question:** "What are the common symptoms of Type 2 diabetes? Keep answer under 75 words."
+
+**Answer:**
+```
+Type 2 diabetes is a disease that occurs when your body can't use insulin properly, 
+and you have higher than normal blood sugar. Common symptoms include weight loss, 
+nausea, vomiting, excessive thirst, increased urination, fatigue, blurry vision, 
+or irritability.
+```
+
+</details>
+
+<details>
+<summary><b>💰 FINANCE - 0xroyce/plutus:latest</b></summary>
+
+**Question:** "Explain dollar-cost averaging as an investment strategy in 50 words."
+
+**Answer:**
+```
+Dollar-cost averaging (DCA) involves consistently investing a fixed amount of money 
+into a financial asset at regular intervals, regardless of price. This strategy 
+reduces the impact of volatility by buying more shares when prices are low and 
+fewer when prices are high, ultimately lowering the average cost per share.
+```
+
+</details>
+
+<details>
+<summary><b>✍️ WRITING - mistral-nemo:12b</b></summary>
+
+**Question:** "Write a professional email declining a job offer politely. Keep it under 75 words."
+
+**Answer:**
+```
+Dear [Hiring Manager's Name],
+
+Thank you for extending an offer to join your team at [Company Name]. After careful 
+consideration, I have accepted another opportunity that aligns more closely with 
+my long-term career goals.
+
+I appreciate the time and effort invested in this process, and I wish your team 
+all the best in finding a suitable candidate.
+
+Sincerely,
+[Your Name]
+```
+
+</details>
+
+<details>
+<summary><b>👁️ VISION - qwen3-vl:8b</b></summary>
+
+**Question:** "Describe what you would see in an image of a sunset over the ocean. Keep it under 50 words."
+
+**Answer:**
+```
+Thinking...
+I should focus on key sensory details: the colors (orange, pink, purple), the 
+ocean's reflection, and the serene atmosphere...
+
+A glowing orange sun descends toward the horizon, painting the sky in warm hues 
+of pink and purple twilight. A serene, warm glow bathes the scene.
+```
+
+</details>
+
+<details>
+<summary><b>👁️ VISION - moondream:1.8b</b></summary>
+
+**Question:** "Describe what you would see in an image of a sunset over the ocean."
+
+**Answer:**
+```
+A breathtaking view of a sunset over the ocean, with the sky painted in hues 
+of orange and pink, reflecting off the calm water below.
+```
+
+</details>
+
+<details>
+<summary><b>🤝 AGENTS - hermes3:8b</b></summary>
+
+**Question:** "You have a function called get_weather(city: str) -> str. Show me how you would call it for NYC."
+
+**Answer:**
+```python
+# To call the get_weather function for New York City:
+weather_info = get_weather("New York City")
+print(weather_info)
+```
+
+</details>
+
+<details>
+<summary><b>🔗 EMBEDDINGS - nomic-embed-text-v2-moe</b></summary>
+
+**Question:** "test embedding generation"
+
+**Answer:**
+```
+[-0.031738963,-0.020416074,0.008431795,0.030672885,0.010865242,
+0.06923237,-0.03085702,0.00310362,0.0462059,-0.034289945,
+-0.01231856,-0.032875687,-0.04562915,...]
+```
+Returns 768-dimensional vector embeddings for semantic search and RAG.
+
+</details>
+
 > **Full Test Results**: See [`model_test_results/test_results.md`](model_test_results/test_results.md) for all tested models.
 
 
