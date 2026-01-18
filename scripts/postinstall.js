@@ -520,15 +520,10 @@ async function setupDockerContainers() {
 
     if (fs.existsSync(composeFile)) {
         try {
-            // Stop any existing standalone containers first
-            for (const container of requiredContainers) {
-                try {
-                    exec(`docker stop ${container} 2>nul`);
-                    exec(`docker rm ${container} 2>nul`);
-                } catch (e) { /* ignore */ }
-            }
-
-            // Run docker compose up with project name api-gateway
+            // Docker Compose up -d will:
+            // - Start new containers that don't exist
+            // - Leave existing containers with data untouched
+            // - Only recreate if config changed (preserves volumes)
             const result = spawnSync('docker', ['compose', '-f', composeFile, '-p', 'api-gateway', 'up', '-d'], {
                 stdio: 'inherit',
                 shell: true,
