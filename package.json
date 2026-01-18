@@ -1,0 +1,35 @@
+{
+    "name": "itak",
+    "version": "0.1.0",
+    "description": "iTaK Agent Framework - Intelligent Task Automation Kernel",
+    "keywords": [
+        "ai",
+        "agents",
+        "automation",
+        "multi-agent",
+        "llm",
+        "ollama",
+        "crewai"
+    ],
+    "author": "David Patton",
+    "license": "MIT",
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/David2024patton/iTaK-Agent-Framework.git"
+    },
+    "homepage": "https://github.com/David2024patton/iTaK-Agent-Framework",
+    "bin": {
+        "itak": "./bin/itak.js"
+    },
+    "scripts": {
+        "postinstall": "node scripts/postinstall.js"
+    },
+    "engines": {
+        "node": ">=16.0.0"
+    },
+    "os": [
+        "darwin",
+        "linux",
+        "win32"
+    ]
+}
