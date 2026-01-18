@@ -79,15 +79,12 @@ def print_banner(style: str = "large"):
 
 def print_welcome_tips():
     """Print getting started tips like Gemini CLI."""
-    tips = [
-        f"{DIM}Tips for getting started:{RESET}",
-        f"{DIM}1. Ask questions, build projects, or run commands.{RESET}",
-        f"{DIM}2. Be specific for the best results.{RESET}",
-        f"{DIM}3. /help for more information.{RESET}",
-    ]
-    
-    for tip in tips:
-        print(tip)
+    print(f"{DIM}Just start typing to chat with AI, or try:{RESET}")
+    print()
+    print(f"  {CYAN}>{RESET} {WHITE}Build me a todo app{RESET}")
+    print(f"  {CYAN}>{RESET} {WHITE}Explain how this code works @file.py{RESET}")
+    print(f"  {CYAN}>{RESET} {WHITE}/create{RESET} {DIM}to start a new project{RESET}")
+    print(f"  {CYAN}>{RESET} {WHITE}/help{RESET} {DIM}for all commands{RESET}")
     print()
 
 
