@@ -176,8 +176,13 @@ def auto(prompt, model, output):
     
     model = model or "qwen3-vl:4b"
     
-    click.secho(f"\n  Responding with {model}", fg="cyan", dim=True)
-    click.echo()
+    # iTaK system prompt
+    system_prompt = """You are iTaK, an AI assistant built into the iTaK Agent Framework CLI.
+iTaK helps users build apps, write code, and automate tasks.
+Key commands users can use: /create (new project), /models (browse AI models), /studio (web UI), /help.
+Be concise and helpful. When asked what you can do, explain iTaK's capabilities."""
+    
+    full_prompt = f"{system_prompt}\n\nUser: {prompt}\n\nAssistant:"
     
     # Call Ollama API
     try:
@@ -185,7 +190,7 @@ def auto(prompt, model, output):
             "http://localhost:11434/api/generate",
             json={
                 "model": model,
-                "prompt": prompt,
+                "prompt": full_prompt,
                 "stream": True
             },
             stream=True,
