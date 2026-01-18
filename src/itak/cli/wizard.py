@@ -142,36 +142,39 @@ def start_build(prompt: str, output_dir: str):
     click.echo()
     
     # Create output directory
-    Path(output_dir).mkdir(parents=True, exist_ok=True)
-    
-    # Run itak auto command
     try:
-        # For now, just show what would be run
-        click.secho("  Running: ", fg="white", nl=False)
-        click.secho(f'itak auto "{prompt[:50]}..." --output {output_dir}', fg="cyan")
-        click.echo()
+        Path(output_dir).mkdir(parents=True, exist_ok=True)
+    except Exception as e:
+        click.secho(f"  ⚠️ Could not create directory: {e}", fg="yellow")
+        output_dir = "."
+    
+    # Run itak auto command via subprocess
+    click.secho("  Running: ", fg="white", nl=False)
+    click.secho(f'itak auto "..."', fg="cyan")
+    click.echo()
+    
+    try:
+        import subprocess
+        import sys
         
-        # Import and run the auto command
-        from .main import auto_command
+        # Run itak auto as subprocess
+        result = subprocess.run(
+            [sys.executable, "-m", "itak.cli.cli", "auto", prompt],
+            cwd=output_dir,
+            shell=False
+        )
         
-        # Change to output directory
-        original_dir = os.getcwd()
-        os.chdir(output_dir)
-        
-        try:
-            # This will run the full CrewAI pipeline
-            auto_command.callback(prompt=prompt, image=None, model=None)
-        finally:
-            os.chdir(original_dir)
-        
-    except ImportError:
-        click.secho("  ⚠️ Auto command not available yet", fg="yellow")
+        if result.returncode == 0:
+            click.secho("  ✅ Build complete!", fg="green")
+        else:
+            click.secho(f"  ⚠️ Build finished with code {result.returncode}", fg="yellow")
+            
+    except Exception as e:
+        click.secho(f"  ❌ Error: {e}", fg="red")
         click.echo()
         click.echo("  To run manually:")
         click.secho(f'  cd {output_dir}', fg="cyan")
         click.secho(f'  itak auto "{prompt}"', fg="cyan")
-    except Exception as e:
-        click.secho(f"  ❌ Error: {e}", fg="red")
 
 
 if __name__ == "__main__":
