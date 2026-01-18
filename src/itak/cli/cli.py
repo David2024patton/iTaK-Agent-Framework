@@ -200,18 +200,50 @@ Be concise and helpful. When asked what you can do, explain iTaK's capabilities.
         
         click.secho("✦ ", fg="magenta", nl=False)
         
+        # Get terminal width for word wrap
+        import shutil
+        import textwrap
+        term_width = shutil.get_terminal_size().columns - 4  # Leave margin
+        
         full_response = ""
+        current_line = ""
+        
         for line in response.iter_lines():
             if line:
                 try:
                     data = json.loads(line)
                     chunk = data.get("response", "")
                     full_response += chunk
-                    click.echo(chunk, nl=False)
+                    
+                    # Handle streaming with word wrap
+                    current_line += chunk
+                    
+                    # If we hit a newline, wrap and print
+                    while '\n' in current_line:
+                        before_nl, current_line = current_line.split('\n', 1)
+                        if before_nl:
+                            wrapped = textwrap.fill(before_nl, width=term_width)
+                            click.echo(wrapped)
+                        else:
+                            click.echo()
+                    
+                    # If line is getting long, wrap it
+                    if len(current_line) > term_width:
+                        # Find last space to wrap at word boundary
+                        wrap_at = current_line.rfind(' ', 0, term_width)
+                        if wrap_at > 0:
+                            click.echo(current_line[:wrap_at])
+                            current_line = current_line[wrap_at+1:]
+                        
                 except json.JSONDecodeError:
                     pass
         
-        click.echo("\n")
+        # Print any remaining text
+        if current_line.strip():
+            wrapped = textwrap.fill(current_line, width=term_width)
+            click.echo(wrapped)
+        
+        click.echo()
         
     except requests.exceptions.ConnectionError:
         click.secho("  ⚠️ Could not connect to Ollama.", fg="yellow")
