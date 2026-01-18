@@ -78,6 +78,12 @@ class iTaKREPL:
         while True:
             try:
                 raw_input = click.prompt(click.style("  Choice", fg="cyan"), default="6")
+                stripped = raw_input.strip().lower()
+                
+                # Handle exit commands at menu level
+                if stripped in ['/exit', '/quit', '/q', 'exit', 'quit', 'q']:
+                    print(f"\n{YELLOW}Goodbye!{RESET}\n")
+                    return
                 
                 # Try to parse as number
                 try:
