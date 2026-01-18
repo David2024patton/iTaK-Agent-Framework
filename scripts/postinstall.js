@@ -23,10 +23,10 @@ const PLATFORM = os.platform(); // 'win32', 'darwin', 'linux'
 
 // Docker service ports
 const DOCKER_SERVICES = [
-    { name: 'chromadb', container: 'shared-chromadb', port: 8000, envVar: 'CHROMADB_URL' },
+    { name: 'chromadb', container: 'shared-chromadb', port: 29800, envVar: 'CHROMADB_URL' },
     { name: 'ollama', container: 'ollama', port: 11434, envVar: 'OLLAMA_URL' },
-    { name: 'playwright', container: 'playwright', port: 3000, envVar: 'PLAYWRIGHT_URL' },
-    { name: 'searxng', container: 'searxng', port: 8080, envVar: 'SEARXNG_URL' },
+    { name: 'playwright', container: 'playwright-server', port: 39281, envVar: 'PLAYWRIGHT_URL' },
+    { name: 'searxng', container: 'searxng', port: 48192, envVar: 'SEARXNG_URL' },
 ];
 
 // Architecture detection
