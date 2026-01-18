@@ -176,17 +176,11 @@ def auto(prompt, model, output):
     
     model = model or "qwen3-vl:4b"
     
-    # iTaK system prompt - Code Completion Mode
-    system_prompt = """You are a code completion engine.
-Output only the code for the request.
-User: Build a button
-Code:
-```html
-<button>Click Me</button>
-```
-"""
+    # iTaK system prompt - Raw Code Mode
+    # Stripped of all "iTaK" identity to prevent conversational loop
+    system_prompt = "Generate code for the following request. Output only the code in markdown blocks. Do not explain."
     
-    full_prompt = f"{system_prompt}User: {prompt}\nCode:"
+    full_prompt = f"{system_prompt}\nRequest: {prompt}\nCode:"
     
     # Call Ollama API
     try:
