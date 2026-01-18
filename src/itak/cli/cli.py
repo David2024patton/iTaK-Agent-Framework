@@ -161,6 +161,63 @@ def setup(force):
 
 
 @iTaK.command()
+@click.argument("prompt", required=True)
+@click.option("--model", "-m", default=None, help="Model to use (default: qwen3-vl:4b)")
+@click.option("--output", "-o", default=".", help="Output directory for generated files")
+def auto(prompt, model, output):
+    """Process a prompt with AI and generate code/files.
+    
+    Example:
+        itak auto "Build a todo app with HTML and JavaScript"
+        itak auto "Create a Python script to sort files" -o ./my-project
+    """
+    import requests
+    import json
+    
+    model = model or "qwen3-vl:4b"
+    
+    click.secho(f"\n  Responding with {model}", fg="cyan", dim=True)
+    click.echo()
+    
+    # Call Ollama API
+    try:
+        response = requests.post(
+            "http://localhost:11434/api/generate",
+            json={
+                "model": model,
+                "prompt": prompt,
+                "stream": True
+            },
+            stream=True,
+            timeout=120
+        )
+        response.raise_for_status()
+        
+        click.secho("✦ ", fg="magenta", nl=False)
+        
+        full_response = ""
+        for line in response.iter_lines():
+            if line:
+                try:
+                    data = json.loads(line)
+                    chunk = data.get("response", "")
+                    full_response += chunk
+                    click.echo(chunk, nl=False)
+                except json.JSONDecodeError:
+                    pass
+        
+        click.echo("\n")
+        
+    except requests.exceptions.ConnectionError:
+        click.secho("  ⚠️ Could not connect to Ollama.", fg="yellow")
+        click.secho("  Make sure Ollama is running: ollama serve", fg="white", dim=True)
+    except requests.exceptions.Timeout:
+        click.secho("  ⚠️ Request timed out.", fg="yellow")
+    except Exception as e:
+        click.secho(f"  ⚠️ Error: {e}", fg="yellow")
+
+
+@iTaK.command()
 @click.option("--port", "-p", default=29501, help="Port to run Studio on (default: 29501)")
 @click.option("--no-browser", is_flag=True, help="Don't auto-open browser")
 def studio(port, no_browser):
