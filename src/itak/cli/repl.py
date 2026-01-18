@@ -40,27 +40,57 @@ class iTaKREPL:
         # Print banner
         print_banner("large")
         
+        # Get terminal width for formatting
+        import shutil
+        term_width = shutil.get_terminal_size().columns
+        
         # Startup Menu - "What type of project would you like to build?"
         print(f"\n  {BOLD}What type of project would you like to build?{RESET}\n")
         
         from .wizard import PROJECT_TYPES
         
+        # Calculate max description length to avoid wrap
+        prefix_len = 8  # "    [N] " 
+        # Shorten descriptions if terminal is narrow
+        short_descs = {
+            "HTML/CSS/JavaScript web application": "Web app",
+            "Python script or automation": "Python script",
+            "REST API or backend service": "API service",
+            "AI agent or automation workflow": "AI workflow",
+            "Describe your project freely": "Custom project",
+        }
+        
         # Print Wizard Options [1-5]
         for i, (name, _, desc) in enumerate(PROJECT_TYPES, 1):
-            print(f"    {GREEN}[{i}]{RESET} {name} {DIM}- {desc}{RESET}")
+            # Use short desc if terminal is narrow
+            display_desc = short_descs.get(desc, desc) if term_width < 80 else desc
+            print(f"    {GREEN}[{i}]{RESET} {name} {DIM}- {display_desc}{RESET}")
             
         # Print Chat Option [6]
-        print(f"    {GREEN}[6]{RESET} {MAGENTA}💬 Chat with AI{RESET} {DIM}- Interactive general coding assistance{RESET}")
+        chat_desc = "Chat/test models" if term_width < 80 else "Interactive general coding assistance"
+        print(f"    {GREEN}[6]{RESET} {MAGENTA}💬 Chat with AI{RESET} {DIM}- {chat_desc}{RESET}")
         print()
         
-        # Get choice
+        # Get choice - smart input: numbers select menu, text goes to chat
         import click
+        initial_message = None
+        
         while True:
             try:
-                choice = click.prompt(click.style("  Choice", fg="cyan"), type=int, default=6)
-                if 1 <= choice <= 6:
+                raw_input = click.prompt(click.style("  Choice", fg="cyan"), default="6")
+                
+                # Try to parse as number
+                try:
+                    choice = int(raw_input.strip())
+                    if 1 <= choice <= 6:
+                        break
+                    print(f"  {YELLOW}Please enter 1-6, or just type your question{RESET}")
+                except ValueError:
+                    # Not a number - treat as chat message and auto-select option 6
+                    choice = 6
+                    initial_message = raw_input.strip()
                     break
-                print(f"  {YELLOW}Please enter a number between 1 and 6{RESET}")
+                    
             except click.Abort:
                 return
         
@@ -68,6 +98,11 @@ class iTaKREPL:
         if choice == 6:
             # Chat Mode (Default behavior)
             print_welcome_tips()
+            
+            # If user typed a message at the menu, process it immediately
+            if initial_message:
+                self.history.append(initial_message)
+                self.process_prompt(initial_message)
             
             # Main loop
             while self.running:
