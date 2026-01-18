@@ -25,9 +25,9 @@ const PLATFORM = os.platform(); // 'win32', 'darwin', 'linux'
 const API_GATEWAY_PORT = 28934;
 const DOCKER_SERVICES = [
     { name: 'api-gateway', container: 'fastapi', port: API_GATEWAY_PORT, envVar: 'API_GATEWAY_URL' },
-    { name: 'chromadb', container: 'shared-chromadb', port: 29800, envVar: 'CHROMADB_URL' },
+    { name: 'chromadb', container: 'chromadb', port: 29800, envVar: 'CHROMADB_URL' },
     { name: 'ollama', container: 'ollama', port: 11434, envVar: 'OLLAMA_URL' },
-    { name: 'playwright', container: 'playwright-server', port: 39281, envVar: 'PLAYWRIGHT_URL' },
+    { name: 'playwright', container: 'playwright', port: 39281, envVar: 'PLAYWRIGHT_URL' },
     { name: 'searxng', container: 'searxng', port: 48192, envVar: 'SEARXNG_URL' },
 ];
 
@@ -457,7 +457,7 @@ function pullModel(model) {
 // Container configurations - auto-installed during setup
 const CONTAINER_CONFIGS = {
     chromadb: {
-        name: 'shared-chromadb',
+        name: 'chromadb',
         image: 'chromadb/chroma',
         ports: '29800:8000',
         required: true
@@ -470,7 +470,7 @@ const CONTAINER_CONFIGS = {
         volumes: PLATFORM === 'win32' ? 'ollama:/root/.ollama' : `${os.homedir()}/.ollama:/root/.ollama`
     },
     playwright: {
-        name: 'playwright-server',
+        name: 'playwright',
         image: 'mcr.microsoft.com/playwright:v1.40.0-jammy',
         ports: '39281:39281',
         required: false,
@@ -495,7 +495,7 @@ async function setupDockerContainers() {
 
     // Check if containers are already running under api-gateway project
     const running = getRunningContainers();
-    const requiredContainers = ['ollama', 'shared-chromadb', 'playwright-server', 'searxng'];
+    const requiredContainers = ['ollama', 'chromadb', 'playwright', 'searxng'];
     const allRunning = requiredContainers.every(name =>
         running.some(r => r.includes(name) || r === name)
     );

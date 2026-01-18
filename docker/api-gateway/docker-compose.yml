@@ -23,7 +23,7 @@ services:
   # ============================================
   chromadb:
     image: chromadb/chroma
-    container_name: shared-chromadb
+    container_name: chromadb
     restart: unless-stopped
     ports:
       - "29800:8000"
@@ -33,9 +33,9 @@ services:
   # ============================================
   # Playwright - Browser Automation Server
   # ============================================
-  playwright-server:
+  playwright:
     image: mcr.microsoft.com/playwright:v1.40.0-jammy
-    container_name: playwright-server
+    container_name: playwright
     restart: unless-stopped
     command: npx -y playwright@1.40.0 run-server --port 39281
     ports:
