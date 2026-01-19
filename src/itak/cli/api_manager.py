@@ -261,8 +261,8 @@ def show_service_status():
     
     services = [
         ('ollama', 'Ollama LLM', f'http://localhost:{PORTS["ollama"]}'),
-        ('shared-chromadb', 'ChromaDB', f'http://localhost:{PORTS["chromadb"]}'),
-        ('playwright-server', 'Playwright', f'ws://localhost:{PORTS["playwright"]}'),
+        ('chromadb', 'ChromaDB', f'http://localhost:{PORTS["chromadb"]}'),
+        ('playwright', 'Playwright', f'ws://localhost:{PORTS["playwright"]}'),
         ('searxng', 'SearXNG', f'http://localhost:{PORTS["searxng"]}'),
         ('frpc', 'FRP Tunnel', 'VPS Connection'),
         ('cloudflared-tunnel', 'Cloudflare Tunnel', 'Public URL'),
