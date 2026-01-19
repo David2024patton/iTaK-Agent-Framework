@@ -1,5 +1,3 @@
-version: '3.9'
-
 # iTaK API Gateway Stack
 # All local services organized under one compose project
 
@@ -51,7 +49,7 @@ services:
     container_name: whisper
     restart: unless-stopped
     ports:
-      - "69247:9000"
+      - "59247:9000"
     environment:
       - ASR_MODEL=base
       - ASR_ENGINE=openai_whisper
