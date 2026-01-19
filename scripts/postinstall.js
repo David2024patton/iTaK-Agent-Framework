@@ -596,9 +596,19 @@ function generateEnvFile() {
 
     const running = getRunningContainers();
 
-    // Auto-generate a random FRP auth token (like: openssl rand -hex 16)
+    // Check for existing FRP_AUTH_TOKEN in .env - preserve it if exists!
     const crypto = require('crypto');
-    const autoToken = crypto.randomBytes(16).toString('hex');
+    let autoToken = crypto.randomBytes(16).toString('hex');
+    let tokenPreserved = false;
+
+    if (fs.existsSync(envPath)) {
+        const existingEnv = fs.readFileSync(envPath, 'utf8');
+        const tokenMatch = existingEnv.match(/^FRP_AUTH_TOKEN=(.+)$/m);
+        if (tokenMatch && tokenMatch[1] && !tokenMatch[1].startsWith('#')) {
+            autoToken = tokenMatch[1].trim();
+            tokenPreserved = true;
+        }
+    }
 
     // Detect GPU
     const gpu = detectNvidiaGPU();
@@ -699,8 +709,12 @@ ITAK_DEFAULT_MODEL=${DEFAULT_MODEL}
 FRP_AUTH_TOKEN=${autoToken}
 `;
 
-    console.log(`\n  🔑 Auto-generated FRP_AUTH_TOKEN for VPS tunneling`);
-    console.log(`     Use this token in your VPS frps.toml auth.token setting\n`);
+    if (tokenPreserved) {
+        console.log(`\n  🔑 Preserved existing FRP_AUTH_TOKEN from .env`);
+    } else {
+        console.log(`\n  🔑 Auto-generated FRP_AUTH_TOKEN for VPS tunneling`);
+        console.log(`     Use this token in your VPS frps.toml auth.token setting`);
+    }
 
     fs.writeFileSync(envPath, content);
     console.log(`  ✅ .env file created\n`);
