@@ -76,6 +76,10 @@ class iTaKREPL:
         # Print API Option [7]
         api_desc = "Gateway & tunnels" if term_width < 80 else "FastAPI gateway and Cloudflare tunnels"
         print(f"    {GREEN}[7]{RESET} {CYAN}⚡ API Gateway{RESET} {DIM}- {api_desc}{RESET}")
+        
+        # Print Optional Services Option [8]
+        opt_desc = "Heavy services" if term_width < 80 else "Install Supabase, ComfyUI, Whisper, Redis"
+        print(f"    {GREEN}[8]{RESET} {YELLOW}🧩 Optional Services{RESET} {DIM}- {opt_desc}{RESET}")
         print()
         
         # Get choice - smart input: numbers select menu, text goes to chat
@@ -95,9 +99,9 @@ class iTaKREPL:
                 # Try to parse as number
                 try:
                     choice = int(raw_input.strip())
-                    if 1 <= choice <= 7:
+                    if 1 <= choice <= 8:
                         break
-                    print(f"  {YELLOW}Please enter 1-7, or just type your question{RESET}")
+                    print(f"  {YELLOW}Please enter 1-8, or just type your question{RESET}")
                 except ValueError:
                     # Not a number - treat as chat message and auto-select option 6
                     choice = 6
@@ -150,6 +154,18 @@ class iTaKREPL:
                 print(f"\n{YELLOW}API Manager module not available.{RESET}\n")
             except Exception as e:
                 print(f"\n{YELLOW}Error running API manager: {e}{RESET}\n")
+        
+        elif choice == 8:
+            # Optional Services Mode
+            try:
+                from .optional_services import run_optional_services_menu
+                run_optional_services_menu()
+                # After returning from menu, restart main menu
+                self.start()
+            except ImportError:
+                print(f"\n{YELLOW}Optional Services module not available.{RESET}\n")
+            except Exception as e:
+                print(f"\n{YELLOW}Error: {e}{RESET}\n")
         
         else:
             # Wizard Mode [1-5] - Clear screen for fresh view

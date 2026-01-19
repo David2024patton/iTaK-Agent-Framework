@@ -35,6 +35,8 @@ services:
     image: redis:7-alpine
     container_name: redis
     restart: unless-stopped
+    profiles:
+      - optional
     ports:
       - "63790:6379"
     volumes:
@@ -48,6 +50,8 @@ services:
     image: onerahmet/openai-whisper-asr-webservice:latest-gpu
     container_name: whisper
     restart: unless-stopped
+    profiles:
+      - optional
     ports:
       - "59247:9000"
     environment:
@@ -106,6 +110,8 @@ services:
     image: yanwk/comfyui-boot:cu124-cn
     container_name: comfyui
     restart: unless-stopped
+    profiles:
+      - optional
     ports:
       - "58127:8188"
     volumes:
@@ -125,6 +131,8 @@ services:
     image: supabase/postgres:15.6.1.143
     container_name: supabase-db
     restart: unless-stopped
+    profiles:
+      - optional
     ports:
       - "54321:5432"
     environment:
@@ -142,6 +150,8 @@ services:
     image: supabase/studio:20241202-71e5240
     container_name: supabase-studio
     restart: unless-stopped
+    profiles:
+      - optional
     ports:
       - "54323:3000"
     environment:
