@@ -66,12 +66,16 @@ services:
               capabilities: [ gpu ]
 
   # ============================================
-  # Playwright - Browser Automation Server
+  # Playwright - Browser Automation Server (DEPRECATED)
+  # NOTE: Replaced by agent-browser CLI (npm install @anthropic-ai/agent-browser)
+  # Kept for backwards compatibility, use 'docker compose --profile optional up'
   # ============================================
   playwright:
     image: mcr.microsoft.com/playwright:v1.40.0-jammy
     container_name: playwright
     restart: unless-stopped
+    profiles:
+      - optional
     command: npx -y playwright@1.40.0 run-server --port 39281
     ports:
       - "39281:39281"

@@ -262,17 +262,25 @@ def show_service_status():
     services = [
         ('ollama', 'Ollama LLM', f'http://localhost:{PORTS["ollama"]}'),
         ('chromadb', 'ChromaDB', f'http://localhost:{PORTS["chromadb"]}'),
-        ('redis', 'Redis', 'redis://localhost:63790'),
-        ('whisper', 'Whisper STT', 'http://localhost:69247'),
-        ('playwright', 'Playwright', f'ws://localhost:{PORTS["playwright"]}'),
         ('searxng', 'SearXNG', f'http://localhost:{PORTS["searxng"]}'),
         ('crawl4ai', 'Crawl4AI', 'http://localhost:47836'),
-        ('comfyui', 'ComfyUI', 'http://localhost:58127'),
-        ('supabase-db', 'Supabase DB', 'postgresql://localhost:54321'),
-        ('supabase-studio', 'Supabase Studio', 'http://localhost:54323'),
         ('frpc', 'FRP Tunnel', 'VPS Connection'),
         ('cloudflared-tunnel', 'Cloudflare Tunnel', 'Public URL'),
     ]
+    
+    # Check agent-browser CLI (not Docker)
+    import subprocess
+    try:
+        result = subprocess.run(['agent-browser', '--version'], capture_output=True, text=True)
+        if result.returncode == 0:
+            print(f"  {GREEN}✅{RESET} Agent Browser CLI: {GREEN}Installed{RESET}")
+            print(f"     {DIM}npx agent-browser --help{RESET}")
+        else:
+            print(f"  {DIM}⬜{RESET} Agent Browser CLI: {DIM}Not installed{RESET}")
+            print(f"     {DIM}npm install -g @anthropic-ai/agent-browser{RESET}")
+    except FileNotFoundError:
+        print(f"  {DIM}⬜{RESET} Agent Browser CLI: {DIM}Not installed{RESET}")
+        print(f"     {DIM}npm install -g @anthropic-ai/agent-browser{RESET}")
     
     for container, name, url in services:
         status, details = get_container_status(container)
