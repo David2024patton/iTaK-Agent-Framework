@@ -404,7 +404,6 @@ def configure_vps():
     auth_token = click.prompt(
         f"  FRP Auth Token",
         default=config.get('auth_token', ''),
-        hide_input=True,
         show_default=False
     )
     
