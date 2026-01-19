@@ -745,6 +745,41 @@ function installPythonPackage() {
     }
 }
 
+function installAgentBrowser() {
+    console.log('  🌐 Installing Agent Browser CLI...\n');
+
+    try {
+        // Check if already installed
+        const result = execSync('agent-browser --version 2>&1', { encoding: 'utf8', stdio: 'pipe' });
+        console.log(`  ✅ Agent Browser already installed: ${result.trim()}`);
+        return true;
+    } catch {
+        // Not installed, install it
+    }
+
+    try {
+        console.log('  📦 Installing @anthropic-ai/agent-browser globally...');
+        execSync('npm install -g @anthropic-ai/agent-browser', { stdio: 'inherit' });
+
+        // On Linux/WSL, install playwright deps
+        if (PLATFORM === 'linux') {
+            console.log('  📦 Installing Playwright dependencies for Linux...');
+            try {
+                execSync('npx playwright install-deps', { stdio: 'inherit' });
+            } catch {
+                console.log('  ⚠️  Playwright deps install failed (may need sudo)');
+            }
+        }
+
+        console.log('  ✅ Agent Browser CLI installed!');
+        return true;
+    } catch {
+        console.log('  ⚠️  Failed to install Agent Browser');
+        console.log('  You can install manually: npm install -g @anthropic-ai/agent-browser');
+        return false;
+    }
+}
+
 function checkDockerServices() {
     console.log('  🐳 Checking Docker services...\n');
 
@@ -896,7 +931,10 @@ async function main() {
     // Step 6: Install Python package
     const pythonOk = installPythonPackage();
 
-    // Step 7: Pull default model
+    // Step 7: Install Agent Browser CLI (replaces Playwright for AI agents)
+    installAgentBrowser();
+
+    // Step 8: Pull default model
     if (pythonOk && checkOllama()) {
         if (!checkModelInstalled(DEFAULT_MODEL)) {
             console.log(`\n  📥 Model ${DEFAULT_MODEL} not found.`);
@@ -906,7 +944,7 @@ async function main() {
         }
     }
 
-    // Step 8: Launch CLI
+    // Step 9: Launch CLI
     if (pythonOk) {
         launchCLI();
     } else {
