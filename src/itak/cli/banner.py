@@ -96,7 +96,7 @@ def animate_logo(logo: List[str], duration: float = 1.0):
         sys.stdout.write("\033[?25h")
 
 
-def print_banner(style: str = "large", animate: bool = True, duration: float = 1.0):
+def print_banner(style: str = "large", animate: bool = False, duration: float = 1.0):
     """Print the iTaK banner with gradient colors."""
     import sys
     
