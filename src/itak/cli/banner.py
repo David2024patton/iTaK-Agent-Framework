@@ -56,7 +56,40 @@ def colorize_line(line: str, color_index: int = 0) -> str:
     return f"{color}{BOLD}{line}{RESET}"
 
 
-def print_banner(style: str = "large"):
+
+def animate_logo(logo: List[str], duration: float = 1.0):
+    """Animate the logo with a shimmering gradient effect."""
+    import time
+    import sys
+    
+    cycles = int(duration / 0.1)
+    height = len(logo)
+    
+    # Hide cursor
+    sys.stdout.write("\033[?25l")
+    
+    try:
+        for i in range(cycles):
+            # Move cursor up to overwrite previous frame (except for first frame)
+            if i > 0:
+                sys.stdout.write(f"\033[{height}A")
+            
+            # Print with shifted gradient
+            for line_idx, line in enumerate(logo):
+                # Shift color index by frame number to create movement
+                color_idx = line_idx + i
+                colored_line = colorize_line(line, color_idx)
+                sys.stdout.write(f"{colored_line}\n")
+            
+            sys.stdout.flush()
+            time.sleep(0.1)
+            
+    finally:
+        # Show cursor again
+        sys.stdout.write("\033[?25h")
+
+
+def print_banner(style: str = "large", animate: bool = True):
     """Print the iTaK banner with gradient colors."""
     import sys
     
@@ -70,10 +103,13 @@ def print_banner(style: str = "large"):
     
     print()
     
-    # Print logo with gradient
-    for i, line in enumerate(logo):
-        colored_line = colorize_line(line, i)
-        print(colored_line)
+    if animate and style == "large":
+        animate_logo(logo)
+    else:
+        # Static print
+        for i, line in enumerate(logo):
+            colored_line = colorize_line(line, i)
+            print(colored_line)
     
     print()
 
