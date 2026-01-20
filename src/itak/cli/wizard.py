@@ -23,7 +23,7 @@ def is_back_command(text: str) -> bool:
     if text is None:
         return False
     cmd = text.strip().lower()
-    return cmd in ['back', '/back', '0', 'exit', '/exit', 'quit', '/quit', 'q', '/q']
+    return cmd in ['back', '/back', '0']  # Just back commands, not exit
 
 
 def wizard_prompt(label: str, default: str = "") -> str:
@@ -47,11 +47,11 @@ PROJECT_TYPES = [
 def run_project_wizard(initial_prompt: str = None, project_type_idx: int = None):
     """Run the interactive project creation wizard."""
     click.echo()
-    click.secho("  ╔════════════════════════╗", fg="magenta")
+    click.secho("  ╔══════════════════════════╗", fg="magenta")
     click.secho("  ║ ", fg="magenta", nl=False)
     click.secho("📁 Create New Project", fg="white", bold=True, nl=False)
-    click.secho(" ║", fg="magenta")
-    click.secho("  ╚════════════════════════╝", fg="magenta")
+    click.secho("   ║", fg="magenta")
+    click.secho("  ╚══════════════════════════╝", fg="magenta")
     click.echo()
     
     try:
