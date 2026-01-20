@@ -45,41 +45,19 @@ class iTaKREPL:
         term_width = shutil.get_terminal_size().columns
         
         # Startup Menu - "What type of project would you like to build?"
-        print(f"\n  {BOLD}What type of project would you like to build?{RESET}\n")
+        print(f"\n  {BOLD}What would you like to build?{RESET}\n")
         
         from .wizard import PROJECT_TYPES
         
-        # Calculate max description length to avoid wrap
-        prefix_len = 8  # "    [N] " 
-        # Shorten descriptions if terminal is narrow
-        short_descs = {
-            "HTML/CSS/JavaScript web application": "Web app",
-            "Python script or automation": "Python script",
-            "REST API or backend service": "API service",
-            "AI agent or automation workflow": "AI workflow",
-            "Describe your project freely": "Custom project",
-        }
-        
-        # Print Wizard Options [1-5]
+        # Print project options compactly (no descriptions)
         for i, (name, _, desc) in enumerate(PROJECT_TYPES, 1):
-            # Use short desc if terminal is narrow
-            display_desc = short_descs.get(desc, desc) if term_width < 80 else desc
-            print(f"    {GREEN}[{i}]{RESET} {name} {DIM}- {display_desc}{RESET}")
-            
-        # Print Chat Option [6]
-        chat_desc = "Chat/test models" if term_width < 80 else "Interactive general coding assistance"
-        print(f"    {GREEN}[6]{RESET} {MAGENTA}💬 Chat with AI{RESET} {DIM}- {chat_desc}{RESET}")
+            print(f"    {GREEN}[{i}]{RESET} {name}")
         
-        # Blank line separator
         print()
         
-        # Print API Option [7]
-        api_desc = "Gateway & tunnels" if term_width < 80 else "FastAPI gateway and Cloudflare tunnels"
-        print(f"    {GREEN}[7]{RESET} {CYAN}⚡ API Gateway{RESET} {DIM}- {api_desc}{RESET}")
-        
-        # Print Optional Services Option [8]
-        opt_desc = "Heavy services" if term_width < 80 else "Install Supabase, ComfyUI, Whisper, Redis"
-        print(f"    {GREEN}[8]{RESET} {YELLOW}🧩 Optional Services{RESET} {DIM}- {opt_desc}{RESET}")
+        # System options section
+        print(f"    {GREEN}[6]{RESET} {MAGENTA}💬 Chat{RESET}         {DIM}General coding help{RESET}")
+        print(f"    {GREEN}[7]{RESET} {CYAN}⚙️  Settings{RESET}     {DIM}Services & tunnels{RESET}")
         print()
         
         # Get choice - smart input: numbers select menu, text goes to chat
@@ -99,9 +77,9 @@ class iTaKREPL:
                 # Try to parse as number
                 try:
                     choice = int(raw_input.strip())
-                    if 1 <= choice <= 8:
+                    if 1 <= choice <= 7:
                         break
-                    print(f"  {YELLOW}Please enter 1-8, or just type your question{RESET}")
+                    print(f"  {YELLOW}Please enter 1-7, or just type your question{RESET}")
                 except ValueError:
                     # Not a number - treat as chat message and auto-select option 6
                     choice = 6
@@ -144,26 +122,14 @@ class iTaKREPL:
                     print(f"\n{YELLOW}Goodbye!{RESET}\n")
         
         elif choice == 7:
-            # API Gateway Mode
+            # Settings Mode (API Gateway, Tunnels, Optional Services)
             try:
                 from .api_manager import run_api_menu
                 run_api_menu()
                 # After returning from API menu, restart main menu
                 self.start()
             except ImportError:
-                print(f"\n{YELLOW}API Manager module not available.{RESET}\n")
-            except Exception as e:
-                print(f"\n{YELLOW}Error running API manager: {e}{RESET}\n")
-        
-        elif choice == 8:
-            # Optional Services Mode
-            try:
-                from .optional_services import run_optional_services_menu
-                run_optional_services_menu()
-                # After returning from menu, restart main menu
-                self.start()
-            except ImportError:
-                print(f"\n{YELLOW}Optional Services module not available.{RESET}\n")
+                print(f"\n{YELLOW}Settings module not available.{RESET}\n")
             except Exception as e:
                 print(f"\n{YELLOW}Error: {e}{RESET}\n")
         

@@ -208,15 +208,12 @@ def print_api_menu():
         print(f"    • Playwright:   {CYAN}ws://{vps}:{PORTS['playwright']}{RESET}")
     
     print(f"\n  {BOLD}Options:{RESET}")
-    print(f"    {GREEN}[1]{RESET} 📊 {WHITE}Show Service Status{RESET}")
-    print()
+    print(f"    {GREEN}[1]{RESET} 📊 {WHITE}Service Status{RESET}")
     print(f"    {GREEN}[2]{RESET} 🌐 {WHITE}Cloudflare Tunnels{RESET}")
-    print(f"        {DIM}Quick (temporary) or Permanent (custom domain){RESET}")
-    print()
     print(f"    {GREEN}[3]{RESET} 🚀 {WHITE}VPS / FRP Tunnel{RESET}")
-    print(f"        {DIM}Connect to your own VPS{RESET}")
+    print(f"    {GREEN}[4]{RESET} 🧩 {WHITE}Optional Services{RESET}  {DIM}Supabase, ComfyUI, etc{RESET}")
     print()
-    print(f"    {GREEN}[0]{RESET} ↩️  {WHITE}Back to Main Menu{RESET}")
+    print(f"    {GREEN}[0]{RESET} ↩️  {WHITE}Back{RESET}")
     print()
 
 
@@ -1001,8 +998,19 @@ def run_api_menu():
             elif choice == 3:
                 frp_tunnel_menu()
                 # No pause needed - submenu handles its own flow
+            elif choice == 4:
+                # Optional Services
+                try:
+                    from .optional_services import run_optional_services_menu
+                    run_optional_services_menu()
+                except ImportError:
+                    print(f"  {YELLOW}Optional Services module not available.{RESET}")
+                    click.pause("  Press any key to continue...")
+                except Exception as e:
+                    print(f"  {YELLOW}Error: {e}{RESET}")
+                    click.pause("  Press any key to continue...")
             else:
-                print(f"  {YELLOW}Invalid choice. Please enter 0-3.{RESET}")
+                print(f"  {YELLOW}Invalid choice. Please enter 0-4.{RESET}")
                 
         except click.Abort:
             return
