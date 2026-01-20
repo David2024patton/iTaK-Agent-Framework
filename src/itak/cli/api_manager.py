@@ -216,10 +216,8 @@ def print_api_menu():
     print(f"    {GREEN}[3]{RESET} 🔒 {WHITE}Cloudflare Tunnel (Permanent){RESET}")
     print(f"        {DIM}Custom domain, requires Cloudflare account{RESET}")
     print()
-    print(f"    {GREEN}[4]{RESET} 🖥️  {WHITE}Configure VPS Connection{RESET}")
+    print(f"    {GREEN}[4]{RESET} 🚀 {WHITE}VPS / FRP Tunnel{RESET}")
     print(f"        {DIM}Connect to your own VPS via FRP tunnel{RESET}")
-    print()
-    print(f"    {GREEN}[5]{RESET} 🚀 {WHITE}Start/Stop FRP Tunnel{RESET}")
     print()
     print(f"    {GREEN}[0]{RESET} ↩️  {WHITE}Back to Main Menu{RESET}")
     print()
@@ -478,6 +476,7 @@ def cloudflare_permanent_menu():
         # Info about permanent tunnel
         print(f"  {GREEN}✓ Persistent URL with custom domain{RESET}")
         print(f"  {DIM}Requires Cloudflare account & tunnel token{RESET}")
+        print(f"  {CYAN}https://one.dash.cloudflare.com/{RESET}")
         print()
         
         # Show status
@@ -692,7 +691,9 @@ def frp_tunnel_menu():
         is_running = status == 'running'
         
         # Show submenu
-        print(f"\n  {BOLD}🚀 FRP Tunnel{RESET}")
+        print(f"\n  {BOLD}🚀 VPS / FRP Tunnel{RESET}")
+        print(f"  {DIM}Connect local services to your VPS{RESET}")
+        print(f"  {CYAN}https://github.com/fatedier/frp{RESET}")
         print()
         
         # Show status
@@ -705,7 +706,7 @@ def frp_tunnel_menu():
             print(f"  Status: {DIM}○ Stopped{RESET}")
         
         if not configured:
-            print(f"  {YELLOW}⚠️  Not configured - use option [4] first{RESET}")
+            print(f"  {YELLOW}⚠️  Not configured - use option [5] for setup guide{RESET}")
         
         # Show current config
         config = load_config()
@@ -720,6 +721,7 @@ def frp_tunnel_menu():
         print()
         print(f"  {GREEN}[3]{RESET} 🌐 Change VPS IP     {DIM}({current_ip}){RESET}")
         print(f"  {GREEN}[4]{RESET} 🔑 Change FRP Token  {DIM}({current_token}){RESET}")
+        print(f"  {GREEN}[5]{RESET} 📖 Setup Instructions")
         print()
         print(f"  {GREEN}[0]{RESET} ↩️  Back")
         print()
@@ -840,6 +842,32 @@ def frp_tunnel_menu():
                 
                 input("\n  Press Enter to continue...")
             
+            elif choice == '5':
+                # Setup Instructions
+                print(f"\n  {BOLD}How to set up FRP Tunnel to your VPS:{RESET}")
+                print()
+                print(f"  {BOLD}1. Install FRP on your VPS:{RESET}")
+                print(f"     {CYAN}https://github.com/fatedier/frp/releases{RESET}")
+                print()
+                print(f"  {BOLD}2. Create frps.toml on VPS:{RESET}")
+                print(f"     bindPort = 7000")
+                print(f"     auth.token = \"your-secret-token\"")
+                print()
+                print(f"  {BOLD}3. Run FRP server on VPS:{RESET}")
+                print(f"     ./frps -c frps.toml")
+                print()
+                print(f"  {BOLD}4. Configure here:{RESET}")
+                print(f"     Use option [3] to set your VPS IP")
+                print(f"     Use option [4] to set the same token")
+                print()
+                print(f"  {BOLD}5. Start tunnel:{RESET}")
+                print(f"     Use option [1] to connect")
+                print()
+                print(f"  {DIM}Full guide: https://github.com/fatedier/frp{RESET}")
+                print()
+                
+                input("  Press Enter to continue...")
+            
             else:
                 print(f"  {YELLOW}Invalid choice{RESET}")
                 
@@ -873,13 +901,10 @@ def run_api_menu():
                 cloudflare_permanent_menu()
                 # No pause needed - submenu handles its own flow
             elif choice == 4:
-                configure_vps()
-                click.pause("  Press any key to continue...")
-            elif choice == 5:
                 frp_tunnel_menu()
                 # No pause needed - submenu handles its own flow
             else:
-                print(f"  {YELLOW}Invalid choice. Please enter 0-5.{RESET}")
+                print(f"  {YELLOW}Invalid choice. Please enter 0-4.{RESET}")
                 
         except click.Abort:
             return
