@@ -86,14 +86,57 @@ ITAK_LOGO_PIXEL = [
     " ▀▀▀  ▀  ▀ ▀ ▀ ▀ ",
 ]
 
-ITAK_LOGO_DASH_3D = [
-    "  __   _______      __       __   __",
-    " |  | |__   __|    /  \     |  | / /",
-    " |  |    | |      / /\ \    |  |/ / ",
-    " |  |    | |     / /__\ \   |     \ ",
-    " |  |    | |    /  ____  \  |  |\  \ ",
-    " |__|    |_|   /__/    \__\ |__| \__\\",
+# --- 3D DASHED PARTS ---
+D3D_ARROW = [
+    "  __      ",
+    "  \ \     ",
+    "   \ \    ",
+    "   / /    ",
+    "  /_/     ",
+    "          ",
 ]
+
+D3D_I = [
+    "  __   ",
+    " |  |  ",
+    " |  |  ",
+    " |  |  ",
+    " |  |  ",
+    " |__|  ",
+]
+
+D3D_T = [
+    " _______  ",
+    "|__   __| ",
+    "   | |    ",
+    "   | |    ",
+    "   | |    ",
+    "   |_|    ",
+]
+
+D3D_A = [
+    "    __      ",
+    "   /  \     ",
+    "  / /\ \    ",
+    " / /__\ \   ",
+    "/  ____  \  ",
+    "/__/    \__\ ",
+]
+
+D3D_K = [
+    " __   __ ",
+    "|  | / / ",
+    "|  |/ /  ",
+    "|     \  ",
+    "|  |\  \ ",
+    "|__| \__\\",
+]
+
+def join_art(*parts):
+    """Combine ASCII art columns horizontally."""
+    return ["".join(lines) for lines in zip(*parts)]
+
+ITAK_LOGO_DASH_3D = join_art(D3D_ARROW, D3D_I, D3D_T, D3D_A, D3D_K)
 
 ITAK_LOGO_3D = [
     "  _____ _______    _      _  __",
@@ -271,14 +314,68 @@ def print_code_block(code: str, language: str = "python", filename: str = None):
     print(f"  {DIM}└{'─' * 60}┘{RESET}")
 
 
-# --- MAIN (GALLERY)# Test the banner
+def animate_intro(theme_key: str = CURRENT_THEME):
+    """Animate the Dashed 3D logo: Static > then types I-T-A-K."""
+    import time
+    import sys
+    
+    parts = [D3D_ARROW, D3D_I, D3D_T, D3D_A, D3D_K]
+    current_blocks = [D3D_ARROW] # Start with just >
+    
+    # Setup Colors
+    if theme_key not in THEMES: theme_key = CURRENT_THEME
+    start_hex, end_hex = THEMES[theme_key]
+    
+    # 1. Show Static Arrow first
+    # 2. Type letters one by one
+    
+    # Total Frames: 1 (Arrow) + 4 (Letters)
+    
+    print(f"\n{BOLD}🎨 iTaK Animation Sequence 🎨{RESET}\n")
+    
+    # Clear screen helper logic could go here, but we'll specificially just print frames 
+    # separated by newlines for the gallery demo, or use carriage return for in-place.
+    # For a CLI banner, usually we just want the final result, but as a demo we will
+    # use carriage returns to animate in place if possible, or just sequential prints.
+    
+    # Let's do a proper in-place animation using ANSI cursor controls
+    # Save cursor position? Simple version: Print, sleep, clear lines.
+    
+    for i in range(len(parts)):
+        # Build current state
+        frame_logo = join_art(*parts[:i+1])
+        
+        # Calculate colors for THIS frame width
+        # (This makes the gradient shift as it types, which looks cool)
+        max_width = max(len(line) for line in frame_logo)
+        colors = generate_gradient_colors(start_hex, end_hex, max_width)
+        
+        # Move cursor up 7 lines (height + padding) to overwrite previous frame
+        # Only if not the first frame
+        if i > 0:
+            sys.stdout.write(f"\033[{len(frame_logo)+1}A") 
+            
+        # Render Frame
+        print()
+        for line in frame_logo:
+             print(colorize_string_horizontally(line, colors))
+             
+        time.sleep(0.4) # Typing speed
+        
+    print()
+
+# --- MAIN (GALLERY) ---
 if __name__ == "__main__":
+    
+    # Run the REQUESTED Animation Demo first
+    animate_intro(CURRENT_THEME)
+    
     print(f"\n{BOLD}🎨 iTaK Logo Style Gallery 🎨{RESET}\n")
-    print(f"{DIM}Theme: {CURRENT_THEME}{RESET}\n")
+    print(f"{DIM}Theme: {CURRENT_THEME} (Red Sunset){RESET}\n")
     
     # Show all defined logo styles
     for style_name in LOGO_STYLES.keys():
         print(f"\n{WHITE}--- Style: {style_name.upper()} ---{RESET}")
-        print_banner(style=style_name, theme_key=CURRENT_THEME) # Use current default theme
+        print_banner(style=style_name, theme_key=CURRENT_THEME) 
     
     print(f"\n{DIM}To change the default style, update the 'style' argument in cli.py{RESET}\n")
