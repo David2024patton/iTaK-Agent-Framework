@@ -809,21 +809,28 @@ function installAgentBrowser() {
         console.log('  📦 Installing agent-browser globally...');
         execSync('npm install -g agent-browser', { stdio: 'inherit' });
 
-        // Install Chromium for agent-browser (use npx since PATH may not be updated yet)
-        console.log('  📦 Downloading Chromium for agent-browser...');
-        try {
-            execSync('npx agent-browser install', { stdio: 'inherit' });
-        } catch {
-            console.log('  ⚠️  Chromium install failed (can run later: npx agent-browser install)');
-        }
-
-        // On Linux/WSL, install playwright deps
-        if (PLATFORM === 'linux') {
-            console.log('  📦 Installing Playwright dependencies for Linux...');
+        // On Windows, skip Chromium install (agent-browser has known Windows issues)
+        // It works best on Linux/WSL
+        if (PLATFORM === 'win32') {
+            console.log('  ℹ️  agent-browser works best on Linux/WSL');
+            console.log('     For best results, run in WSL: npx agent-browser install');
+        } else {
+            // On Linux/macOS, install Chromium
+            console.log('  📦 Downloading Chromium for agent-browser...');
             try {
-                execSync('npx agent-browser install --with-deps', { stdio: 'inherit' });
+                execSync('npx agent-browser install', { stdio: 'inherit' });
             } catch {
-                console.log('  ⚠️  Playwright deps install failed (may need sudo)');
+                console.log('  ⚠️  Chromium install failed (can run later: npx agent-browser install)');
+            }
+
+            // On Linux, install playwright deps
+            if (PLATFORM === 'linux') {
+                console.log('  📦 Installing Playwright dependencies for Linux...');
+                try {
+                    execSync('npx agent-browser install --with-deps', { stdio: 'inherit' });
+                } catch {
+                    console.log('  ⚠️  Playwright deps install failed (may need sudo)');
+                }
             }
         }
 
