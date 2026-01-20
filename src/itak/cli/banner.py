@@ -45,14 +45,17 @@ THEMES = {
 CURRENT_THEME = "7. Miami Sunset"
 
 # --- CONSTANTS ---
+# ANSI Color Codes
 RESET = "\033[0m"
 BOLD = "\033[1m"
 DIM = "\033[2m"
-CYAN = "\033[96m"
-GREEN = "\033[92m"
-YELLOW = "\033[93m"
 WHITE = "\033[97m"
 MAGENTA = "\033[95m"
+
+class Theme:
+    CYAN = "\033[36m"
+    GREEN = "\033[32m"
+    YELLOW = "\033[33m"
 
 # --- LOGOS ---
 ITAK_LOGO_LARGE = [
@@ -84,6 +87,16 @@ ITAK_LOGO_PIXEL = [
     " ▀█▀ ▀█▀ █▀█ █ █ ",
     "  █   █  █▀█ █▀▄ ",
     " ▀▀▀  ▀  ▀ ▀ ▀ ▀ ",
+]
+
+# --- SHADOW STYLE ---
+ITAK_LOGO_SHADOW = [
+    "██╗ ▄▄▄▄▄▄▄▄╗  ▄▄▄▄▄▄▄▄╗ ██╗  ██╗",
+    "██║ ╚══██╔══╝ ▄█▀▀▀▀▀▀▀█▄ ██║ ██╔╝",
+    "██║    ██║    ██║     ██║ █████╔╝ ",
+    "██║    ██║    ██████████║ ██╔═██╗ ",
+    "██║    ██║    ██║     ██║ ██║  ██╗",
+    "╚═╝    ╚═╝    ╚═╝     ╚═╝ ╚═╝  ╚═╝",
 ]
 
 # --- 3D DASHED PARTS ---
@@ -186,6 +199,7 @@ LOGO_STYLES = {
     "cyber": ITAK_LOGO_CYBER,
     "modern": ITAK_LOGO_MODERN,
     "pixel": ITAK_LOGO_PIXEL,
+    "shadow": ITAK_LOGO_SHADOW,
     "dash_3d": ITAK_LOGO_DASH_3D,
     "3d": ITAK_LOGO_3D,
     "slant": ITAK_LOGO_SLANT,
@@ -375,18 +389,42 @@ def animate_intro(theme_key: str = CURRENT_THEME):
         
     print()
 
+
+def print_menu():
+    """Print the interactive CLI menu."""
+    print(f"\n   {BOLD}What would you like to do?{RESET}\n")
+    
+    options = [
+        ("1", "🌐", "Web App"),
+        ("2", "🐍", "Python Script"),
+        ("3", "⚡", "API/Backend"),
+        ("4", "🤖", "AI Agent"),
+        ("5", "📝", "Custom"),
+    ]
+    
+    for key, icon, label in options:
+        print(f"    [{key}] {icon} {label}")
+        
+    print()
+    print(f"    [{Theme.CYAN}6{RESET}] 💬 {Theme.CYAN}Chat{RESET}           {DIM}General coding help{RESET}")
+    print(f"    [{Theme.CYAN}7{RESET}] ⚙️  {Theme.CYAN}Settings{RESET}       {DIM}Services & tunnels{RESET}")
+    print()
+    print(f"    Choice [6]: ", end="")
+
+# ... (Existing animate_intro) ...
+
 # --- MAIN (GALLERY) ---
 if __name__ == "__main__":
     
-    # Run the REQUESTED Animation Demo first
-    animate_intro(CURRENT_THEME)
+    # 1. Animation (Blinking Arrow)
+    animate_intro("7. Miami Sunset")
     
-    print(f"\n{BOLD}🎨 iTaK Logo Style Gallery 🎨{RESET}\n")
-    print(f"{DIM}Theme: {CURRENT_THEME} (Red Sunset){RESET}\n")
+    # 2. Main Logo (Shadow Style matching screenshot)
+    print_banner(style="shadow", theme_key="7. Miami Sunset")
     
-    # Show all defined logo styles
-    for style_name in LOGO_STYLES.keys():
-        print(f"\n{WHITE}--- Style: {style_name.upper()} ---{RESET}")
-        print_banner(style=style_name, theme_key=CURRENT_THEME) 
+    # 3. Menu
+    print_menu()
     
-    print(f"\n{DIM}To change the default style, update the 'style' argument in cli.py{RESET}\n")
+    # Keep the script running to hold the visual if needed, 
+    # but for now just exit so user can see the print.
+    print()
