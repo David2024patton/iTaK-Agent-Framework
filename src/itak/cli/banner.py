@@ -15,7 +15,7 @@ THEMES = {
     "4. Inferno":          ("#FFFF00", "#FF0000"), # Yellow -> Red
     "5. Deep Ocean":       ("#00BFFF", "#00008B"), # DeepSkyBlue -> DarkBlue
     "6. Royal Amethyst":   ("#E6E6FA", "#4B0082"), # Lavender -> Indigo
-    "7. Miami Sunset":     ("#FF00FF", "#FFA500"), # Magenta -> Orange
+    "7. Miami Sunset":     ("#FF0000", "#FFA500"), # Red -> Orange
     "8. Toxic Sludge":     ("#7FFF00", "#FFFF00"), # Chartreuse -> Yellow
     "9. Glacial Ice":      ("#E0FFFF", "#00FFFF"), # LightCyan -> Cyan
     "10. Noir":            ("#FFFFFF", "#333333"), # White -> Dark Gray
@@ -42,7 +42,7 @@ THEMES = {
 }
 
 # DEFAULT THEME
-CURRENT_THEME = "2. Neon Cyberpunk"
+CURRENT_THEME = "7. Miami Sunset"
 
 # --- CONSTANTS ---
 RESET = "\033[0m"
