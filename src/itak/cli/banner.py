@@ -89,7 +89,7 @@ def animate_logo(logo: List[str], duration: float = 1.0):
         sys.stdout.write("\033[?25h")
 
 
-def print_banner(style: str = "large", animate: bool = True):
+def print_banner(style: str = "large", animate: bool = True, duration: float = 3.0):
     """Print the iTaK banner with gradient colors."""
     import sys
     
@@ -104,7 +104,14 @@ def print_banner(style: str = "large", animate: bool = True):
     print()
     
     if animate and style == "large":
-        animate_logo(logo)
+        # Check if we are in a non-interactive shell (CI/CD)
+        if hasattr(sys.stdout, 'isatty') and sys.stdout.isatty():
+            animate_logo(logo, duration=duration)
+        else:
+             # Fallback for non-interactive
+            for i, line in enumerate(logo):
+                colored_line = colorize_line(line, i)
+                print(colored_line)
     else:
         # Static print
         for i, line in enumerate(logo):
