@@ -296,97 +296,312 @@ def show_service_status():
     print()
 
 
-def install_cloudflare_temp():
-    """Install temporary Cloudflare tunnel (no account needed)."""
-    print(f"\n  {CYAN}🌐 Starting Cloudflare Tunnel (Temporary)...{RESET}\n")
+def cloudflare_temp_menu():
+    """Cloudflare Quick Tunnel submenu with status and start/stop options."""
+    import click
     
     if not check_docker():
-        print(f"  {YELLOW}⚠️  Docker is not running. Please start Docker first.{RESET}\n")
-        return False
+        print(f"\n  {YELLOW}⚠️  Docker is not running.{RESET}\n")
+        return
     
     DOCKER_DIR.mkdir(parents=True, exist_ok=True)
-    
     compose_file = DOCKER_DIR / 'cloudflare-temp.yml'
-    compose_file.write_text(CLOUDFLARE_TEMP_COMPOSE)
     
-    print(f"  {DIM}Starting tunnel to expose port {PORTS['gateway']}...{RESET}\n")
-    
-    try:
-        subprocess.run(
-            ['docker', 'compose', '-f', str(compose_file), 'up', '-d'],
-            check=True
-        )
+    while True:
+        # Get current status
+        status, _ = get_container_status('cloudflared-tunnel')
+        is_running = status == 'running'
         
-        import time
-        time.sleep(5)
+        # Get current URL if running
+        current_url = None
+        if is_running:
+            try:
+                logs = subprocess.run(['docker', 'logs', 'cloudflared-tunnel', '--tail', '50'],
+                    capture_output=True, text=True)
+                for line in logs.stdout.split('\n') + logs.stderr.split('\n'):
+                    if 'trycloudflare.com' in line.lower():
+                        import re
+                        match = re.search(r'https://[^\s]+\.trycloudflare\.com', line)
+                        if match:
+                            current_url = match.group(0)
+                            break
+            except:
+                pass
         
-        logs = subprocess.run(
-            ['docker', 'logs', 'cloudflared-tunnel'],
-            capture_output=True, text=True
-        )
+        # Show submenu
+        print(f"\n  {BOLD}🌐 Cloudflare Quick Tunnel{RESET}")
+        print()
         
-        # Look for the trycloudflare.com URL in logs
-        for line in logs.stdout.split('\n') + logs.stderr.split('\n'):
-            if 'trycloudflare.com' in line.lower():
-                print(f"  {GREEN}✅ Tunnel URL found in logs!{RESET}")
-                print(f"  {CYAN}{line.strip()}{RESET}")
-                break
+        # Warning about temporary URL
+        print(f"  {YELLOW}⚠️  TEMPORARY URL - Changes every restart!{RESET}")
+        print(f"  {DIM}No account needed, but URL is not persistent.{RESET}")
+        print()
+        
+        # Show status
+        if is_running:
+            print(f"  Status: {GREEN}● Running{RESET}")
+            if current_url:
+                print(f"  URL: {CYAN}{current_url}{RESET}")
+            else:
+                print(f"  URL: {DIM}Check logs: docker logs cloudflared-tunnel{RESET}")
         else:
-            print(f"  {GREEN}✅ Tunnel started! Check logs for URL:{RESET}")
-            print(f"  {DIM}docker logs cloudflared-tunnel{RESET}")
+            print(f"  Status: {DIM}○ Stopped{RESET}")
         
         print()
-        return True
-    except subprocess.CalledProcessError as e:
-        print(f"  {YELLOW}⚠️  Failed to start tunnel: {e}{RESET}\n")
-        return False
+        print(f"  {GREEN}[1]{RESET} ▶️  Start Tunnel")
+        print(f"  {GREEN}[2]{RESET} ⏹️  Stop Tunnel")
+        print(f"  {GREEN}[3]{RESET} 📋 Show Tunnel URL")
+        print()
+        print(f"  {GREEN}[0]{RESET} ↩️  Back")
+        print()
+        
+        try:
+            choice = click.prompt(click.style("  Choice", fg="cyan"), default="0").strip()
+            
+            if choice == '0' or choice == '':
+                return
+            
+            elif choice == '1':
+                # Start
+                if is_running:
+                    print(f"\n  {YELLOW}ℹ️  Tunnel is already running!{RESET}")
+                    if current_url:
+                        print(f"  URL: {CYAN}{current_url}{RESET}")
+                    input("\n  Press Enter to continue...")
+                    continue
+                
+                print(f"\n  {CYAN}Starting Cloudflare Quick Tunnel...{RESET}")
+                compose_file.write_text(CLOUDFLARE_TEMP_COMPOSE)
+                
+                subprocess.run(['docker', 'compose', '-f', str(compose_file), 'up', '-d'], capture_output=True)
+                
+                import time
+                time.sleep(5)
+                
+                # Try to get URL
+                logs = subprocess.run(['docker', 'logs', 'cloudflared-tunnel'], capture_output=True, text=True)
+                found_url = None
+                for line in logs.stdout.split('\n') + logs.stderr.split('\n'):
+                    if 'trycloudflare.com' in line.lower():
+                        import re
+                        match = re.search(r'https://[^\s]+\.trycloudflare\.com', line)
+                        if match:
+                            found_url = match.group(0)
+                            break
+                
+                if found_url:
+                    print(f"  {GREEN}✅ Tunnel started!{RESET}")
+                    print(f"\n  {BOLD}Your public URL:{RESET}")
+                    print(f"  {CYAN}{found_url}{RESET}")
+                    print(f"\n  {YELLOW}⚠️  This URL will change when tunnel restarts!{RESET}")
+                else:
+                    print(f"  {GREEN}✅ Tunnel started! Check logs for URL:{RESET}")
+                    print(f"  {DIM}docker logs cloudflared-tunnel{RESET}")
+                
+                input("\n  Press Enter to continue...")
+            
+            elif choice == '2':
+                # Stop
+                if not is_running:
+                    print(f"\n  {YELLOW}ℹ️  Tunnel is not running.{RESET}")
+                    input("\n  Press Enter to continue...")
+                    continue
+                
+                print(f"\n  {CYAN}Stopping Cloudflare tunnel...{RESET}")
+                subprocess.run(['docker', 'stop', 'cloudflared-tunnel'], capture_output=True)
+                subprocess.run(['docker', 'rm', 'cloudflared-tunnel'], capture_output=True)
+                
+                new_status, _ = get_container_status('cloudflared-tunnel')
+                if new_status != 'running':
+                    print(f"  {GREEN}✅ Tunnel stopped.{RESET}")
+                else:
+                    print(f"  {YELLOW}⚠️  Failed to stop. Try: docker stop cloudflared-tunnel{RESET}")
+                
+                input("\n  Press Enter to continue...")
+            
+            elif choice == '3':
+                # Show URL
+                if not is_running:
+                    print(f"\n  {YELLOW}ℹ️  Tunnel is not running. Start it first.{RESET}")
+                    input("\n  Press Enter to continue...")
+                    continue
+                
+                print(f"\n  {CYAN}Fetching tunnel URL...{RESET}")
+                logs = subprocess.run(['docker', 'logs', 'cloudflared-tunnel', '--tail', '100'],
+                    capture_output=True, text=True)
+                
+                found = False
+                for line in logs.stdout.split('\n') + logs.stderr.split('\n'):
+                    if 'trycloudflare.com' in line.lower():
+                        print(f"  {CYAN}{line.strip()}{RESET}")
+                        found = True
+                
+                if not found:
+                    print(f"  {YELLOW}URL not found in logs. Tunnel may still be starting...{RESET}")
+                
+                input("\n  Press Enter to continue...")
+            
+            else:
+                print(f"  {YELLOW}Invalid choice{RESET}")
+                
+        except KeyboardInterrupt:
+            return
 
 
-def install_cloudflare_permanent():
-    """Install permanent Cloudflare tunnel (requires account)."""
-    print(f"\n  {CYAN}🔒 Setting up Cloudflare Tunnel (Permanent)...{RESET}\n")
+def cloudflare_permanent_menu():
+    """Cloudflare Permanent Tunnel submenu with status, start/stop, and token config."""
+    import click
     
     if not check_docker():
-        print(f"  {YELLOW}⚠️  Docker is not running. Please start Docker first.{RESET}\n")
-        return False
-    
-    print(f"  {BOLD}To set up a permanent tunnel:{RESET}")
-    print(f"  1. Go to https://one.dash.cloudflare.com/")
-    print(f"  2. Navigate to: Zero Trust → Networks → Tunnels")
-    print(f"  3. Create a new tunnel")
-    print(f"  4. Copy the tunnel token")
-    print()
-    
-    import click
-    token = click.prompt(f"  Enter Cloudflare Tunnel Token (or 'skip')", default='skip')
-    
-    if token.lower() == 'skip':
-        print(f"\n  {YELLOW}Skipped. Run this option again when you have a token.{RESET}\n")
-        return False
+        print(f"\n  {YELLOW}⚠️  Docker is not running.{RESET}\n")
+        return
     
     DOCKER_DIR.mkdir(parents=True, exist_ok=True)
-    
-    # Save token to .env
-    env_file = DOCKER_DIR / '.env'
-    env_content = f"CLOUDFLARE_TUNNEL_TOKEN={token}\n"
-    env_file.write_text(env_content)
-    
     compose_file = DOCKER_DIR / 'cloudflare-permanent.yml'
-    compose_file.write_text(CLOUDFLARE_PERMANENT_COMPOSE)
+    env_file = DOCKER_DIR / '.env'
     
-    print(f"\n  {DIM}Token saved. Starting tunnel...{RESET}")
-    
-    try:
-        subprocess.run(
-            ['docker', 'compose', '-f', str(compose_file), '--env-file', str(env_file), 'up', '-d'],
-            check=True
-        )
-        print(f"\n  {GREEN}✅ Permanent tunnel configured!{RESET}")
-        print(f"  {DIM}Manage at: https://one.dash.cloudflare.com/{RESET}\n")
-        return True
-    except subprocess.CalledProcessError as e:
-        print(f"  {YELLOW}⚠️  Failed to start tunnel: {e}{RESET}\n")
-        return False
+    while True:
+        # Get current status
+        status, _ = get_container_status('cloudflared-tunnel')
+        is_running = status == 'running'
+        
+        # Check if token is configured
+        config = load_config()
+        current_token = config.get('cloudflare_token', '')
+        has_token = bool(current_token)
+        masked_token = current_token[:12] + '...' if len(current_token) > 12 else (current_token or 'Not set')
+        
+        # Show submenu
+        print(f"\n  {BOLD}🔒 Cloudflare Permanent Tunnel{RESET}")
+        print()
+        
+        # Info about permanent tunnel
+        print(f"  {GREEN}✓ Persistent URL with custom domain{RESET}")
+        print(f"  {DIM}Requires Cloudflare account & tunnel token{RESET}")
+        print()
+        
+        # Show status
+        if is_running:
+            print(f"  Status: {GREEN}● Running{RESET}")
+        else:
+            print(f"  Status: {DIM}○ Stopped{RESET}")
+        
+        if not has_token:
+            print(f"  {YELLOW}⚠️  No token configured{RESET}")
+        
+        print()
+        print(f"  {GREEN}[1]{RESET} ▶️  Start Tunnel")
+        print(f"  {GREEN}[2]{RESET} ⏹️  Stop Tunnel")
+        print()
+        print(f"  {GREEN}[3]{RESET} 🔑 Set Tunnel Token  {DIM}({masked_token}){RESET}")
+        print(f"  {GREEN}[4]{RESET} 📖 Setup Instructions")
+        print()
+        print(f"  {GREEN}[0]{RESET} ↩️  Back")
+        print()
+        
+        try:
+            choice = click.prompt(click.style("  Choice", fg="cyan"), default="0").strip()
+            
+            if choice == '0' or choice == '':
+                return
+            
+            elif choice == '1':
+                # Start
+                if is_running:
+                    print(f"\n  {YELLOW}ℹ️  Tunnel is already running!{RESET}")
+                    input("\n  Press Enter to continue...")
+                    continue
+                
+                if not has_token:
+                    print(f"\n  {YELLOW}⚠️  No token configured. Use option [3] first.{RESET}")
+                    input("\n  Press Enter to continue...")
+                    continue
+                
+                print(f"\n  {CYAN}Starting Cloudflare Permanent Tunnel...{RESET}")
+                
+                # Write compose and env files
+                compose_file.write_text(CLOUDFLARE_PERMANENT_COMPOSE)
+                env_file.write_text(f"CLOUDFLARE_TUNNEL_TOKEN={current_token}\n")
+                
+                result = subprocess.run(
+                    ['docker', 'compose', '-f', str(compose_file), '--env-file', str(env_file), 'up', '-d'],
+                    capture_output=True
+                )
+                
+                import time
+                time.sleep(3)
+                
+                new_status, _ = get_container_status('cloudflared-tunnel')
+                if new_status == 'running':
+                    print(f"  {GREEN}✅ Tunnel started!{RESET}")
+                    print(f"  {DIM}Manage at: https://one.dash.cloudflare.com/{RESET}")
+                else:
+                    print(f"  {YELLOW}⚠️  Failed to start. Check: docker logs cloudflared-tunnel{RESET}")
+                
+                input("\n  Press Enter to continue...")
+            
+            elif choice == '2':
+                # Stop
+                if not is_running:
+                    print(f"\n  {YELLOW}ℹ️  Tunnel is not running.{RESET}")
+                    input("\n  Press Enter to continue...")
+                    continue
+                
+                print(f"\n  {CYAN}Stopping Cloudflare tunnel...{RESET}")
+                subprocess.run(['docker', 'stop', 'cloudflared-tunnel'], capture_output=True)
+                subprocess.run(['docker', 'rm', 'cloudflared-tunnel'], capture_output=True)
+                
+                new_status, _ = get_container_status('cloudflared-tunnel')
+                if new_status != 'running':
+                    print(f"  {GREEN}✅ Tunnel stopped.{RESET}")
+                else:
+                    print(f"  {YELLOW}⚠️  Failed to stop. Try: docker stop cloudflared-tunnel{RESET}")
+                
+                input("\n  Press Enter to continue...")
+            
+            elif choice == '3':
+                # Set Token
+                print(f"\n  Current Token: {CYAN}{masked_token}{RESET}")
+                print()
+                print(f"  {DIM}Get your token from:{RESET}")
+                print(f"  {CYAN}https://one.dash.cloudflare.com/{RESET}")
+                print(f"  {DIM}Zero Trust → Networks → Tunnels → Your Tunnel → Configure{RESET}")
+                print()
+                
+                new_token = click.prompt(click.style("  New Token", fg="cyan"), default='').strip()
+                
+                if new_token:
+                    config['cloudflare_token'] = new_token
+                    save_config(config)
+                    print(f"  {GREEN}✅ Token saved!{RESET}")
+                    if is_running:
+                        print(f"  {DIM}Restart tunnel to apply changes{RESET}")
+                else:
+                    print(f"  {YELLOW}No change made{RESET}")
+                
+                input("\n  Press Enter to continue...")
+            
+            elif choice == '4':
+                # Setup Instructions
+                print(f"\n  {BOLD}How to set up a Cloudflare Tunnel:{RESET}")
+                print()
+                print(f"  1. Go to {CYAN}https://one.dash.cloudflare.com/{RESET}")
+                print(f"  2. Navigate to: Zero Trust → Networks → Tunnels")
+                print(f"  3. Click 'Create a tunnel'")
+                print(f"  4. Name your tunnel (e.g., 'itak-tunnel')")
+                print(f"  5. Choose 'Cloudflared' connector")
+                print(f"  6. Copy the tunnel token")
+                print(f"  7. Use option [3] here to save the token")
+                print(f"  8. Configure public hostname in Cloudflare dashboard")
+                print()
+                
+                input("  Press Enter to continue...")
+            
+            else:
+                print(f"  {YELLOW}Invalid choice{RESET}")
+                
+        except KeyboardInterrupt:
+            return
 
 
 def configure_vps():
@@ -652,11 +867,11 @@ def run_api_menu():
                 show_service_status()
                 click.pause("  Press any key to continue...")
             elif choice == 2:
-                install_cloudflare_temp()
-                click.pause("  Press any key to continue...")
+                cloudflare_temp_menu()
+                # No pause needed - submenu handles its own flow
             elif choice == 3:
-                install_cloudflare_permanent()
-                click.pause("  Press any key to continue...")
+                cloudflare_permanent_menu()
+                # No pause needed - submenu handles its own flow
             elif choice == 4:
                 configure_vps()
                 click.pause("  Press any key to continue...")
