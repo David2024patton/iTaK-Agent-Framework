@@ -51,6 +51,9 @@ BOLD = "\033[1m"
 DIM = "\033[2m"
 WHITE = "\033[97m"
 MAGENTA = "\033[95m"
+CYAN = "\033[36m"
+GREEN = "\033[32m"
+YELLOW = "\033[33m"
 
 class Theme:
     CYAN = "\033[36m"
