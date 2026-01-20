@@ -809,19 +809,19 @@ function installAgentBrowser() {
         console.log('  📦 Installing agent-browser globally...');
         execSync('npm install -g agent-browser', { stdio: 'inherit' });
 
-        // Install Chromium for agent-browser
+        // Install Chromium for agent-browser (use npx since PATH may not be updated yet)
         console.log('  📦 Downloading Chromium for agent-browser...');
         try {
-            execSync('agent-browser install', { stdio: 'inherit' });
+            execSync('npx agent-browser install', { stdio: 'inherit' });
         } catch {
-            console.log('  ⚠️  Chromium install failed (can run later: agent-browser install)');
+            console.log('  ⚠️  Chromium install failed (can run later: npx agent-browser install)');
         }
 
         // On Linux/WSL, install playwright deps
         if (PLATFORM === 'linux') {
             console.log('  📦 Installing Playwright dependencies for Linux...');
             try {
-                execSync('agent-browser install --with-deps', { stdio: 'inherit' });
+                execSync('npx agent-browser install --with-deps', { stdio: 'inherit' });
             } catch {
                 console.log('  ⚠️  Playwright deps install failed (may need sudo)');
             }
