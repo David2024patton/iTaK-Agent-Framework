@@ -50,7 +50,7 @@ def run_project_wizard(initial_prompt: str = None, project_type_idx: int = None)
     click.secho("  ╔══════════════════════════╗", fg="magenta")
     click.secho("  ║ ", fg="magenta", nl=False)
     click.secho("📁 Create New Project", fg="white", bold=True, nl=False)
-    click.secho("   ║", fg="magenta")
+    click.secho("     ║", fg="magenta")
     click.secho("  ╚══════════════════════════╝", fg="magenta")
     click.echo()
     
