@@ -201,10 +201,38 @@ async function downloadAndRunInstaller(url, filename, args = []) {
 // ============================================================================
 
 function checkWSL() {
-    // Use 'wsl -l -v' which works more reliably
-    const result = exec('wsl -l -v');
-    // If we get output with distro names, WSL is installed
-    return result && (result.includes('Running') || result.includes('Stopped') || result.includes('Ubuntu') || result.includes('docker-desktop'));
+    // Method 1: Check if wsl.exe exists and runs
+    try {
+        // Use --status which is more reliable than -l -v (avoids UTF-16 encoding issues)
+        const result = execSync('wsl --status 2>&1', { encoding: 'utf8', stdio: 'pipe', timeout: 5000 });
+        // If it returns anything without error, WSL is installed
+        if (result && !result.includes('not recognized')) {
+            return true;
+        }
+    } catch (e) {
+        // --status might fail even if WSL is installed (permission issues)
+    }
+
+    // Method 2: Check if wsl command exists at all
+    try {
+        execSync('where wsl', { encoding: 'utf8', stdio: 'pipe' });
+        return true; // If 'where wsl' succeeds, WSL is installed
+    } catch {
+        // wsl not found in PATH
+    }
+
+    // Method 3: Check PowerShell for WSL feature
+    try {
+        const result = execSync('powershell -Command "Get-WindowsOptionalFeature -Online -FeatureName Microsoft-Windows-Subsystem-Linux | Select-Object -ExpandProperty State"',
+            { encoding: 'utf8', stdio: 'pipe', timeout: 10000 });
+        if (result && result.includes('Enabled')) {
+            return true;
+        }
+    } catch {
+        // PowerShell check failed
+    }
+
+    return false;
 }
 
 function installWSL() {
