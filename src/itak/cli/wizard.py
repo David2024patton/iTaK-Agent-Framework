@@ -63,14 +63,21 @@ def run_project_wizard(initial_prompt: str = None, project_type_idx: int = None)
             # Simple heuristic to extract potential name
             # e.g. "Build a finance dashboard" -> "finance-dashboard"
             words = initial_prompt.lower().split()
-            ignored = {'build', 'create', 'make', 'a', 'an', 'new', 'with', 'using', 'for'}
+            ignored = {'build', 'create', 'make', 'a', 'an', 'new', 'with', 'using', 'for', 'project'}
             meaningful = [w for w in words if w not in ignored]
-            if meaningful:
+            
+            # Only auto-fill name if it looks like a short intent (<= 5 words total)
+            # If it's a long description, just default to general name
+            if meaningful and len(words) < 10:
                 default_name = "-".join(meaningful[:3])
-                
+            
             default_desc = initial_prompt
         
         # Project name
+        # If default name comes from a long prompt, reset it to safe default
+        if len(default_name) > 30: 
+            default_name = "my-project"
+            
         project_name = wizard_prompt("Project name", default_name)
     
         # Description (Skip if we already have it from initial_prompt)
