@@ -451,27 +451,47 @@ def toggle_frp_tunnel():
         print(f"\n  {YELLOW}⚠️  Docker is not running.{RESET}\n")
         return
     
-    config = load_config()
+    # Find the correct compose file
+    # Priority 1: Custom frpc.yml in ~/.itak/docker/
+    # Priority 2: Main api-gateway docker-compose.yml (with tunnel profile)
+    custom_compose = DOCKER_DIR / 'frpc.yml'
     
-    if not config.get('vps_ip'):
-        print(f"\n  {YELLOW}VPS not configured. Use option [4] first.{RESET}\n")
-        return
+    # Find main docker-compose.yml (relative to this package)
+    package_dir = Path(__file__).parent.parent.parent.parent  # Up to repo root
+    main_compose = package_dir / 'docker' / 'api-gateway' / 'docker-compose.yml'
     
-    compose_file = DOCKER_DIR / 'frpc.yml'
+    # Also check frpc.toml in same dir as main compose
+    main_frpc_config = main_compose.parent / 'frpc.toml'
     
-    if not compose_file.exists():
-        print(f"\n  {YELLOW}FRP config not found. Use option [4] to configure.{RESET}\n")
+    # Determine which compose to use
+    use_main_compose = False
+    compose_file = None
+    
+    if custom_compose.exists():
+        compose_file = custom_compose
+    elif main_compose.exists() and main_frpc_config.exists():
+        compose_file = main_compose
+        use_main_compose = True
+    else:
+        print(f"\n  {YELLOW}FRP not configured.{RESET}")
+        print(f"  Use option [4] to configure VPS connection first.\n")
         return
     
     status, _ = get_container_status('frpc')
     
     if status == 'running':
         print(f"\n  {CYAN}Stopping FRP tunnel...{RESET}")
-        subprocess.run(['docker', 'compose', '-f', str(compose_file), 'down'], check=True)
+        if use_main_compose:
+            subprocess.run(['docker', 'compose', '-f', str(compose_file), '-p', 'api-gateway', '--profile', 'tunnel', 'down', 'frpc'], capture_output=True)
+        else:
+            subprocess.run(['docker', 'compose', '-f', str(compose_file), 'down'], capture_output=True)
         print(f"  {GREEN}✅ FRP tunnel stopped.{RESET}\n")
     else:
         print(f"\n  {CYAN}Starting FRP tunnel...{RESET}")
-        subprocess.run(['docker', 'compose', '-f', str(compose_file), 'up', '-d'], check=True)
+        if use_main_compose:
+            result = subprocess.run(['docker', 'compose', '-f', str(compose_file), '-p', 'api-gateway', '--profile', 'tunnel', 'up', '-d', 'frpc'], capture_output=True)
+        else:
+            result = subprocess.run(['docker', 'compose', '-f', str(compose_file), 'up', '-d'], capture_output=True)
         
         import time
         time.sleep(2)
@@ -480,7 +500,8 @@ def toggle_frp_tunnel():
         
         if 'start proxy success' in logs.stdout or 'start proxy success' in logs.stderr:
             print(f"  {GREEN}✅ FRP tunnel connected!{RESET}")
-            vps = config.get('vps_ip')
+            config = load_config()
+            vps = config.get('vps_ip', 'your-vps-ip')
             print(f"\n  {BOLD}Your VPS endpoints:{RESET}")
             print(f"    • API:      http://{vps}:{PORTS['gateway']}")
             print(f"    • Ollama:   http://{vps}:{PORTS['ollama']}")
