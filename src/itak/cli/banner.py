@@ -332,63 +332,22 @@ def print_code_block(code: str, language: str = "python", filename: str = None):
 
 
 def animate_intro(theme_key: str = CURRENT_THEME):
-    """Animate the Dashed 3D logo: Arrow Blinks > Static > Types I-T-A-K."""
-    import time
-    import sys
-    
-    # Define Empty Block for blinking (Same size as Arrow)
-    D3D_EMPTY = [" " * len(line) for line in D3D_ARROW]
-    
-    # Build Frame Sequence
-    # 1. Blink Sequence (On, Off, On, Off)
-    # 2. Build Sequence (Arrow, Arrow+I, Arrow+I+T...)
-    
-    frames = []
-    # Blink 1
-    frames.append(([D3D_ARROW], 0.4)) # ON
-    frames.append(([D3D_EMPTY], 0.2)) # OFF
-    # Blink 2
-    frames.append(([D3D_ARROW], 0.4)) # ON
-    frames.append(([D3D_EMPTY], 0.2)) # OFF
-    # Blink 3
-    frames.append(([D3D_ARROW], 0.4)) # ON
-    frames.append(([D3D_EMPTY], 0.2)) # OFF
-    
-    # Typing Sequence
-    current_build = [D3D_ARROW]
-    frames.append((list(current_build), 0.5)) # Static Arrow start
-    
-    letters = [D3D_I, D3D_T, D3D_A, D3D_K]
-    for letter in letters:
-        current_build.append(letter)
-        frames.append((list(current_build), 0.3)) # Type letter
-    
+    """Display the static ITAK logo."""
     # Setup Colors
     if theme_key not in THEMES: theme_key = CURRENT_THEME
     start_hex, end_hex = THEMES[theme_key]
     
-    for i, (parts, duration) in enumerate(frames):
-        # Build current state
-        frame_logo = join_art(*parts)
-        
-        # Calculate colors for THIS frame width
-        max_width = max(len(line) for line in frame_logo)
-        # Handle empty blink case (width might be small/empty coloring?)
-        # Only start/end hex matter really.
-        colors = generate_gradient_colors(start_hex, end_hex, max_width if max_width > 0 else 1)
-        
-        # Move cursor up to overwrite previous frame (if not first)
-        if i > 0:
-            sys.stdout.write(f"\033[{len(frame_logo)+1}A") 
-            
-        # Render Frame
-        print()
-        for line in frame_logo:
-             # \033[K clears the line to the right to prevent artifacts from previous frames
-             print(f"{colorize_string_horizontally(line, colors)}\033[K")
-             
-        time.sleep(duration)
-        
+    # Build ITAK logo without arrow
+    logo = join_art(D3D_I, D3D_T, D3D_A, D3D_K)
+    
+    # Calculate colors for logo width
+    max_width = max(len(line) for line in logo)
+    colors = generate_gradient_colors(start_hex, end_hex, max_width if max_width > 0 else 1)
+    
+    # Render Logo
+    print()
+    for line in logo:
+        print(f"{colorize_string_horizontally(line, colors)}\\033[K")
     print()
 
 
