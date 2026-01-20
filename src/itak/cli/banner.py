@@ -236,14 +236,14 @@ def colorize_string_horizontally(line: str, colors: List[str]) -> str:
             result += f"{colors[-1]}{char}"
     return f"{BOLD}{result}{RESET}"
 
-def print_banner(style: str = "large", theme_key: str = None):
+def print_banner(style: str = "dash_3d", theme_key: str = None):
     """Print the iTaK banner with horizontal smooth gradient."""
     
     # Select Logo
     if style in LOGO_STYLES:
         logo = LOGO_STYLES[style]
     else:
-        logo = LOGO_STYLES["large"]
+        logo = LOGO_STYLES["dash_3d"]
 
     # Select Theme
     theme_key = theme_key or CURRENT_THEME
@@ -331,6 +331,9 @@ def animate_intro(theme_key: str = CURRENT_THEME):
     frames.append(([D3D_ARROW], 0.4)) # ON
     frames.append(([D3D_EMPTY], 0.2)) # OFF
     # Blink 2
+    frames.append(([D3D_ARROW], 0.4)) # ON
+    frames.append(([D3D_EMPTY], 0.2)) # OFF
+    # Blink 3
     frames.append(([D3D_ARROW], 0.4)) # ON
     frames.append(([D3D_EMPTY], 0.2)) # OFF
     
