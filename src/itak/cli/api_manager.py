@@ -210,14 +210,11 @@ def print_api_menu():
     print(f"\n  {BOLD}Options:{RESET}")
     print(f"    {GREEN}[1]{RESET} 📊 {WHITE}Show Service Status{RESET}")
     print()
-    print(f"    {GREEN}[2]{RESET} 🌐 {WHITE}Cloudflare Tunnel (Quick){RESET}")
-    print(f"        {DIM}Instant public URL, no account needed{RESET}")
+    print(f"    {GREEN}[2]{RESET} 🌐 {WHITE}Cloudflare Tunnels{RESET}")
+    print(f"        {DIM}Quick (temporary) or Permanent (custom domain){RESET}")
     print()
-    print(f"    {GREEN}[3]{RESET} 🔒 {WHITE}Cloudflare Tunnel (Permanent){RESET}")
-    print(f"        {DIM}Custom domain, requires Cloudflare account{RESET}")
-    print()
-    print(f"    {GREEN}[4]{RESET} 🚀 {WHITE}VPS / FRP Tunnel{RESET}")
-    print(f"        {DIM}Connect to your own VPS via FRP tunnel{RESET}")
+    print(f"    {GREEN}[3]{RESET} 🚀 {WHITE}VPS / FRP Tunnel{RESET}")
+    print(f"        {DIM}Connect to your own VPS{RESET}")
     print()
     print(f"    {GREEN}[0]{RESET} ↩️  {WHITE}Back to Main Menu{RESET}")
     print()
@@ -292,6 +289,106 @@ def show_service_status():
             print(f"  {DIM}⬜{RESET} {name}: {DIM}Not installed{RESET}")
     
     print()
+
+
+def cloudflare_menu():
+    """Combined Cloudflare Tunnel submenu with Quick and Permanent options."""
+    import click
+    
+    if not check_docker():
+        print(f"\n  {YELLOW}⚠️  Docker is not running.{RESET}\n")
+        return
+    
+    while True:
+        # Get current status
+        status, _ = get_container_status('cloudflared-tunnel')
+        is_running = status == 'running'
+        
+        # Check tunnel type
+        config = load_config()
+        has_permanent_token = bool(config.get('cloudflare_token', ''))
+        
+        # Try to detect if it's Quick or Permanent
+        tunnel_type = "Unknown"
+        current_url = None
+        if is_running:
+            try:
+                logs = subprocess.run(['docker', 'logs', 'cloudflared-tunnel', '--tail', '50'],
+                    capture_output=True, text=True)
+                for line in logs.stdout.split('\n') + logs.stderr.split('\n'):
+                    if 'trycloudflare.com' in line.lower():
+                        tunnel_type = "Quick (Temporary)"
+                        import re
+                        match = re.search(r'https://[^\s]+\.trycloudflare\.com', line)
+                        if match:
+                            current_url = match.group(0)
+                        break
+                else:
+                    tunnel_type = "Permanent"
+            except:
+                pass
+        
+        # Show submenu
+        print(f"\n  {BOLD}🌐 Cloudflare Tunnels{RESET}")
+        print(f"  {CYAN}https://one.dash.cloudflare.com/{RESET}")
+        print()
+        
+        # Show status
+        if is_running:
+            print(f"  Status: {GREEN}● Running ({tunnel_type}){RESET}")
+            if current_url:
+                print(f"  URL: {CYAN}{current_url}{RESET}")
+        else:
+            print(f"  Status: {DIM}○ Stopped{RESET}")
+        
+        print()
+        print(f"  {GREEN}[1]{RESET} 🌐 Quick Tunnel")
+        print(f"      {DIM}Instant URL, no account needed{RESET}")
+        print(f"      {YELLOW}⚠️  URL changes on restart{RESET}")
+        print()
+        print(f"  {GREEN}[2]{RESET} 🔒 Permanent Tunnel")
+        print(f"      {DIM}Custom domain, requires CF account{RESET}")
+        print(f"      {GREEN}✓ Persistent URL{RESET}")
+        print()
+        if is_running:
+            print(f"  {GREEN}[3]{RESET} ⏹️  Stop Current Tunnel")
+            print()
+        print(f"  {GREEN}[0]{RESET} ↩️  Back")
+        print()
+        
+        try:
+            choice = click.prompt(click.style("  Choice", fg="cyan"), default="0").strip()
+            
+            if choice == '0' or choice == '':
+                return
+            
+            elif choice == '1':
+                # Quick Tunnel submenu
+                cloudflare_temp_menu()
+            
+            elif choice == '2':
+                # Permanent Tunnel submenu
+                cloudflare_permanent_menu()
+            
+            elif choice == '3' and is_running:
+                # Stop current tunnel
+                print(f"\n  {CYAN}Stopping Cloudflare tunnel...{RESET}")
+                subprocess.run(['docker', 'stop', 'cloudflared-tunnel'], capture_output=True)
+                subprocess.run(['docker', 'rm', 'cloudflared-tunnel'], capture_output=True)
+                
+                new_status, _ = get_container_status('cloudflared-tunnel')
+                if new_status != 'running':
+                    print(f"  {GREEN}✅ Tunnel stopped.{RESET}")
+                else:
+                    print(f"  {YELLOW}⚠️  Failed to stop.{RESET}")
+                
+                input("\n  Press Enter to continue...")
+            
+            else:
+                print(f"  {YELLOW}Invalid choice{RESET}")
+                
+        except KeyboardInterrupt:
+            return
 
 
 def cloudflare_temp_menu():
@@ -895,16 +992,13 @@ def run_api_menu():
                 show_service_status()
                 click.pause("  Press any key to continue...")
             elif choice == 2:
-                cloudflare_temp_menu()
+                cloudflare_menu()
                 # No pause needed - submenu handles its own flow
             elif choice == 3:
-                cloudflare_permanent_menu()
-                # No pause needed - submenu handles its own flow
-            elif choice == 4:
                 frp_tunnel_menu()
                 # No pause needed - submenu handles its own flow
             else:
-                print(f"  {YELLOW}Invalid choice. Please enter 0-4.{RESET}")
+                print(f"  {YELLOW}Invalid choice. Please enter 0-3.{RESET}")
                 
         except click.Abort:
             return
