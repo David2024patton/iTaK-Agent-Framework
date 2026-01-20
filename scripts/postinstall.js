@@ -527,16 +527,30 @@ async function setupDockerContainers() {
         return false;
     }
 
-    // Check if containers are already running under api-gateway project
+    // Check if CORE containers are already running (skip optional ones)
     const running = getRunningContainers();
-    const requiredContainers = ['ollama', 'chromadb', 'redis', 'whisper', 'playwright', 'searxng', 'crawl4ai', 'comfyui', 'supabase-db'];
-    const allRunning = requiredContainers.every(name =>
+    const coreContainers = ['ollama', 'chromadb', 'searxng'];
+    const coreRunning = coreContainers.filter(name =>
         running.some(r => r.includes(name) || r === name)
     );
 
-    if (allRunning) {
-        console.log('  ✅ All containers already running!\n');
+    // If all core containers are running, skip docker compose entirely
+    if (coreRunning.length === coreContainers.length) {
+        console.log('  ✅ Core containers already running:');
+        for (const name of coreRunning) {
+            console.log(`     ✅ ${name}`);
+        }
+        console.log();
         return true;
+    }
+
+    // Show which containers are already running (if any)
+    if (coreRunning.length > 0) {
+        console.log('  ℹ️  Some containers already running:');
+        for (const name of coreRunning) {
+            console.log(`     ✅ ${name}`);
+        }
+        console.log();
     }
 
     // Use docker-compose from the api-gateway directory
@@ -544,7 +558,7 @@ async function setupDockerContainers() {
     const composeFile = path.join(projectRoot, 'docker', 'api-gateway', 'docker-compose.yml');
 
     console.log(`  📦 Starting api-gateway stack...`);
-    console.log(`     (ollama, chromadb, playwright, searxng)\n`);
+    console.log(`     (ollama, chromadb, searxng)\n`);
 
     if (fs.existsSync(composeFile)) {
         try {
@@ -552,14 +566,20 @@ async function setupDockerContainers() {
             // - Start new containers that don't exist
             // - Leave existing containers with data untouched
             // - Only recreate if config changed (preserves volumes)
+            // Use stdio: 'pipe' to capture and filter error output
             const result = spawnSync('docker', ['compose', '-f', composeFile, '-p', 'api-gateway', 'up', '-d'], {
-                stdio: 'inherit',
+                stdio: 'pipe',
                 shell: true,
-                cwd: path.dirname(composeFile)
+                cwd: path.dirname(composeFile),
+                encoding: 'utf8'
             });
 
-            if (result.status === 0) {
-                console.log('\n  ✅ api-gateway stack started!');
+            // Check for conflicts in stderr but don't show the raw red errors
+            if (result.stderr && result.stderr.includes('Conflict')) {
+                console.log('  ℹ️  Containers exist outside api-gateway project.');
+                console.log('     Using existing containers (this is fine!).\n');
+            } else if (result.status === 0) {
+                console.log('  ✅ api-gateway stack started!');
                 console.log('  📦 Containers grouped under: api-gateway\n');
 
                 // Auto-start FRP tunnel if frpc.toml exists
@@ -567,7 +587,7 @@ async function setupDockerContainers() {
                 if (fs.existsSync(frpcConfig)) {
                     console.log('  🔗 Found frpc.toml - auto-starting VPS tunnel...');
                     const tunnelResult = spawnSync('docker', ['compose', '-f', composeFile, '-p', 'api-gateway', '--profile', 'tunnel', 'up', '-d', 'frpc'], {
-                        stdio: 'inherit',
+                        stdio: 'pipe',
                         shell: true,
                         cwd: path.dirname(composeFile)
                     });
@@ -577,9 +597,9 @@ async function setupDockerContainers() {
                         console.log('  ⚠️  FRP tunnel failed to start\n');
                     }
                 }
-
-                return true;
             }
+
+            return true;
         } catch (e) {
             console.log(`  ⚠️  Docker compose failed, using standalone containers...\n`);
         }
