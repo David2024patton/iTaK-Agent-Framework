@@ -34,6 +34,28 @@ PORTS = {
     'frp_control': 7000,
 }
 
+
+class ExitCLI(Exception):
+    """Raised when user wants to exit the entire CLI."""
+    pass
+
+
+def is_exit_command(text: str) -> bool:
+    """Check if the input is an exit command."""
+    if text is None:
+        return False
+    cmd = text.strip().lower()
+    return cmd in ['exit', '/exit', '/quit', '/q', 'quit', 'q']
+
+
+def prompt_with_exit(prompt_text: str, default: str = "0") -> str:
+    """Prompt user for input, raising ExitCLI if exit command entered."""
+    import click
+    result = click.prompt(click.style(prompt_text, fg="cyan"), default=default).strip()
+    if is_exit_command(result):
+        raise ExitCLI()
+    return result
+
 # FRP Client Configuration Template
 FRP_CLIENT_CONFIG = '''# FRP Client Configuration
 # Connects your local services to your VPS
@@ -308,6 +330,10 @@ def show_service_status():
         try:
             choice = click.prompt(click.style("  Choice", fg="cyan"), default="0").strip()
             
+            if is_exit_command(choice):
+                print(f"\n{YELLOW}Goodbye!{RESET}\n")
+                sys.exit(0)
+            
             if choice == '0' or choice == '':
                 return
             
@@ -410,6 +436,10 @@ def cloudflare_menu():
         try:
             choice = click.prompt(click.style("  Choice", fg="cyan"), default="0").strip()
             
+            if is_exit_command(choice):
+                print(f"\n{YELLOW}Goodbye!{RESET}\n")
+                sys.exit(0)
+            
             if choice == '0' or choice == '':
                 return
             
@@ -504,6 +534,10 @@ def cloudflare_temp_menu():
         
         try:
             choice = click.prompt(click.style("  Choice", fg="cyan"), default="0").strip()
+            
+            if is_exit_command(choice):
+                print(f"\n{YELLOW}Goodbye!{RESET}\n")
+                sys.exit(0)
             
             if choice == '0' or choice == '':
                 return
@@ -650,6 +684,10 @@ def cloudflare_permanent_menu():
         
         try:
             choice = click.prompt(click.style("  Choice", fg="cyan"), default="0").strip()
+            
+            if is_exit_command(choice):
+                print(f"\n{YELLOW}Goodbye!{RESET}\n")
+                sys.exit(0)
             
             if choice == '0' or choice == '':
                 return
@@ -880,6 +918,10 @@ def frp_tunnel_menu():
         try:
             choice = click.prompt(click.style("  Choice", fg="cyan"), default="0").strip()
             
+            if is_exit_command(choice):
+                print(f"\n{YELLOW}Goodbye!{RESET}\n")
+                sys.exit(0)
+            
             if choice == '0' or choice == '':
                 return
             
@@ -1034,11 +1076,18 @@ def run_api_menu():
         print_api_menu()
         
         try:
-            choice = click.prompt(
-                click.style("  Choice", fg="cyan"),
-                type=int,
-                default=0
-            )
+            raw = click.prompt(click.style("  Choice", fg="cyan"), default="0").strip()
+            
+            # Check for exit command
+            if is_exit_command(raw):
+                print(f"\n{YELLOW}Goodbye!{RESET}\n")
+                sys.exit(0)
+            
+            try:
+                choice = int(raw)
+            except ValueError:
+                print(f"  {YELLOW}Invalid choice. Please enter 0-4.{RESET}")
+                continue
             
             if choice == 0:
                 return  # Back to main menu
@@ -1067,6 +1116,9 @@ def run_api_menu():
                 
         except click.Abort:
             return
+        except ExitCLI:
+            print(f"\n{YELLOW}Goodbye!{RESET}\n")
+            sys.exit(0)
         except Exception as e:
             print(f"  {YELLOW}Error: {e}{RESET}")
 
