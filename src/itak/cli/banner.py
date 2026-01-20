@@ -315,43 +315,51 @@ def print_code_block(code: str, language: str = "python", filename: str = None):
 
 
 def animate_intro(theme_key: str = CURRENT_THEME):
-    """Animate the Dashed 3D logo: Static > then types I-T-A-K."""
+    """Animate the Dashed 3D logo: Arrow Blinks > Static > Types I-T-A-K."""
     import time
     import sys
     
-    parts = [D3D_ARROW, D3D_I, D3D_T, D3D_A, D3D_K]
-    current_blocks = [D3D_ARROW] # Start with just >
+    # Define Empty Block for blinking (Same size as Arrow)
+    D3D_EMPTY = [" " * len(line) for line in D3D_ARROW]
+    
+    # Build Frame Sequence
+    # 1. Blink Sequence (On, Off, On, Off)
+    # 2. Build Sequence (Arrow, Arrow+I, Arrow+I+T...)
+    
+    frames = []
+    # Blink 1
+    frames.append(([D3D_ARROW], 0.4)) # ON
+    frames.append(([D3D_EMPTY], 0.2)) # OFF
+    # Blink 2
+    frames.append(([D3D_ARROW], 0.4)) # ON
+    frames.append(([D3D_EMPTY], 0.2)) # OFF
+    
+    # Typing Sequence
+    current_build = [D3D_ARROW]
+    frames.append((list(current_build), 0.5)) # Static Arrow start
+    
+    letters = [D3D_I, D3D_T, D3D_A, D3D_K]
+    for letter in letters:
+        current_build.append(letter)
+        frames.append((list(current_build), 0.3)) # Type letter
     
     # Setup Colors
     if theme_key not in THEMES: theme_key = CURRENT_THEME
     start_hex, end_hex = THEMES[theme_key]
     
-    # 1. Show Static Arrow first
-    # 2. Type letters one by one
-    
-    # Total Frames: 1 (Arrow) + 4 (Letters)
-    
     print(f"\n{BOLD}🎨 iTaK Animation Sequence 🎨{RESET}\n")
     
-    # Clear screen helper logic could go here, but we'll specificially just print frames 
-    # separated by newlines for the gallery demo, or use carriage return for in-place.
-    # For a CLI banner, usually we just want the final result, but as a demo we will
-    # use carriage returns to animate in place if possible, or just sequential prints.
-    
-    # Let's do a proper in-place animation using ANSI cursor controls
-    # Save cursor position? Simple version: Print, sleep, clear lines.
-    
-    for i in range(len(parts)):
+    for i, (parts, duration) in enumerate(frames):
         # Build current state
-        frame_logo = join_art(*parts[:i+1])
+        frame_logo = join_art(*parts)
         
         # Calculate colors for THIS frame width
-        # (This makes the gradient shift as it types, which looks cool)
         max_width = max(len(line) for line in frame_logo)
-        colors = generate_gradient_colors(start_hex, end_hex, max_width)
+        # Handle empty blink case (width might be small/empty coloring?)
+        # Only start/end hex matter really.
+        colors = generate_gradient_colors(start_hex, end_hex, max_width if max_width > 0 else 1)
         
-        # Move cursor up 7 lines (height + padding) to overwrite previous frame
-        # Only if not the first frame
+        # Move cursor up to overwrite previous frame (if not first)
         if i > 0:
             sys.stdout.write(f"\033[{len(frame_logo)+1}A") 
             
@@ -360,7 +368,7 @@ def animate_intro(theme_key: str = CURRENT_THEME):
         for line in frame_logo:
              print(colorize_string_horizontally(line, colors))
              
-        time.sleep(0.4) # Typing speed
+        time.sleep(duration)
         
     print()
 
