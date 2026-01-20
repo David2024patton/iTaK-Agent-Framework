@@ -6,10 +6,33 @@ Interactive CLI wizard for creating new projects.
 
 import os
 import subprocess
+import sys
 from pathlib import Path
 from typing import Optional
 
 import click
+
+
+class BackToMenu(Exception):
+    """Raised when user wants to go back to main menu."""
+    pass
+
+
+def is_back_command(text: str) -> bool:
+    """Check if input is a back/exit command."""
+    if text is None:
+        return False
+    cmd = text.strip().lower()
+    return cmd in ['back', '/back', '0', 'exit', '/exit', 'quit', '/quit', 'q', '/q']
+
+
+def wizard_prompt(label: str, default: str = "") -> str:
+    """Prompt that checks for back/exit commands."""
+    click.echo(f"  {click.style('(type 0 or back to cancel)', fg='bright_black')}")
+    result = click.prompt(click.style(f"  {label}", fg="cyan"), type=str, default=default)
+    if is_back_command(result):
+        raise BackToMenu()
+    return result
 
 
 PROJECT_TYPES = [
@@ -30,115 +53,111 @@ def run_project_wizard(initial_prompt: str = None, project_type_idx: int = None)
     click.secho(" ║", fg="magenta")
     click.secho("  ╚════════════════════════╝", fg="magenta")
     click.echo()
-    click.echo()
     
-    # Infer defaults from initial prompt
-    default_name = "my-project"
-    default_desc = "A new iTaK project"
-    
-    if initial_prompt:
-        # Simple heuristic to extract potential name
-        # e.g. "Build a finance dashboard" -> "finance-dashboard"
-        words = initial_prompt.lower().split()
-        ignored = {'build', 'create', 'make', 'a', 'an', 'new', 'with', 'using', 'for'}
-        meaningful = [w for w in words if w not in ignored]
-        if meaningful:
-            default_name = "-".join(meaningful[:3])
-            
-        default_desc = initial_prompt
-    
-    # Project name
-    project_name = click.prompt(
-        click.style("  Project name", fg="cyan"),
-        type=str,
-        default=default_name
-    )
-    
-    # Description (Skip if we already have it from initial_prompt)
-    if initial_prompt:
-        description = initial_prompt
-    else:
-        description = click.prompt(
-            click.style("  Description", fg="cyan"),
-            type=str,
-            default=default_desc
-        )
-    
-    click.echo()
-    
-    # Project type
-    if project_type_idx is None:
-        click.secho("  What type of project?", fg="white", bold=True)
-        click.echo()
-        for i, (name, _, desc) in enumerate(PROJECT_TYPES, 1):
-            click.secho(f"    [{i}] ", fg="green", nl=False)
-            click.secho(name, fg="white", nl=False)
-            click.secho(f" - {desc}", fg="bright_black")
-        click.echo()
+    try:
+        # Infer defaults from initial prompt
+        default_name = "my-project"
+        default_desc = "A new iTaK project"
         
-        while True:
-            type_choice = click.prompt(
-                click.style("  Choice", fg="cyan"),
-                type=int,
-                default=1
-            )
-            if 1 <= type_choice <= len(PROJECT_TYPES):
-                break
-            click.secho("  Please enter a valid number", fg="yellow")
-        
-        project_type = PROJECT_TYPES[type_choice - 1]
-    else:
-        # Use pre-selected type (adjusted for 0-index if passing from menu that might use 1-index)
-        # But wait, let's assume valid PROJECT_TYPES index + 1 is passed or just index
-        project_type = PROJECT_TYPES[project_type_idx - 1]
-        click.secho(f"  Selected: {project_type[0]}", fg="green")
-    
-    # Custom description if needed
-    custom_prompt = None
-    if project_type[1] == "custom":
         if initial_prompt:
-            custom_prompt = initial_prompt
+            # Simple heuristic to extract potential name
+            # e.g. "Build a finance dashboard" -> "finance-dashboard"
+            words = initial_prompt.lower().split()
+            ignored = {'build', 'create', 'make', 'a', 'an', 'new', 'with', 'using', 'for'}
+            meaningful = [w for w in words if w not in ignored]
+            if meaningful:
+                default_name = "-".join(meaningful[:3])
+                
+            default_desc = initial_prompt
+        
+        # Project name
+        project_name = wizard_prompt("Project name", default_name)
+    
+        # Description (Skip if we already have it from initial_prompt)
+        if initial_prompt:
+            description = initial_prompt
         else:
-            custom_prompt = click.prompt(
-                click.style("  Describe what you want to build", fg="cyan"),
-                type=str
-            )
+            description = wizard_prompt("Description", default_desc)
+        
+        click.echo()
+        
+        # Project type
+        if project_type_idx is None:
+            click.secho("  What type of project?", fg="white", bold=True)
+            click.secho("  (type 0 or back to cancel)", fg="bright_black")
+            click.echo()
+            for i, (name, _, desc) in enumerate(PROJECT_TYPES, 1):
+                click.secho(f"    [{i}] ", fg="green", nl=False)
+                click.secho(name, fg="white", nl=False)
+                click.secho(f" - {desc}", fg="bright_black")
+            click.echo()
+            
+            while True:
+                type_input = click.prompt(
+                    click.style("  Choice", fg="cyan"),
+                    type=str,
+                    default="1"
+                )
+                if is_back_command(type_input):
+                    raise BackToMenu()
+                try:
+                    type_choice = int(type_input)
+                    if 1 <= type_choice <= len(PROJECT_TYPES):
+                        break
+                except ValueError:
+                    pass
+                click.secho("  Please enter a valid number", fg="yellow")
+            
+            project_type = PROJECT_TYPES[type_choice - 1]
+        else:
+            # Use pre-selected type (adjusted for 0-index if passing from menu that might use 1-index)
+            # But wait, let's assume valid PROJECT_TYPES index + 1 is passed or just index
+            project_type = PROJECT_TYPES[project_type_idx - 1]
+            click.secho(f"  Selected: {project_type[0]}", fg="green")
+        
+        # Custom description if needed
+        custom_prompt = None
+        if project_type[1] == "custom":
+            if initial_prompt:
+                custom_prompt = initial_prompt
+            else:
+                custom_prompt = wizard_prompt("Describe what you want to build", "")
+        
+        click.echo()
+        
+        # Output directory
+        default_dir = f"./{project_name}"
+        output_dir = wizard_prompt("Output directory", default_dir)
+        
+        # Confirm
+        click.echo()
+        click.secho("  ─" * 30, fg="bright_black")
+        click.echo()
+        click.secho("  📋 Project Summary:", fg="white", bold=True)
+        click.echo(f"      Name: {project_name}")
+        click.echo(f"      Type: {project_type[0]}")
+        click.echo(f"      Description: {description}")
+        click.echo(f"      Output: {output_dir}")
+        click.echo()
+        
+        if not click.confirm(click.style("  Start building?", fg="cyan"), default=True):
+            click.secho("  Cancelled.", fg="yellow")
+            return
+        
+        click.echo()
+        
+        # Build the prompt
+        if custom_prompt:
+            full_prompt = custom_prompt
+        else:
+            full_prompt = build_prompt(project_name, description, project_type)
+        
+        # Run iTaK auto
+        start_build(full_prompt, output_dir)
     
-    click.echo()
-    
-    # Output directory
-    default_dir = f"./{project_name}"
-    output_dir = click.prompt(
-        click.style("  Output directory", fg="cyan"),
-        type=str,
-        default=default_dir
-    )
-    
-    # Confirm
-    click.echo()
-    click.secho("  ─" * 30, fg="bright_black")
-    click.echo()
-    click.secho("  📋 Project Summary:", fg="white", bold=True)
-    click.echo(f"      Name: {project_name}")
-    click.echo(f"      Type: {project_type[0]}")
-    click.echo(f"      Description: {description}")
-    click.echo(f"      Output: {output_dir}")
-    click.echo()
-    
-    if not click.confirm(click.style("  Start building?", fg="cyan"), default=True):
-        click.secho("  Cancelled.", fg="yellow")
+    except BackToMenu:
+        click.secho("\n  Cancelled. Returning to menu...\n", fg="yellow")
         return
-    
-    click.echo()
-    
-    # Build the prompt
-    if custom_prompt:
-        full_prompt = custom_prompt
-    else:
-        full_prompt = build_prompt(project_name, description, project_type)
-    
-    # Run iTaK auto
-    start_build(full_prompt, output_dir)
 
 
 def build_prompt(name: str, description: str, project_type: tuple) -> str:
