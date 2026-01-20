@@ -64,6 +64,28 @@ ITAK_LOGO_LARGE = [
     "╚═╝   ╚═╝   ╚═╝  ╚═╝╚═╝  ╚═╝",
 ]
 
+ITAK_LOGO_CYBER = [
+    "  ▄▄▄  ▄▄▄▄▄▄▄ ▄▄▄▄▄▄   ▄▄▄   ▄▄",
+    "  ███  ▀▀▀███▀ ▀▀████▄  ███  ▄██",
+    "  ███     ███    █████▄ ███ ▄██▀",
+    "  ███     ███    ██████▄███▄██▀ ",
+    "  ███     ███    ███▀████████▀  ",
+    "  ███     ███    ███  ▀█████▀   ",
+    "  ███     ███    ███   ▀███▀    ",
+]
+
+ITAK_LOGO_MODERN = [
+    "   │  ┌┬┐  ┌─┐  ┬┌─",
+    "   │   │   ├─┤  ├┴┐",
+    "   │   ┴   ┴ ┴  ┴ ┴",
+]
+
+ITAK_LOGO_PIXEL = [
+    " █▀▀ ▀█▀ █▀█ █ █ ",
+    " █ █  █  █▀█ █▀▄ ",
+    " ▀▀▀  ▀  ▀ ▀ ▀ ▀ ",
+]
+
 ITAK_LOGO_BLOCK = [
     "██ ████████  ███████  ██   ██",
     "██    ██    ██    ██  ██  ██ ",
@@ -76,6 +98,16 @@ ITAK_LOGO = [
     "▀█▀ ▀█▀ █▀█ █▄▀",
     " █   █  █▀█ █ █",
 ]
+
+# Map styles to variables
+LOGO_STYLES = {
+    "large": ITAK_LOGO_LARGE,
+    "cyber": ITAK_LOGO_CYBER,
+    "modern": ITAK_LOGO_MODERN,
+    "pixel": ITAK_LOGO_PIXEL,
+    "block": ITAK_LOGO_BLOCK,
+    "small": ITAK_LOGO
+}
 
 
 # --- RGB LOGIC ---
@@ -122,12 +154,10 @@ def print_banner(style: str = "large", theme_key: str = None):
     """Print the iTaK banner with horizontal smooth gradient."""
     
     # Select Logo
-    if style == "block":
-        logo = ITAK_LOGO_BLOCK
-    elif style == "small":
-        logo = ITAK_LOGO
+    if style in LOGO_STYLES:
+        logo = LOGO_STYLES[style]
     else:
-        logo = ITAK_LOGO_LARGE
+        logo = LOGO_STYLES["large"]
 
     # Select Theme
     theme_key = theme_key or CURRENT_THEME
@@ -198,12 +228,14 @@ def print_code_block(code: str, language: str = "python", filename: str = None):
     print(f"  {DIM}└{'─' * 60}┘{RESET}")
 
 
-# --- MAIN (GALLERY) ---
+# --- MAIN (GALLERY)# Test the banner
 if __name__ == "__main__":
-    print(f"\n{BOLD}🎨 iTaK TrueColor Gradient Gallery 🎨{RESET}\n")
+    print(f"\n{BOLD}🎨 iTaK Logo Style Gallery 🎨{RESET}\n")
+    print(f"{DIM}Theme: {CURRENT_THEME}{RESET}\n")
     
-    for name in THEMES:
-        print(f"\n{WHITE}--- {name} ---{RESET}")
-        print_banner("large", theme_key=name)
-        
-    print(f"\n{DIM}To change the default, edit 'CURRENT_THEME' in src/itak/cli/banner.py{RESET}\n")
+    # Show all defined logo styles
+    for style_name in LOGO_STYLES.keys():
+        print(f"\n{WHITE}--- Style: {style_name.upper()} ---{RESET}")
+        print_banner(style=style_name, theme_key=CURRENT_THEME) # Use current default theme
+    
+    print(f"\n{DIM}To change the default style, update the 'style' argument in cli.py{RESET}\n")
