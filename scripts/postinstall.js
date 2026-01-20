@@ -817,13 +817,13 @@ function installPythonPackage() {
                     return true;
                 } catch {
                     console.log('  ⚠️  Still failed - please close all terminals running itak');
-                    console.log('  Then run: pip install -e .');
+                    console.log('  Then run: npm install');
                     return false;
                 }
             } catch {
                 // taskkill failed - no itak.exe running or permission denied
                 console.log('  ⚠️  Could not close iTaK - please close all terminals manually');
-                console.log('  Then run: pip install -e .');
+                console.log('  Then run: npm install');
                 return false;
             }
         }
