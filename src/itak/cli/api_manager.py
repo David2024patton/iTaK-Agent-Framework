@@ -492,9 +492,20 @@ def frp_tunnel_menu():
         if not configured:
             print(f"  {YELLOW}⚠️  Not configured - use option [4] first{RESET}")
         
+        # Show current config
+        config = load_config()
+        current_ip = config.get('vps_ip', 'Not set')
+        current_token = config.get('frp_token', 'Not set')
+        if current_token != 'Not set':
+            current_token = current_token[:8] + '...' if len(current_token) > 8 else current_token
+        
         print()
         print(f"  {GREEN}[1]{RESET} ▶️  Start Tunnel")
         print(f"  {GREEN}[2]{RESET} ⏹️  Stop Tunnel")
+        print()
+        print(f"  {GREEN}[3]{RESET} 🌐 Change VPS IP     {DIM}({current_ip}){RESET}")
+        print(f"  {GREEN}[4]{RESET} 🔑 Change FRP Token  {DIM}({current_token}){RESET}")
+        print()
         print(f"  {GREEN}[0]{RESET} ↩️  Back")
         print()
         
@@ -560,6 +571,57 @@ def frp_tunnel_menu():
                     print(f"  {GREEN}✅ FRP tunnel stopped.{RESET}")
                 else:
                     print(f"  {YELLOW}⚠️  Failed to stop. Try: docker stop frpc{RESET}")
+                
+                input("\n  Press Enter to continue...")
+            
+            elif choice == '3':
+                # Change VPS IP
+                config = load_config()
+                current = config.get('vps_ip', '')
+                print(f"\n  Current VPS IP: {CYAN}{current or 'Not set'}{RESET}")
+                new_ip = click.prompt(click.style("  New VPS IP", fg="cyan"), default=current or '').strip()
+                
+                if new_ip:
+                    config['vps_ip'] = new_ip
+                    save_config(config)
+                    print(f"  {GREEN}✅ VPS IP updated to: {new_ip}{RESET}")
+                    
+                    # Update frpc.toml if it exists
+                    main_frpc = package_dir / 'docker' / 'api-gateway' / 'frpc.toml'
+                    if main_frpc.exists():
+                        print(f"  {DIM}Note: Restart tunnel to apply changes{RESET}")
+                else:
+                    print(f"  {YELLOW}No change made{RESET}")
+                
+                input("\n  Press Enter to continue...")
+            
+            elif choice == '4':
+                # Change FRP Token
+                config = load_config()
+                current = config.get('frp_token', '')
+                masked = current[:8] + '...' if current and len(current) > 8 else (current or 'Not set')
+                print(f"\n  Current FRP Token: {CYAN}{masked}{RESET}")
+                new_token = click.prompt(click.style("  New FRP Token", fg="cyan"), default='').strip()
+                
+                if new_token:
+                    config['frp_token'] = new_token
+                    save_config(config)
+                    print(f"  {GREEN}✅ FRP Token updated{RESET}")
+                    
+                    # Update frpc.toml with new token
+                    main_frpc = package_dir / 'docker' / 'api-gateway' / 'frpc.toml'
+                    if main_frpc.exists():
+                        try:
+                            content = main_frpc.read_text()
+                            import re
+                            content = re.sub(r'auth\.token\s*=\s*"[^"]*"', f'auth.token = "{new_token}"', content)
+                            main_frpc.write_text(content)
+                            print(f"  {GREEN}✅ frpc.toml updated{RESET}")
+                            print(f"  {DIM}Restart tunnel to apply changes{RESET}")
+                        except Exception as e:
+                            print(f"  {YELLOW}⚠️  Could not update frpc.toml: {e}{RESET}")
+                else:
+                    print(f"  {YELLOW}No change made{RESET}")
                 
                 input("\n  Press Enter to continue...")
             
