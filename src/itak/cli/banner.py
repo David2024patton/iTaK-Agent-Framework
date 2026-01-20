@@ -84,12 +84,19 @@ def animate_logo(logo: List[str], duration: float = 1.0):
             sys.stdout.flush()
             time.sleep(0.1)
             
+        # Final reset: Ensure we end with the static gradient (Yellow top, Orange bottom)
+        sys.stdout.write(f"\033[{height}A")
+        for line_idx, line in enumerate(logo):
+            colored_line = colorize_line(line, line_idx) # No offset
+            sys.stdout.write(f"{colored_line}\n")
+        sys.stdout.flush()
+            
     finally:
         # Show cursor again
         sys.stdout.write("\033[?25h")
 
 
-def print_banner(style: str = "large", animate: bool = True, duration: float = 3.0):
+def print_banner(style: str = "large", animate: bool = True, duration: float = 1.0):
     """Print the iTaK banner with gradient colors."""
     import sys
     
