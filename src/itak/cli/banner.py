@@ -7,15 +7,44 @@ Displays the iTaK logo with gradient colors on startup.
 from typing import List, Tuple
 
 # Color codes for gradient effect (5 steps: Yellow → Orange fade)
-# Color codes for gradient effect (Neon Cyberpunk: Cyan -> Purple -> Pink)
-GRADIENT_COLORS = [
-    "\033[38;5;51m",   # Neon Cyan
-    "\033[38;5;45m",   # Light Blue
-    "\033[38;5;39m",   # Deep Sky Blue
-    "\033[38;5;99m",   # Slate Blue
-    "\033[38;5;129m",  # Purple
-    "\033[38;5;201m",  # Magenta/Pink
-]
+
+# 10 Different Color Themes for the User to choose from
+THEMES = {
+    "1. Original Gold": [
+        "\033[38;5;226m", "\033[38;5;220m", "\033[38;5;214m", "\033[38;5;208m", "\033[38;5;202m"
+    ],
+    "2. Neon Cyberpunk": [
+        "\033[38;5;51m", "\033[38;5;45m", "\033[38;5;39m", "\033[38;5;99m", "\033[38;5;129m", "\033[38;5;201m"
+    ],
+    "3. Matrix Green": [
+        "\033[38;5;46m", "\033[38;5;40m", "\033[38;5;34m", "\033[38;5;28m", "\033[38;5;22m"
+    ],
+    "4. Inferno (Fire)": [
+        "\033[38;5;196m", "\033[38;5;202m", "\033[38;5;208m", "\033[38;5;214m", "\033[38;5;226m"
+    ],
+    "5. Deep Ocean": [
+        "\033[38;5;27m", "\033[38;5;33m", "\033[38;5;39m", "\033[38;5;45m", "\033[38;5;51m"
+    ],
+    "6. Royal Amethyst": [
+        "\033[38;5;93m", "\033[38;5;99m", "\033[38;5;105m", "\033[38;5;111m", "\033[38;5;117m"
+    ],
+    "7. Miami Sunset": [
+        "\033[38;5;199m", "\033[38;5;205m", "\033[38;5;211m", "\033[38;5;217m", "\033[38;5;223m"
+    ],
+    "8. Toxic Sludge": [
+        "\033[38;5;118m", "\033[38;5;154m", "\033[38;5;190m", "\033[38;5;226m", "\033[38;5;220m"
+    ],
+    "9. Glacial Ice": [
+        "\033[38;5;231m", "\033[38;5;195m", "\033[38;5;159m", "\033[38;5;123m", "\033[38;5;87m"
+    ],
+    "10. Noir (Monochrome)": [
+        "\033[38;5;231m", "\033[38;5;250m", "\033[38;5;244m", "\033[38;5;238m", "\033[38;5;232m"
+    ],
+}
+
+# START WITH A DEFAULT (Change this string to select a different theme)
+CURRENT_THEME = "2. Neon Cyberpunk"
+GRADIENT_COLORS = THEMES[CURRENT_THEME]
 
 RESET = "\033[0m"
 BOLD = "\033[1m"
@@ -52,14 +81,15 @@ ITAK_LOGO_BLOCK = [
 ]
 
 
-def colorize_line(line: str, color_index: int = 0) -> str:
+def colorize_line(line: str, color_index: int = 0, colors: List[str] = None) -> str:
     """Apply gradient color to a line."""
-    color = GRADIENT_COLORS[color_index % len(GRADIENT_COLORS)]
+    if colors is None:
+        colors = GRADIENT_COLORS
+    color = colors[color_index % len(colors)]
     return f"{color}{BOLD}{line}{RESET}"
 
 
-
-def animate_logo(logo: List[str], duration: float = 1.0):
+def animate_logo(logo: List[str], duration: float = 1.0, colors: List[str] = None):
     """Animate the logo with a shimmering gradient effect."""
     import time
     import sys
@@ -80,16 +110,16 @@ def animate_logo(logo: List[str], duration: float = 1.0):
             for line_idx, line in enumerate(logo):
                 # Shift color index by frame number to create movement
                 color_idx = line_idx + i
-                colored_line = colorize_line(line, color_idx)
+                colored_line = colorize_line(line, color_idx, colors)
                 sys.stdout.write(f"{colored_line}\n")
             
             sys.stdout.flush()
             time.sleep(0.1)
             
-        # Final reset: Ensure we end with the static gradient (Yellow top, Orange bottom)
+        # Final reset: Ensure we end with the static gradient
         sys.stdout.write(f"\033[{height}A")
         for line_idx, line in enumerate(logo):
-            colored_line = colorize_line(line, line_idx) # No offset
+            colored_line = colorize_line(line, line_idx, colors) # No offset
             sys.stdout.write(f"{colored_line}\n")
         sys.stdout.flush()
             
@@ -98,7 +128,7 @@ def animate_logo(logo: List[str], duration: float = 1.0):
         sys.stdout.write("\033[?25h")
 
 
-def print_banner(style: str = "large", animate: bool = False, duration: float = 1.0):
+def print_banner(style: str = "large", animate: bool = False, duration: float = 1.0, colors: List[str] = None):
     """Print the iTaK banner with gradient colors."""
     import sys
     
@@ -115,16 +145,16 @@ def print_banner(style: str = "large", animate: bool = False, duration: float = 
     if animate and style == "large":
         # Check if we are in a non-interactive shell (CI/CD)
         if hasattr(sys.stdout, 'isatty') and sys.stdout.isatty():
-            animate_logo(logo, duration=duration)
+            animate_logo(logo, duration=duration, colors=colors)
         else:
              # Fallback for non-interactive
             for i, line in enumerate(logo):
-                colored_line = colorize_line(line, i)
+                colored_line = colorize_line(line, i, colors)
                 print(colored_line)
     else:
         # Static print
         for i, line in enumerate(logo):
-            colored_line = colorize_line(line, i)
+            colored_line = colorize_line(line, i, colors)
             print(colored_line)
     
     print()
@@ -208,6 +238,13 @@ def print_code_block(code: str, language: str = "python", filename: str = None):
 
 # Test the banner
 if __name__ == "__main__":
-    print_banner("large")
-    print_welcome_tips()
-    print_prompt()
+    import sys
+    
+    # Simple gallery mode
+    print("\n🎨 iTaK Banner Theme Gallery 🎨\n")
+    
+    for name, theme_colors in THEMES.items():
+        print(f"\n{BOLD}{WHITE}--- {name} ---{RESET}")
+        print_banner("large", colors=theme_colors)
+    
+    print(f"\n{DIM}To change the default, edit 'CURRENT_THEME' in src/itak/cli/banner.py{RESET}\n")
