@@ -782,20 +782,20 @@ function installPythonPackage() {
 
     const projectDir = __dirname.replace('/scripts', '').replace('\\scripts', '');
 
-    // First attempt
+    // First attempt - capture output to detect specific errors
     try {
         execSync(`${python} -m pip install -e . --quiet`, {
-            stdio: 'inherit',
+            stdio: 'pipe',  // Capture output to detect errors
             cwd: projectDir
         });
-        console.log('\n  ✅ Python package installed!');
+        console.log('  ✅ Python package installed!');
         return true;
     } catch (error) {
-        const errorStr = error.message || error.toString();
+        const errorOutput = (error.stderr || error.stdout || error.message || '').toString();
 
         // Check if it's a file lock error (WinError 32)
-        if (PLATFORM === 'win32' && (errorStr.includes('WinError 32') || errorStr.includes('being used by another process'))) {
-            console.log('\n  ⚠️  itak.exe is locked by another process');
+        if (PLATFORM === 'win32' && (errorOutput.includes('WinError 32') || errorOutput.includes('being used by another process'))) {
+            console.log('  ⚠️  itak.exe is locked by another process');
             console.log('  🔄 Attempting to close other iTaK instances...\n');
 
             try {
@@ -810,10 +810,10 @@ function installPythonPackage() {
                 console.log('  🔄 Retrying installation...\n');
                 try {
                     execSync(`${python} -m pip install -e . --quiet`, {
-                        stdio: 'inherit',
+                        stdio: 'pipe',
                         cwd: projectDir
                     });
-                    console.log('\n  ✅ Python package installed!');
+                    console.log('  ✅ Python package installed!');
                     return true;
                 } catch {
                     console.log('  ⚠️  Still failed - please close all terminals running itak');
@@ -828,6 +828,10 @@ function installPythonPackage() {
             }
         }
 
+        // Print the actual error for debugging
+        if (errorOutput) {
+            console.log(errorOutput);
+        }
         console.log('  ⚠️  Failed to install Python package');
         return false;
     }
