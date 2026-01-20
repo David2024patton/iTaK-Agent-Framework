@@ -806,14 +806,22 @@ function installAgentBrowser() {
     }
 
     try {
-        console.log('  📦 Installing @anthropic-ai/agent-browser globally...');
-        execSync('npm install -g @anthropic-ai/agent-browser', { stdio: 'inherit' });
+        console.log('  📦 Installing agent-browser globally...');
+        execSync('npm install -g agent-browser', { stdio: 'inherit' });
+
+        // Install Chromium for agent-browser
+        console.log('  📦 Downloading Chromium for agent-browser...');
+        try {
+            execSync('agent-browser install', { stdio: 'inherit' });
+        } catch {
+            console.log('  ⚠️  Chromium install failed (can run later: agent-browser install)');
+        }
 
         // On Linux/WSL, install playwright deps
         if (PLATFORM === 'linux') {
             console.log('  📦 Installing Playwright dependencies for Linux...');
             try {
-                execSync('npx playwright install-deps', { stdio: 'inherit' });
+                execSync('agent-browser install --with-deps', { stdio: 'inherit' });
             } catch {
                 console.log('  ⚠️  Playwright deps install failed (may need sudo)');
             }
@@ -823,7 +831,7 @@ function installAgentBrowser() {
         return true;
     } catch {
         console.log('  ⚠️  Failed to install Agent Browser');
-        console.log('  You can install manually: npm install -g @anthropic-ai/agent-browser');
+        console.log('  You can install manually: npm install -g agent-browser');
         return false;
     }
 }

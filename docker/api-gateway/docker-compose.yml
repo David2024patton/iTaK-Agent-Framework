@@ -67,7 +67,7 @@ services:
 
   # ============================================
   # Playwright - Browser Automation Server (DEPRECATED)
-  # NOTE: Replaced by agent-browser CLI (npm install @anthropic-ai/agent-browser)
+  # NOTE: Replaced by agent-browser CLI (npm install -g agent-browser)
   # Kept for backwards compatibility, use 'docker compose --profile optional up'
   # ============================================
   playwright:

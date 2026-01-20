@@ -277,10 +277,10 @@ def show_service_status():
             print(f"     {DIM}npx agent-browser --help{RESET}")
         else:
             print(f"  {DIM}⬜{RESET} Agent Browser CLI: {DIM}Not installed{RESET}")
-            print(f"     {DIM}npm install -g @anthropic-ai/agent-browser{RESET}")
+            print(f"     {DIM}npm install -g agent-browser{RESET}")
     except FileNotFoundError:
         print(f"  {DIM}⬜{RESET} Agent Browser CLI: {DIM}Not installed{RESET}")
-        print(f"     {DIM}npm install -g @anthropic-ai/agent-browser{RESET}")
+        print(f"     {DIM}npm install -g agent-browser{RESET}")
     
     for container, name, url in services:
         status, details = get_container_status(container)

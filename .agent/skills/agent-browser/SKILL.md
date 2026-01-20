@@ -9,7 +9,8 @@ Browser automation CLI optimized for AI agents. Uses Playwright under the hood b
 ## Installation
 
 ```bash
-npm install -g @anthropic-ai/agent-browser
+npm install -g agent-browser
+agent-browser install  # Download Chromium
 ```
 
 For Linux/WSL:
