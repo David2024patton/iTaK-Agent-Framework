@@ -233,83 +233,44 @@ def auto(prompt, model, output):
         except ImportError:
             pass
             
-    # iTaK system prompt - Raw Code Mode
-    # Stripped of all "iTaK" identity to prevent conversational loop
-    system_prompt = "Generate code for the following request. Output only the code in markdown blocks. Do not explain."
-    
-    full_prompt = f"{system_prompt}\nRequest: {prompt}\nCode:"
-    
-    # Call Ollama API
+    # iTaK Smart Agent Mode
+    from itak.lite_agent import LiteAgent
+    from itak.tools.smart_edit import SmartEditTool
+    from itak.tools.ripgrep import RipGrepTool
+
+    click.secho(f"\n✦ Activating Smart Agent ({model})...", fg="magenta")
+
     try:
-        response = requests.post(
-            "http://localhost:11434/api/generate",
-            json={
-                "model": model,
-                "prompt": full_prompt,
-                "stream": True,
-                "options": {
-                    "temperature": 0.1
-                }
-            },
-            stream=True,
-            timeout=120
+        # Initialize Tools
+        tools = [SmartEditTool(), RipGrepTool()]
+        
+        # Initialize Agent
+        # Note: LiteAgent will automatically convert the 'model' string into an LLM instance via create_llm
+        agent = LiteAgent(
+            role="Senior Smart Developer",
+            goal="Efficiently solve the user's coding task using robust editing and search tools.",
+            backstory=(
+                "You are an expert software engineer equipped with 'SmartEdit' "
+                "and 'RipGrep'. You prefer using these tools over guessing. "
+                "You always verify your edits."
+            ),
+            tools=tools,
+            llm=model,
+            verbose=True,
+            max_iterations=20  # Give it enough turns to search and edit
         )
-        response.raise_for_status()
+
+        # Execute
+        result = agent.kickoff(messages=[{"role": "user", "content": prompt}])
         
-        click.secho("✦ ", fg="magenta", nl=False)
-        
-        # Get terminal width for word wrap
-        import shutil
-        import textwrap
-        term_width = shutil.get_terminal_size().columns - 4  # Leave margin
-        
-        full_response = ""
-        current_line = ""
-        
-        for line in response.iter_lines():
-            if line:
-                try:
-                    data = json.loads(line)
-                    chunk = data.get("response", "")
-                    full_response += chunk
-                    
-                    # Handle streaming with word wrap
-                    current_line += chunk
-                    
-                    # If we hit a newline, wrap and print
-                    while '\n' in current_line:
-                        before_nl, current_line = current_line.split('\n', 1)
-                        if before_nl:
-                            wrapped = textwrap.fill(before_nl, width=term_width)
-                            click.echo(wrapped)
-                        else:
-                            click.echo()
-                    
-                    # If line is getting long, wrap it
-                    if len(current_line) > term_width:
-                        # Find last space to wrap at word boundary
-                        wrap_at = current_line.rfind(' ', 0, term_width)
-                        if wrap_at > 0:
-                            click.echo(current_line[:wrap_at])
-                            current_line = current_line[wrap_at+1:]
-                        
-                except json.JSONDecodeError:
-                    pass
-        
-        # Print any remaining text
-        if current_line.strip():
-            wrapped = textwrap.fill(current_line, width=term_width)
-            click.echo(wrapped)
-        
-        click.echo()
-        
-    except requests.exceptions.ConnectionError:
-        click.secho("  ⚠️ Could not connect to Ollama.", fg="yellow")
-        click.secho("  Make sure Ollama is running: ollama serve", fg="white", dim=True)
-    except requests.exceptions.Timeout:
-        click.secho("  ⚠️ Request timed out.", fg="yellow")
+        # Print Final Answer
+        click.secho("\nReference Final Output:", fg="cyan")
+        click.echo(result.raw)
+
     except Exception as e:
-        click.secho(f"  ⚠️ Error: {e}", fg="yellow")
+        click.secho(f"  ⚠️ Agent Execution Failed: {e}", fg="red")
+        if "ConnectionError" in str(e):
+             click.secho("  Make sure Ollama is running: ollama serve", fg="white", dim=True)
 
 
 @iTaK.command()

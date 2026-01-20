@@ -7,12 +7,14 @@ Displays the iTaK logo with gradient colors on startup.
 from typing import List, Tuple
 
 # Color codes for gradient effect (5 steps: Yellow → Orange fade)
+# Color codes for gradient effect (Neon Cyberpunk: Cyan -> Purple -> Pink)
 GRADIENT_COLORS = [
-    "\033[38;5;226m",  # Top: Bright Yellow
-    "\033[38;5;220m",  # Gold
-    "\033[38;5;214m",  # Orange
-    "\033[38;5;208m",  # Dark Orange
-    "\033[38;5;202m",  # Bottom: Red-Orange
+    "\033[38;5;51m",   # Neon Cyan
+    "\033[38;5;45m",   # Light Blue
+    "\033[38;5;39m",   # Deep Sky Blue
+    "\033[38;5;99m",   # Slate Blue
+    "\033[38;5;129m",  # Purple
+    "\033[38;5;201m",  # Magenta/Pink
 ]
 
 RESET = "\033[0m"
