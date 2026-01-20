@@ -253,14 +253,14 @@ def colorize_string_horizontally(line: str, colors: List[str]) -> str:
             result += f"{colors[-1]}{char}"
     return f"{BOLD}{result}{RESET}"
 
-def print_banner(style: str = "dash_3d", theme_key: str = None):
+def print_banner(style: str = "shadow", theme_key: str = None):
     """Print the iTaK banner with horizontal smooth gradient."""
     
     # Select Logo
     if style in LOGO_STYLES:
         logo = LOGO_STYLES[style]
     else:
-        logo = LOGO_STYLES["dash_3d"]
+        logo = LOGO_STYLES["shadow"]
 
     # Select Theme
     theme_key = theme_key or CURRENT_THEME
@@ -419,8 +419,8 @@ def print_menu():
 # --- MAIN (GALLERY) ---
 if __name__ == "__main__":
     
-    # 1. Animation (Blinking Arrow)
-    animate_intro("7. Miami Sunset")
+    # 1. Animation (Blinking Arrow) - DISABLED per user request (wants Shadow only)
+    # animate_intro("7. Miami Sunset")
     
     # 2. Main Logo (Shadow Style matching screenshot)
     print_banner(style="shadow", theme_key="7. Miami Sunset")
