@@ -23,12 +23,16 @@ PROJECT_TYPES = [
 
 def run_project_wizard(initial_prompt: str = None, project_type_idx: int = None):
     """Run the interactive project creation wizard."""
+    # Box: "📁 Create New Project" = ~22 chars visible + padding
+    title = "📁 Create New Project"
+    box_width = 28
+    
     click.echo()
-    click.secho("╔" + "═" * 62 + "╗", fg="magenta")
-    click.secho("║   📁 ", fg="magenta", nl=False)
-    click.secho("Create New Project", fg="white", bold=True, nl=False)
-    click.secho(" " * 36 + "║", fg="magenta")
-    click.secho("╚" + "═" * 62 + "╝", fg="magenta")
+    click.secho("  ╔" + "═" * box_width + "╗", fg="magenta")
+    click.secho("  ║ ", fg="magenta", nl=False)
+    click.secho(title, fg="white", bold=True, nl=False)
+    click.secho(" " * (box_width - len(title) - 1) + "║", fg="magenta")
+    click.secho("  ╚" + "═" * box_width + "╝", fg="magenta")
     click.echo()
     
     # Infer defaults from initial prompt
