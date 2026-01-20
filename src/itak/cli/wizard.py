@@ -23,7 +23,8 @@ def is_back_command(text: str) -> bool:
     if text is None:
         return False
     cmd = text.strip().lower()
-    return cmd in ['back', '/back', '0']  # Just back commands, not exit
+    cmd = text.strip().lower()
+    return cmd in ['back', '/back', '0', 'exit', '/exit', '/quit']  # Include exit commands
 
 
 def wizard_prompt(label: str, default: str = "") -> str:
