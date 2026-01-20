@@ -481,11 +481,15 @@ def toggle_frp_tunnel():
     
     if status == 'running':
         print(f"\n  {CYAN}Stopping FRP tunnel...{RESET}")
-        if use_main_compose:
-            subprocess.run(['docker', 'compose', '-f', str(compose_file), '-p', 'api-gateway', '--profile', 'tunnel', 'down', 'frpc'], capture_output=True)
+        # Use direct docker stop/rm - more reliable than compose down
+        subprocess.run(['docker', 'stop', 'frpc'], capture_output=True)
+        subprocess.run(['docker', 'rm', 'frpc'], capture_output=True)
+        # Verify it stopped
+        new_status, _ = get_container_status('frpc')
+        if new_status != 'running':
+            print(f"  {GREEN}✅ FRP tunnel stopped.{RESET}\n")
         else:
-            subprocess.run(['docker', 'compose', '-f', str(compose_file), 'down'], capture_output=True)
-        print(f"  {GREEN}✅ FRP tunnel stopped.{RESET}\n")
+            print(f"  {YELLOW}⚠️  Failed to stop tunnel. Try: docker stop frpc{RESET}\n")
     else:
         print(f"\n  {CYAN}Starting FRP tunnel...{RESET}")
         if use_main_compose:
