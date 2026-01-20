@@ -780,14 +780,54 @@ function installPythonPackage() {
     console.log(`  ✅ Found Python: ${python}`);
     console.log('  📦 Installing iTaK Python package...\n');
 
+    const projectDir = __dirname.replace('/scripts', '').replace('\\scripts', '');
+
+    // First attempt
     try {
         execSync(`${python} -m pip install -e . --quiet`, {
             stdio: 'inherit',
-            cwd: __dirname.replace('/scripts', '').replace('\\scripts', '')
+            cwd: projectDir
         });
         console.log('\n  ✅ Python package installed!');
         return true;
-    } catch {
+    } catch (error) {
+        const errorStr = error.message || error.toString();
+
+        // Check if it's a file lock error (WinError 32)
+        if (PLATFORM === 'win32' && (errorStr.includes('WinError 32') || errorStr.includes('being used by another process'))) {
+            console.log('\n  ⚠️  itak.exe is locked by another process');
+            console.log('  🔄 Attempting to close other iTaK instances...\n');
+
+            try {
+                // Try to kill any running itak.exe processes
+                execSync('taskkill /F /IM itak.exe 2>nul', { stdio: 'pipe' });
+                console.log('  ✅ Closed other iTaK instances');
+
+                // Wait a moment for the file to be released
+                execSync('ping -n 2 127.0.0.1 >nul', { stdio: 'pipe' });
+
+                // Retry installation
+                console.log('  🔄 Retrying installation...\n');
+                try {
+                    execSync(`${python} -m pip install -e . --quiet`, {
+                        stdio: 'inherit',
+                        cwd: projectDir
+                    });
+                    console.log('\n  ✅ Python package installed!');
+                    return true;
+                } catch {
+                    console.log('  ⚠️  Still failed - please close all terminals running itak');
+                    console.log('  Then run: pip install -e .');
+                    return false;
+                }
+            } catch {
+                // taskkill failed - no itak.exe running or permission denied
+                console.log('  ⚠️  Could not close iTaK - please close all terminals manually');
+                console.log('  Then run: pip install -e .');
+                return false;
+            }
+        }
+
         console.log('  ⚠️  Failed to install Python package');
         return false;
     }
