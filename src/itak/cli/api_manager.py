@@ -329,6 +329,7 @@ def cloudflare_menu():
                 pass
         
         # Show submenu
+        clear_screen()
         print(f"\n  {BOLD}🌐 Cloudflare Tunnels{RESET}")
         print(f"  {CYAN}https://one.dash.cloudflare.com/{RESET}")
         print()
@@ -424,6 +425,7 @@ def cloudflare_temp_menu():
                 pass
         
         # Show submenu
+        clear_screen()
         print(f"\n  {BOLD}🌐 Cloudflare Quick Tunnel{RESET}")
         print()
         
@@ -567,6 +569,7 @@ def cloudflare_permanent_menu():
         masked_token = current_token[:12] + '...' if len(current_token) > 12 else (current_token or 'Not set')
         
         # Show submenu
+        clear_screen()
         print(f"\n  {BOLD}🔒 Cloudflare Permanent Tunnel{RESET}")
         print()
         
@@ -788,6 +791,7 @@ def frp_tunnel_menu():
         is_running = status == 'running'
         
         # Show submenu
+        clear_screen()
         print(f"\n  {BOLD}🚀 VPS / FRP Tunnel{RESET}")
         print(f"  {DIM}Connect local services to your VPS{RESET}")
         print(f"  {CYAN}https://github.com/fatedier/frp{RESET}")
