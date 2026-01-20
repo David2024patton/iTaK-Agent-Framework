@@ -106,12 +106,21 @@ def generate_gradient_colors(start_hex: str, end_hex: str, steps: int) -> List[s
 
 # --- RENDER LOGIC ---
 
-def colorize_line(line: str, color_code: str) -> str:
-    """Apply specific ANSI color code to a line."""
-    return f"{color_code}{BOLD}{line}{RESET}"
+def colorize_string_horizontally(line: str, colors: List[str]) -> str:
+    """Apply gradient colors character by character (Horizontal Fade)."""
+    result = ""
+    # We strip ANSI codes from the line length calculation for safety, 
+    # though our logos are plain ASCII/Unicode text currently.
+    for i, char in enumerate(line):
+        if i < len(colors):
+            result += f"{colors[i]}{char}"
+        else:
+            # Fallback if line is longer than generated colors (shouldn't happen)
+            result += f"{colors[-1]}{char}"
+    return f"{BOLD}{result}{RESET}"
 
 def print_banner(style: str = "large", theme_key: str = None):
-    """Print the iTaK banner with the selected theme's gradient."""
+    """Print the iTaK banner with horizontal smooth gradient."""
     
     # Select Logo
     if style == "block":
@@ -124,20 +133,21 @@ def print_banner(style: str = "large", theme_key: str = None):
     # Select Theme
     theme_key = theme_key or CURRENT_THEME
     if theme_key not in THEMES:
-         # Fallback to default if key not found
          theme_key = CURRENT_THEME
          
     start_hex, end_hex = THEMES[theme_key]
     
-    # Generate Gradient
-    height = len(logo)
-    colors = generate_gradient_colors(start_hex, end_hex, height)
+    # Calculate Max Width for Gradient Steps
+    max_width = max(len(line) for line in logo)
+    
+    # Generate Horizontal Gradient (Steps = Width)
+    colors = generate_gradient_colors(start_hex, end_hex, max_width)
     
     print()
-    for i, line in enumerate(logo):
-        print(colorize_line(line, colors[i]))
+    for line in logo:
+        # We need to render each line with the SAME horizontal gradient map
+        print(colorize_string_horizontally(line, colors))
     print()
-
 
 # --- CLI HELPERS (Keep existing interface) ---
 def print_welcome_tips():
