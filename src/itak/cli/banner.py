@@ -86,6 +86,15 @@ ITAK_LOGO_PIXEL = [
     " ▀▀▀  ▀  ▀ ▀ ▀ ▀ ",
 ]
 
+ITAK_LOGO_DASH_3D = [
+    "  __   _______      __       __   __",
+    " |  | |__   __|    /  \     |  | / /",
+    " |  |    | |      / /\ \    |  |/ / ",
+    " |  |    | |     / /__\ \   |     \ ",
+    " |  |    | |    /  ____  \  |  |\  \ ",
+    " |__|    |_|   /__/    \__\ |__| \__\\",
+]
+
 ITAK_LOGO_3D = [
     "  _____ _______    _      _  __",
     " |_   _|__   __|  / \    | |/ /",
@@ -134,6 +143,7 @@ LOGO_STYLES = {
     "cyber": ITAK_LOGO_CYBER,
     "modern": ITAK_LOGO_MODERN,
     "pixel": ITAK_LOGO_PIXEL,
+    "dash_3d": ITAK_LOGO_DASH_3D,
     "3d": ITAK_LOGO_3D,
     "slant": ITAK_LOGO_SLANT,
     "tech": ITAK_LOGO_TECH,
