@@ -445,76 +445,129 @@ def configure_vps():
     print(f"\n  Use option [5] to start the FRP tunnel.\n")
 
 
-def toggle_frp_tunnel():
-    """Start or stop FRP tunnel."""
+def frp_tunnel_menu():
+    """FRP Tunnel submenu with status and start/stop options."""
+    import click
+    
     if not check_docker():
         print(f"\n  {YELLOW}⚠️  Docker is not running.{RESET}\n")
         return
     
-    # Find the correct compose file
-    # Priority 1: Custom frpc.yml in ~/.itak/docker/
-    # Priority 2: Main api-gateway docker-compose.yml (with tunnel profile)
+    # Find compose file configuration
     custom_compose = DOCKER_DIR / 'frpc.yml'
-    
-    # Find main docker-compose.yml (relative to this package)
-    package_dir = Path(__file__).parent.parent.parent.parent  # Up to repo root
+    package_dir = Path(__file__).parent.parent.parent.parent
     main_compose = package_dir / 'docker' / 'api-gateway' / 'docker-compose.yml'
-    
-    # Also check frpc.toml in same dir as main compose
     main_frpc_config = main_compose.parent / 'frpc.toml'
     
-    # Determine which compose to use
     use_main_compose = False
     compose_file = None
+    configured = False
     
     if custom_compose.exists():
         compose_file = custom_compose
+        configured = True
     elif main_compose.exists() and main_frpc_config.exists():
         compose_file = main_compose
         use_main_compose = True
-    else:
-        print(f"\n  {YELLOW}FRP not configured.{RESET}")
-        print(f"  Use option [4] to configure VPS connection first.\n")
-        return
+        configured = True
     
-    status, _ = get_container_status('frpc')
-    
-    if status == 'running':
-        print(f"\n  {CYAN}Stopping FRP tunnel...{RESET}")
-        # Use direct docker stop/rm - more reliable than compose down
-        subprocess.run(['docker', 'stop', 'frpc'], capture_output=True)
-        subprocess.run(['docker', 'rm', 'frpc'], capture_output=True)
-        # Verify it stopped
-        new_status, _ = get_container_status('frpc')
-        if new_status != 'running':
-            print(f"  {GREEN}✅ FRP tunnel stopped.{RESET}\n")
-        else:
-            print(f"  {YELLOW}⚠️  Failed to stop tunnel. Try: docker stop frpc{RESET}\n")
-    else:
-        print(f"\n  {CYAN}Starting FRP tunnel...{RESET}")
-        if use_main_compose:
-            result = subprocess.run(['docker', 'compose', '-f', str(compose_file), '-p', 'api-gateway', '--profile', 'tunnel', 'up', '-d', 'frpc'], capture_output=True)
-        else:
-            result = subprocess.run(['docker', 'compose', '-f', str(compose_file), 'up', '-d'], capture_output=True)
+    while True:
+        # Get current status
+        status, _ = get_container_status('frpc')
+        is_running = status == 'running'
         
-        import time
-        time.sleep(2)
+        # Show submenu
+        print(f"\n  {BOLD}🚀 FRP Tunnel{RESET}")
+        print()
         
-        logs = subprocess.run(['docker', 'logs', 'frpc', '--tail', '10'], capture_output=True, text=True)
-        
-        if 'start proxy success' in logs.stdout or 'start proxy success' in logs.stderr:
-            print(f"  {GREEN}✅ FRP tunnel connected!{RESET}")
+        # Show status
+        if is_running:
             config = load_config()
-            vps = config.get('vps_ip', 'your-vps-ip')
-            print(f"\n  {BOLD}Your VPS endpoints:{RESET}")
-            print(f"    • API:      http://{vps}:{PORTS['gateway']}")
-            print(f"    • Ollama:   http://{vps}:{PORTS['ollama']}")
-            print(f"    • Playwright: ws://{vps}:{PORTS['playwright']}")
+            vps = config.get('vps_ip', 'VPS')
+            print(f"  Status: {GREEN}● Running{RESET}")
+            print(f"  VPS: {CYAN}{vps}{RESET}")
         else:
-            print(f"  {YELLOW}⚠️  Connection may have issues. Check logs:{RESET}")
-            print(f"  {DIM}docker logs frpc{RESET}")
+            print(f"  Status: {DIM}○ Stopped{RESET}")
+        
+        if not configured:
+            print(f"  {YELLOW}⚠️  Not configured - use option [4] first{RESET}")
         
         print()
+        print(f"  {GREEN}[1]{RESET} ▶️  Start Tunnel")
+        print(f"  {GREEN}[2]{RESET} ⏹️  Stop Tunnel")
+        print(f"  {GREEN}[0]{RESET} ↩️  Back")
+        print()
+        
+        try:
+            choice = click.prompt(click.style("  Choice", fg="cyan"), default="0").strip()
+            
+            if choice == '0' or choice == '':
+                return
+            
+            elif choice == '1':
+                # Start
+                if is_running:
+                    print(f"\n  {YELLOW}ℹ️  Tunnel is already running!{RESET}")
+                    input("  Press Enter to continue...")
+                    continue
+                
+                if not configured:
+                    print(f"\n  {YELLOW}⚠️  VPS not configured. Use option [4] first.{RESET}")
+                    input("  Press Enter to continue...")
+                    continue
+                
+                print(f"\n  {CYAN}Starting FRP tunnel...{RESET}")
+                if use_main_compose:
+                    subprocess.run(['docker', 'compose', '-f', str(compose_file), '-p', 'api-gateway', '--profile', 'tunnel', 'up', '-d', 'frpc'], capture_output=True)
+                else:
+                    subprocess.run(['docker', 'compose', '-f', str(compose_file), 'up', '-d'], capture_output=True)
+                
+                import time
+                time.sleep(2)
+                
+                logs = subprocess.run(['docker', 'logs', 'frpc', '--tail', '10'], capture_output=True, text=True)
+                
+                if 'start proxy success' in logs.stdout or 'start proxy success' in logs.stderr:
+                    print(f"  {GREEN}✅ FRP tunnel connected!{RESET}")
+                    config = load_config()
+                    vps = config.get('vps_ip', 'your-vps-ip')
+                    print(f"\n  {BOLD}Your VPS endpoints:{RESET}")
+                    print(f"    • API:      http://{vps}:{PORTS['gateway']}")
+                    print(f"    • Ollama:   http://{vps}:{PORTS['ollama']}")
+                    print(f"    • Playwright: ws://{vps}:{PORTS['playwright']}")
+                else:
+                    new_status, _ = get_container_status('frpc')
+                    if new_status == 'running':
+                        print(f"  {GREEN}✅ Tunnel started (checking connection...){RESET}")
+                    else:
+                        print(f"  {YELLOW}⚠️  Failed to start. Check: docker logs frpc{RESET}")
+                
+                input("\n  Press Enter to continue...")
+            
+            elif choice == '2':
+                # Stop
+                if not is_running:
+                    print(f"\n  {YELLOW}ℹ️  Tunnel is not running.{RESET}")
+                    input("  Press Enter to continue...")
+                    continue
+                
+                print(f"\n  {CYAN}Stopping FRP tunnel...{RESET}")
+                subprocess.run(['docker', 'stop', 'frpc'], capture_output=True)
+                subprocess.run(['docker', 'rm', 'frpc'], capture_output=True)
+                
+                new_status, _ = get_container_status('frpc')
+                if new_status != 'running':
+                    print(f"  {GREEN}✅ FRP tunnel stopped.{RESET}")
+                else:
+                    print(f"  {YELLOW}⚠️  Failed to stop. Try: docker stop frpc{RESET}")
+                
+                input("\n  Press Enter to continue...")
+            
+            else:
+                print(f"  {YELLOW}Invalid choice{RESET}")
+                
+        except KeyboardInterrupt:
+            return
 
 
 def run_api_menu():
@@ -546,8 +599,8 @@ def run_api_menu():
                 configure_vps()
                 click.pause("  Press any key to continue...")
             elif choice == 5:
-                toggle_frp_tunnel()
-                click.pause("  Press any key to continue...")
+                frp_tunnel_menu()
+                # No pause needed - submenu handles its own flow
             else:
                 print(f"  {YELLOW}Invalid choice. Please enter 0-5.{RESET}")
                 
