@@ -244,48 +244,101 @@ def get_container_status(name):
 
 
 def show_service_status():
-    """Show status of all API services."""
-    print(f"\n  {BOLD}📊 Service Status{RESET}\n")
+    """Show status of all API services with install options."""
+    import click
     
-    if not check_docker():
-        print(f"  {RED}❌ Docker is not running{RESET}\n")
-        return
-    
-    services = [
-        ('ollama', 'Ollama LLM', f'http://localhost:{PORTS["ollama"]}'),
-        ('chromadb', 'ChromaDB', f'http://localhost:{PORTS["chromadb"]}'),
-        ('searxng', 'SearXNG', f'http://localhost:{PORTS["searxng"]}'),
-        ('crawl4ai', 'Crawl4AI', 'http://localhost:47836'),
-        ('frpc', 'FRP Tunnel', 'VPS Connection'),
-        ('cloudflared-tunnel', 'Cloudflare Tunnel', 'Public URL'),
-    ]
-    
-    # Check agent-browser CLI (not Docker)
-    import subprocess
-    try:
-        result = subprocess.run(['agent-browser', '--version'], capture_output=True, text=True)
-        if result.returncode == 0:
-            print(f"  {GREEN}✅{RESET} Agent Browser CLI: {GREEN}Installed{RESET}")
-            print(f"     {DIM}npx agent-browser --help{RESET}")
-        else:
-            print(f"  {DIM}⬜{RESET} Agent Browser CLI: {DIM}Not installed{RESET}")
-            print(f"     {DIM}npm install -g agent-browser{RESET}")
-    except FileNotFoundError:
-        print(f"  {DIM}⬜{RESET} Agent Browser CLI: {DIM}Not installed{RESET}")
-        print(f"     {DIM}npm install -g agent-browser{RESET}")
-    
-    for container, name, url in services:
-        status, details = get_container_status(container)
+    while True:
+        clear_screen()
+        print(f"\n  {BOLD}📊 Service Status{RESET}\n")
         
-        if status == 'running':
-            print(f"  {GREEN}✅{RESET} {name}: {GREEN}Running{RESET}")
-            print(f"     {DIM}{url}{RESET}")
-        elif status == 'stopped':
-            print(f"  {YELLOW}⏸️{RESET}  {name}: {YELLOW}Stopped{RESET}")
-        else:
-            print(f"  {DIM}⬜{RESET} {name}: {DIM}Not installed{RESET}")
-    
-    print()
+        if not check_docker():
+            print(f"  {RED}❌ Docker is not running{RESET}\n")
+            input("  Press Enter to go back...")
+            return
+        
+        # Track not-installed items for install menu
+        not_installed = []
+        
+        # Check agent-browser CLI (not Docker)
+        agent_browser_installed = False
+        try:
+            result = subprocess.run(['agent-browser', '--version'], capture_output=True, text=True)
+            if result.returncode == 0:
+                print(f"  {GREEN}✅{RESET} Agent Browser CLI: {GREEN}Installed{RESET}")
+                agent_browser_installed = True
+            else:
+                print(f"  {DIM}⬜{RESET} Agent Browser CLI: {DIM}Not installed{RESET}")
+                not_installed.append(('agent-browser', 'Agent Browser CLI'))
+        except FileNotFoundError:
+            print(f"  {DIM}⬜{RESET} Agent Browser CLI: {DIM}Not installed{RESET}")
+            not_installed.append(('agent-browser', 'Agent Browser CLI'))
+        
+        services = [
+            ('ollama', 'Ollama LLM', f'http://localhost:{PORTS["ollama"]}'),
+            ('chromadb', 'ChromaDB', f'http://localhost:{PORTS["chromadb"]}'),
+            ('searxng', 'SearXNG', f'http://localhost:{PORTS["searxng"]}'),
+            ('crawl4ai', 'Crawl4AI', 'http://localhost:47836'),
+            ('frpc', 'FRP Tunnel', 'VPS Connection'),
+            ('cloudflared-tunnel', 'Cloudflare Tunnel', 'Public URL'),
+        ]
+        
+        for container, name, url in services:
+            status, details = get_container_status(container)
+            
+            if status == 'running':
+                print(f"  {GREEN}✅{RESET} {name}: {GREEN}Running{RESET}")
+                print(f"     {DIM}{url}{RESET}")
+            elif status == 'stopped':
+                print(f"  {YELLOW}⏸️{RESET}  {name}: {YELLOW}Stopped{RESET}")
+            else:
+                print(f"  {DIM}⬜{RESET} {name}: {DIM}Not installed{RESET}")
+        
+        print()
+        
+        # Show install options if there are missing services
+        if not_installed:
+            print(f"  {BOLD}Install Missing:{RESET}")
+            for idx, (key, name) in enumerate(not_installed, 1):
+                print(f"    {GREEN}[{idx}]{RESET} Install {name}")
+            print()
+        
+        print(f"  {GREEN}[0]{RESET} ↩️  Back")
+        print()
+        
+        try:
+            choice = click.prompt(click.style("  Choice", fg="cyan"), default="0").strip()
+            
+            if choice == '0' or choice == '':
+                return
+            
+            try:
+                choice_num = int(choice)
+                if 1 <= choice_num <= len(not_installed):
+                    key, name = not_installed[choice_num - 1]
+                    
+                    if key == 'agent-browser':
+                        print(f"\n  {CYAN}Installing {name}...{RESET}")
+                        print(f"  {DIM}This may take a minute...{RESET}\n")
+                        
+                        result = subprocess.run(['npm', 'install', '-g', 'agent-browser'], 
+                            capture_output=False)
+                        
+                        if result.returncode == 0:
+                            print(f"\n  {GREEN}✅ {name} installed!{RESET}")
+                            # Try to install Chromium
+                            print(f"\n  {CYAN}Installing Chromium browser...{RESET}")
+                            subprocess.run(['npx', 'agent-browser', 'install'], capture_output=False)
+                        else:
+                            print(f"\n  {YELLOW}⚠️  Installation may have issues. Check above for errors.{RESET}")
+                        
+                        input("\n  Press Enter to continue...")
+                else:
+                    print(f"  {YELLOW}Invalid choice{RESET}")
+            except ValueError:
+                print(f"  {YELLOW}Invalid choice{RESET}")
+                
+        except KeyboardInterrupt:
+            return
 
 
 def cloudflare_menu():
@@ -991,7 +1044,7 @@ def run_api_menu():
                 return  # Back to main menu
             elif choice == 1:
                 show_service_status()
-                click.pause("  Press any key to continue...")
+                # No pause needed - submenu handles its own flow
             elif choice == 2:
                 cloudflare_menu()
                 # No pause needed - submenu handles its own flow
