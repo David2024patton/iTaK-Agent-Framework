@@ -108,12 +108,18 @@ def generate_gradient_colors(start_hex: str, end_hex: str, steps: int) -> List[s
 
 # --- RENDER LOGIC ---
 
-def colorize_line(line: str, color_code: str) -> str:
-    """Apply specific ANSI color code to a line (Vertical Fade step)."""
-    return f"{color_code}{BOLD}{line}{RESET}"
+def colorize_string_horizontally(line: str, colors: List[str]) -> str:
+    """Apply gradient colors character by character (Horizontal Fade)."""
+    result = ""
+    for i, char in enumerate(line):
+        if i < len(colors):
+            result += f"{colors[i]}{char}"
+        else:
+            result += f"{colors[-1]}{char}"
+    return f"{BOLD}{result}{RESET}"
 
 def print_banner(style: str = "large", theme_key: str = None):
-    """Print the iTaK banner with vertical smooth gradient."""
+    """Print the iTaK banner with horizontal smooth gradient."""
     
     # Select Logo
     if style == "block":
@@ -130,14 +136,16 @@ def print_banner(style: str = "large", theme_key: str = None):
          
     start_hex, end_hex = THEMES[theme_key]
     
-    # Generate Vertical Gradient (Steps = Height)
-    height = len(logo)
-    colors = generate_gradient_colors(start_hex, end_hex, height)
+    # Calculate Max Width for Gradient Steps
+    max_width = max(len(line) for line in logo)
+    
+    # Generate Horizontal Gradient (Steps = Width)
+    colors = generate_gradient_colors(start_hex, end_hex, max_width)
     
     print()
-    for i, line in enumerate(logo):
-        # Apply the i-th color to the i-th line
-        print(colorize_line(line, colors[i]))
+    for line in logo:
+        # Render each line with the horizontal gradient map
+        print(colorize_string_horizontally(line, colors))
     print()
 
 # --- CLI HELPERS (Keep existing interface) ---
