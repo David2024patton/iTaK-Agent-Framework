@@ -347,7 +347,7 @@ def animate_intro(theme_key: str = CURRENT_THEME):
     # Render Logo
     print()
     for line in logo:
-        print(f"{colorize_string_horizontally(line, colors)}\\033[K")
+        print(colorize_string_horizontally(line, colors))
     print()
 
 
