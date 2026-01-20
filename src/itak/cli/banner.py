@@ -367,8 +367,6 @@ def animate_intro(theme_key: str = CURRENT_THEME):
     if theme_key not in THEMES: theme_key = CURRENT_THEME
     start_hex, end_hex = THEMES[theme_key]
     
-    print(f"\n{BOLD}🎨 iTaK Animation Sequence 🎨{RESET}\n")
-    
     for i, (parts, duration) in enumerate(frames):
         # Build current state
         frame_logo = join_art(*parts)
@@ -386,7 +384,8 @@ def animate_intro(theme_key: str = CURRENT_THEME):
         # Render Frame
         print()
         for line in frame_logo:
-             print(colorize_string_horizontally(line, colors))
+             # \033[K clears the line to the right to prevent artifacts from previous frames
+             print(f"{colorize_string_horizontally(line, colors)}\033[K")
              
         time.sleep(duration)
         
@@ -412,7 +411,6 @@ def print_menu():
     print(f"    [{Theme.CYAN}6{RESET}] 💬 {Theme.CYAN}Chat{RESET}           {DIM}General coding help{RESET}")
     print(f"    [{Theme.CYAN}7{RESET}] ⚙️  {Theme.CYAN}Settings{RESET}       {DIM}Services & tunnels{RESET}")
     print()
-    print(f"    Choice [6]: ", end="")
 
 # ... (Existing animate_intro) ...
 

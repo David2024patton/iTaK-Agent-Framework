@@ -11,6 +11,8 @@ from typing import Optional
 
 from .banner import (
     print_banner,
+    print_menu,
+    animate_intro,
     print_welcome_tips,
     print_prompt,
     print_response_start,
@@ -37,28 +39,15 @@ class iTaKREPL:
         # Clear screen
         os.system('cls' if os.name == 'nt' else 'clear')
         
-        # Print banner
-        print_banner("large")
+        # Animation & Banner
+        animate_intro()
         
         # Get terminal width for formatting
         import shutil
         term_width = shutil.get_terminal_size().columns
         
-        # Startup Menu - "What type of project would you like to build?"
-        print(f"\n  {BOLD}What would you like to build?{RESET}\n")
-        
-        from .wizard import PROJECT_TYPES
-        
-        # Print project options compactly (no descriptions)
-        for i, (name, _, desc) in enumerate(PROJECT_TYPES, 1):
-            print(f"    {GREEN}[{i}]{RESET} {name}")
-        
-        print()
-        
-        # System options section
-        print(f"    {GREEN}[6]{RESET} {MAGENTA}💬 Chat{RESET}         {DIM}General coding help{RESET}")
-        print(f"    {GREEN}[7]{RESET} {CYAN}⚙️  Settings{RESET}     {DIM}Services & tunnels{RESET}")
-        print()
+        # Interactive Menu
+        print_menu()
         
         # Get choice - smart input: numbers select menu, text goes to chat
         import click
@@ -66,7 +55,8 @@ class iTaKREPL:
         
         while True:
             try:
-                raw_input = click.prompt(click.style("  Choice", fg="cyan"), default="6")
+                # Use a clean, non-indented prompt that naturally follows the menu
+                raw_input = click.prompt(click.style("   Choice", fg="cyan"), default="6")
                 stripped = raw_input.strip().lower()
                 
                 # Handle exit commands at menu level
@@ -185,7 +175,7 @@ class iTaKREPL:
             
         elif cmd in ['/clear', '/cls']:
             os.system('cls' if os.name == 'nt' else 'clear')
-            print_banner("large")
+            print_banner("dash_3d")
             
         elif cmd == '/model':
             if args:
