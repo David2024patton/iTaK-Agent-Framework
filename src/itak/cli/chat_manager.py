@@ -180,6 +180,33 @@ If anyone mentions self-harm, suicide, depression, or feeling hopeless:
                             print(f"\n  {GREEN}✓ Switched to: {model}{RESET}\n")
                             history = []
                     else:
+                        # Model capability metadata
+                        MODEL_INFO = {
+                            'qwen3': {'tags': '🧠 Thinking', 'note': 'Deep reasoning, slower'},
+                            'qwq': {'tags': '🧠 Thinking', 'note': 'Deep reasoning, slower'},
+                            'deepseek-r1': {'tags': '🧠 Thinking', 'note': 'Deep reasoning, slower'},
+                            'gemma3': {'tags': '⚡ Fast', 'note': 'Quick responses'},
+                            'llama3': {'tags': '⚡ Fast', 'note': 'General purpose'},
+                            'phi4': {'tags': '⚡ Fast', 'note': 'Compact and quick'},
+                            'llava': {'tags': '👁️ Vision', 'note': 'Can see images'},
+                            'bakllava': {'tags': '👁️ Vision', 'note': 'Can see images'},
+                            'moondream': {'tags': '👁️ Vision', 'note': 'Small vision model'},
+                            'minicpm-v': {'tags': '👁️ Vision', 'note': 'Can see images'},
+                            'codellama': {'tags': '💻 Code', 'note': 'Coding specialist'},
+                            'codegemma': {'tags': '💻 Code', 'note': 'Coding specialist'},
+                            'starcoder': {'tags': '💻 Code', 'note': 'Coding specialist'},
+                            'mistral': {'tags': '⚡ Fast', 'note': 'General purpose'},
+                            'mixtral': {'tags': '🔥 Large', 'note': 'Powerful but slow'},
+                        }
+                        
+                        def get_model_info(name):
+                            """Get capability info for a model."""
+                            name_lower = name.lower()
+                            for key, info in MODEL_INFO.items():
+                                if key in name_lower:
+                                    return info
+                            return {'tags': '💬 Chat', 'note': 'General purpose'}
+                        
                         # Show numbered model list
                         print(f"\n  {DIM}Fetching models...{RESET}", end="", flush=True)
                         try:
@@ -188,17 +215,22 @@ If anyone mentions self-harm, suicide, depression, or feeling hopeless:
                             print(f"\r                        \r")  # Clear line
                             
                             if available:
-                                print(f"\n  {BOLD}Installed Models:{RESET}\n")
+                                print(f"\n  {BOLD}Installed Models:{RESET}")
+                                print(f"  {DIM}🧠 Thinking models take longer but reason deeper{RESET}\n")
+                                
                                 for i, m in enumerate(available, 1):
                                     name = m.get('model') or m.get('name') or str(m)
                                     size_bytes = m.get('size', 0)
                                     size_gb = size_bytes / (1024**3)
+                                    info = get_model_info(name)
                                     
                                     # Mark current model
                                     if name == model or model in name:
-                                        print(f"    {GREEN}[{i}] ▸ {name}{RESET} {DIM}({size_gb:.1f}GB) ← current{RESET}")
+                                        print(f"    {GREEN}[{i}] ▸ {name}{RESET}")
+                                        print(f"        {info['tags']} {DIM}• {info['note']} • {size_gb:.1f}GB ← current{RESET}")
                                     else:
-                                        print(f"    [{CYAN}{i}{RESET}]   {CYAN}{name}{RESET} {DIM}({size_gb:.1f}GB){RESET}")
+                                        print(f"    [{CYAN}{i}{RESET}]   {CYAN}{name}{RESET}")
+                                        print(f"        {info['tags']} {DIM}• {info['note']} • {size_gb:.1f}GB{RESET}")
                                 
                                 print(f"\n  {DIM}Type /model 1 or /model qwen3:4b to switch{RESET}\n")
                             else:
