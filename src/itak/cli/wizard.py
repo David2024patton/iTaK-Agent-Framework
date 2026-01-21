@@ -48,11 +48,49 @@ PROJECT_TYPES = [
 def run_project_wizard(initial_prompt: str = None, project_type_idx: int = None):
     """Run the interactive project creation wizard."""
     click.echo()
-    click.secho("  ╔══════════════════════════╗", fg="magenta")
-    click.secho("  ║ ", fg="magenta", nl=False)
-    click.secho("📁 Create New Project", fg="white", bold=True, nl=False)
-    click.secho("    ║", fg="magenta")
-    click.secho("  ╚══════════════════════════╝", fg="magenta")
+    
+    # Header
+    click.secho("  ╔══════════════════════════════════════════════════════════════╗", fg="magenta")
+    click.secho("  ║", fg="magenta", nl=False)
+    click.secho("  🧙 Wizard Code", fg="yellow", bold=True, nl=False)
+    click.secho(" - AI-Powered Project Generator", fg="white", nl=False)
+    click.secho("               ║", fg="magenta")
+    click.secho("  ╚══════════════════════════════════════════════════════════════╝", fg="magenta")
+    click.echo()
+    
+    # Show project type examples
+    click.secho("  ┌─────────────────────────────────────────────────────────────┐", fg="bright_black")
+    click.secho("  │", fg="bright_black", nl=False)
+    click.secho("  💡 What can you build?", fg="cyan", bold=True, nl=False)
+    click.secho("                                          │", fg="bright_black")
+    click.secho("  │", fg="bright_black", nl=False)
+    click.secho("                                                               │", fg="bright_black")
+    click.secho("  │", fg="bright_black", nl=False)
+    click.secho("   🌐 ", fg="green", nl=False)
+    click.secho("Web Apps", fg="white", nl=False)
+    click.secho("      → React dashboards, landing pages, portfolios    │", fg="bright_black")
+    click.secho("  │", fg="bright_black", nl=False)
+    click.secho("   🐍 ", fg="green", nl=False)
+    click.secho("Python", fg="white", nl=False)
+    click.secho("        → Data scripts, web scrapers, automation       │", fg="bright_black")
+    click.secho("  │", fg="bright_black", nl=False)
+    click.secho("   ⚡ ", fg="green", nl=False)
+    click.secho("APIs", fg="white", nl=False)
+    click.secho("           → FastAPI backends, REST services, webhooks   │", fg="bright_black")
+    click.secho("  │", fg="bright_black", nl=False)
+    click.secho("   🤖 ", fg="green", nl=False)
+    click.secho("AI Agents", fg="white", nl=False)
+    click.secho("     → CrewAI workflows, chatbots, automation agents   │", fg="bright_black")
+    click.secho("  │", fg="bright_black", nl=False)
+    click.secho("   📝 ", fg="green", nl=False)
+    click.secho("Custom", fg="white", nl=False)
+    click.secho("        → Describe anything, AI figures out the rest   │", fg="bright_black")
+    click.secho("  │", fg="bright_black", nl=False)
+    click.secho("                                                               │", fg="bright_black")
+    click.secho("  └─────────────────────────────────────────────────────────────┘", fg="bright_black")
+    click.echo()
+    
+    click.secho("  (type 0 or back to cancel)", fg="bright_black")
     click.echo()
     
     try:
@@ -79,25 +117,26 @@ def run_project_wizard(initial_prompt: str = None, project_type_idx: int = None)
         if len(default_name) > 30: 
             default_name = "my-project"
             
-        project_name = wizard_prompt("Project name", default_name)
+        click.secho("  📁 Project Setup", fg="white", bold=True)
+        click.echo()
+        project_name = wizard_prompt("  Project name", default_name)
     
         # Description (Skip if we already have it from initial_prompt)
         if initial_prompt:
             description = initial_prompt
         else:
-            description = wizard_prompt("Description", default_desc)
+            description = wizard_prompt("  What should it do", default_desc)
         
         click.echo()
         
         # Project type
         if project_type_idx is None:
-            click.secho("  What type of project?", fg="white", bold=True)
-            click.secho("  (type 0 or back to cancel)", fg="bright_black")
+            click.secho("  🎯 Select project type:", fg="white", bold=True)
             click.echo()
             for i, (name, _, desc) in enumerate(PROJECT_TYPES, 1):
-                click.secho(f"    [{i}] ", fg="green", nl=False)
-                click.secho(name, fg="white", nl=False)
-                click.secho(f" - {desc}", fg="bright_black")
+                click.secho(f"      [{i}] ", fg="cyan", nl=False)
+                click.secho(name, fg="white", bold=True, nl=False)
+                click.secho(f"  {desc}", fg="bright_black")
             click.echo()
             
             while True:
