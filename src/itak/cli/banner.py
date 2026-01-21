@@ -367,8 +367,9 @@ def print_menu():
         print(f"    [{key}] {icon} {label}")
         
     print()
-    print(f"    [{Theme.CYAN}6{RESET}] 💬 {Theme.CYAN}Chat{RESET}           {DIM}General coding help{RESET}")
-    print(f"    [{Theme.CYAN}7{RESET}] ⚙️  {Theme.CYAN}Settings{RESET}       {DIM}Services & tunnels{RESET}")
+    print(f"    [{Theme.CYAN}6{RESET}] 💬 {Theme.CYAN}Chat{RESET}              {DIM}General coding help{RESET}")
+    print(f"    [{Theme.CYAN}7{RESET}] ⚡ {Theme.CYAN}API Gateway{RESET}       {DIM}FastAPI & tunnels{RESET}")
+    print(f"    [{Theme.CYAN}8{RESET}] 🧩 {Theme.CYAN}Optional Services{RESET} {DIM}Supabase, ComfyUI, etc{RESET}")
     print()
 
 # ... (Existing animate_intro) ...
