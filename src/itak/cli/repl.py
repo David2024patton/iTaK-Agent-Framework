@@ -79,9 +79,9 @@ class iTaKREPL:
                     if choice == 0:
                         print(f"\n{YELLOW}Goodbye!{RESET}\n")
                         return
-                    if 1 <= choice <= 5:
+                    if 1 <= choice <= 6:
                         break
-                    print(f"  {YELLOW}Please enter 0-5, or just type your question{RESET}")
+                    print(f"  {YELLOW}Please enter 0-6, or just type your question{RESET}")
                 except ValueError:
                     # Not a number - treat as chat message and auto-select Chat (option 2)
                     choice = 2
@@ -118,11 +118,11 @@ class iTaKREPL:
                 print(f"\n{YELLOW}Error: {e}{RESET}\n")
         
         elif choice == 3:
-            # AI Agents Mode
+            # Wizards & Guilds Mode (was AI Agents)
             try:
                 from .agent_manager import run_agent_menu
                 run_agent_menu()
-                # After returning from agent menu, restart main menu
+                # After returning from menu, restart main menu
                 self.start()
             except ImportError as e:
                 print(f"\n{YELLOW}Agent Manager module not available: {e}{RESET}\n")
@@ -130,6 +130,18 @@ class iTaKREPL:
                 print(f"\n{YELLOW}Error: {e}{RESET}\n")
         
         elif choice == 4:
+            # Powers (Skills) Mode
+            try:
+                from .powers_manager import run_powers_menu
+                run_powers_menu()
+                # After returning from menu, restart main menu
+                self.start()
+            except ImportError as e:
+                print(f"\n{YELLOW}Powers module not available: {e}{RESET}\n")
+            except Exception as e:
+                print(f"\n{YELLOW}Error: {e}{RESET}\n")
+        
+        elif choice == 5:
             # API Gateway Mode
             try:
                 from .api_manager import run_api_menu
@@ -141,7 +153,7 @@ class iTaKREPL:
             except Exception as e:
                 print(f"\n{YELLOW}Error: {e}{RESET}\n")
         
-        elif choice == 5:
+        elif choice == 6:
             # Optional Services Mode
             try:
                 from .optional_services import run_optional_services_menu

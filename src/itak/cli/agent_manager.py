@@ -34,36 +34,36 @@ def ensure_dirs():
 
 
 def print_agent_menu():
-    """Print the AI Agents submenu."""
+    """Print the Wizards & Guilds submenu."""
     clear_screen()
     ensure_dirs()
     
-    # Count existing agents and crews
-    agents = list(AGENTS_DIR.glob('*.yaml'))
-    crews = list(CREWS_DIR.glob('*.yaml'))
+    # Count existing wizards and guilds
+    wizards = list(AGENTS_DIR.glob('*.yaml'))
+    guilds = list(CREWS_DIR.glob('*.yaml'))
     
     print(f"\n  \033[35m╔══════════════════════════════════════════════════════════════╗\033[0m")
-    print(f"  \033[35m║  🤖 AI Agents & Crews                                        ║\033[0m")
+    print(f"  \033[35m║  🔮 Wizards & Guilds                                         ║\033[0m")
     print(f"  \033[35m╚══════════════════════════════════════════════════════════════╝\033[0m")
     print()
     
     print(f"  \033[90m┌───────────────────────────────────────────────────────────────┐\033[0m")
-    print(f"  \033[90m│  💡 Build and manage your AI workforce                        │\033[0m")
+    print(f"  \033[90m│  💡 Build and manage your magical workforce                   │\033[0m")
     print(f"  \033[90m│                                                               │\033[0m")
-    print(f"  \033[90m│    🤖 Agents  → Specialized AI with custom roles/tools        │\033[0m")
-    print(f"  \033[90m│    👥 Crews   → Teams of agents working together              │\033[0m")
+    print(f"  \033[90m│    🧙 Wizards → Specialized AI with custom roles/powers       │\033[0m")
+    print(f"  \033[90m│    🏰 Guilds  → Teams of wizards working together             │\033[0m")
     print(f"  \033[90m│                                                               │\033[0m")
     print(f"  \033[90m└───────────────────────────────────────────────────────────────┘\033[0m")
     print()
     
-    print(f"  {BOLD}Agents:{RESET} {len(agents)} saved  |  {BOLD}Crews:{RESET} {len(crews)} saved")
+    print(f"  {BOLD}Wizards:{RESET} {len(wizards)} saved  |  {BOLD}Guilds:{RESET} {len(guilds)} saved")
     print()
     
-    print(f"  {GREEN}[1]{RESET} 🤖 {WHITE}Create Agent{RESET}      {DIM}Define a new specialized agent{RESET}")
-    print(f"  {GREEN}[2]{RESET} 👥 {WHITE}Create Crew{RESET}       {DIM}Build a team of agents{RESET}")
+    print(f"  {GREEN}[1]{RESET} 🧙 {WHITE}Create Wizard{RESET}     {DIM}Define a new specialized wizard{RESET}")
+    print(f"  {GREEN}[2]{RESET} 🏰 {WHITE}Create Guild{RESET}      {DIM}Build a team of wizards{RESET}")
     print()
-    print(f"  {GREEN}[3]{RESET} 📋 {WHITE}List Agents{RESET}       {DIM}View and manage agents{RESET}")
-    print(f"  {GREEN}[4]{RESET} 📋 {WHITE}List Crews{RESET}        {DIM}View and manage crews{RESET}")
+    print(f"  {GREEN}[3]{RESET} 📋 {WHITE}List Wizards{RESET}      {DIM}View and manage wizards{RESET}")
+    print(f"  {GREEN}[4]{RESET} 📋 {WHITE}List Guilds{RESET}       {DIM}View and manage guilds{RESET}")
     print()
     print(f"  {GREEN}[0]{RESET} ↩️  {WHITE}Back{RESET}")
     print()
