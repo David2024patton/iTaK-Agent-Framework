@@ -108,7 +108,7 @@ def show_models_in_category(category_name: str, models: list):
     return models
 
 
-def browse_models(current_model: str = "qwen3-vl:4b") -> str:
+def browse_models(current_model: str = "ollama/qwen3-vl:4b") -> str:
     """Interactive model browser. Returns selected model name."""
     
     print(f"\n{BOLD}🤖 Model Browser{RESET}")
@@ -143,6 +143,8 @@ def browse_models(current_model: str = "qwen3-vl:4b") -> str:
                         model_idx = int(model_choice) - 1
                         if 0 <= model_idx < len(models):
                             selected = models[model_idx]["name"]
+                            # Add ollama/ prefix for proper routing
+                            selected = f"ollama/{selected}"
                             print(f"\n{GREEN}✓{RESET} Model set to: {CYAN}{selected}{RESET}\n")
                             return selected
                     except ValueError:
