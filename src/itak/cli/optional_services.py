@@ -123,6 +123,7 @@ def update_env_file(key, value):
 
 def start_service(service_key):
     """Start an optional service using docker compose with profile."""
+    import os
     service = OPTIONAL_SERVICES[service_key]
     
     print(f"\n  {CYAN}🚀 Installing {service['name']}...{RESET}")
@@ -134,11 +135,16 @@ def start_service(service_key):
         
         print(f"  {DIM}Pulling Docker image (please wait)...{RESET}\n")
         
-        # Use stdio='inherit' so user sees docker pull progress
+        # Set environment for UTF-8 to avoid Windows encoding issues
+        env = os.environ.copy()
+        env['PYTHONIOENCODING'] = 'utf-8'
+        
+        # Use shell=True for Windows compatibility, let output flow to terminal
         result = subprocess.run(
-            ['docker', 'compose', '-f', str(compose_file), '-p', 'api-gateway',
-             '--profile', 'optional', 'up', '-d', service['container']],
-            cwd=str(DOCKER_DIR)  # Let output flow to terminal
+            f'docker compose -f "{compose_file}" -p api-gateway --profile optional up -d {service["container"]}',
+            cwd=str(DOCKER_DIR),
+            shell=True,
+            env=env
         )
         
         # Also start extra containers if any
@@ -146,9 +152,10 @@ def start_service(service_key):
             for extra in service['extra_containers']:
                 print(f"\n  {DIM}Starting {extra}...{RESET}")
                 subprocess.run(
-                    ['docker', 'compose', '-f', str(compose_file), '-p', 'api-gateway',
-                     '--profile', 'optional', 'up', '-d', extra],
-                    cwd=str(DOCKER_DIR)
+                    f'docker compose -f "{compose_file}" -p api-gateway --profile optional up -d {extra}',
+                    cwd=str(DOCKER_DIR),
+                    shell=True,
+                    env=env
                 )
         
         if result.returncode == 0:
