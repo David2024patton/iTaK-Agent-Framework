@@ -132,17 +132,19 @@ def natural_chat():
                             if available:
                                 print(f"  {BOLD}Installed Models:{RESET}\n")
                                 for m in available:
-                                    name = m.get('name', 'unknown')
+                                    # Ollama API uses 'model' or 'name' depending on version
+                                    name = m.get('model') or m.get('name') or str(m)
                                     size_bytes = m.get('size', 0)
                                     size_gb = size_bytes / (1024**3)
                                     
                                     # Mark current model
-                                    if name == model:
+                                    if name == model or model in name:
                                         print(f"    {GREEN}▸ {name}{RESET} {DIM}({size_gb:.1f}GB) ← current{RESET}")
                                     else:
                                         print(f"    • {CYAN}{name}{RESET} {DIM}({size_gb:.1f}GB){RESET}")
                                 
-                                print(f"\n  {DIM}Usage: /model {available[0].get('name', 'modelname')}{RESET}\n")
+                                first_model = available[0].get('model') or available[0].get('name') or 'modelname'
+                                print(f"\n  {DIM}Usage: /model {first_model}{RESET}\n")
                             else:
                                 print(f"  {YELLOW}No models installed.{RESET}")
                                 print(f"  {DIM}Run: ollama pull qwen3:4b{RESET}\n")
