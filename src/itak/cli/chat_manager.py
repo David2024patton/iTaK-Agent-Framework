@@ -196,7 +196,10 @@ If anyone mentions self-harm, suicide, depression, or feeling hopeless:
                         print(f"\r                        \r")
                         
                         if available:
-                            print(f"  {DIM}Current: {CYAN}{model}{RESET}\n")
+                            # Header with legend
+                            print(f"  {DIM}Current:{RESET} {CYAN}{model}{RESET}")
+                            print(f"  {DIM}🧠=Thinking  ⚡=Fast  👁️=Vision  💻=Code{RESET}")
+                            print()
                             
                             for i, m in enumerate(available, 1):
                                 name = m.get('model') or m.get('name') or str(m)
@@ -206,13 +209,13 @@ If anyone mentions self-harm, suicide, depression, or feeling hopeless:
                                 
                                 is_current = (name == model or model in name)
                                 
+                                # Clean single-line format
                                 if is_current:
-                                    print(f"  {GREEN}[{i}] {info['icon']} {name}{RESET} {DIM}← current{RESET}")
+                                    print(f"  {GREEN}[{i}]{RESET} {info['icon']} {GREEN}{name:<25}{RESET} {DIM}{size_gb:.1f}GB{RESET} {GREEN}← current{RESET}")
                                 else:
-                                    print(f"  [{CYAN}{i}{RESET}] {info['icon']} {name}")
-                                print(f"      {DIM}{info['type']} • {info['speed']} • {size_gb:.1f}GB{RESET}")
+                                    print(f"  [{CYAN}{i}{RESET}] {info['icon']} {name:<25} {DIM}{size_gb:.1f}GB{RESET}")
                             
-                            print(f"\n  {GREEN}[0]{RESET} ↩️  Back to chat\n")
+                            print(f"\n  [{GREEN}0{RESET}] ↩️  Back to chat\n")
                             
                             # Prompt for selection
                             try:
