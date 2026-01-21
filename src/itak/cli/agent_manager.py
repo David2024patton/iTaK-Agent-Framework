@@ -299,7 +299,7 @@ def create_wizard_from_template():
                 print(f"  {GREEN}✓{RESET} {role}\n")
                 
                 # Goal/Mission
-                print(f"  {BOLD}Mission{RESET} {DIM}(current: {template['goal'][:50]}...){RESET}")
+                print(f"  {BOLD}Mission{RESET} {DIM}(current: {template['goal']}){RESET}")
                 goal = click.prompt(click.style("  Mission", fg="cyan"), default=template['goal'], show_default=False).strip()
                 if goal.lower() in ['/exit', 'exit']:
                     return
