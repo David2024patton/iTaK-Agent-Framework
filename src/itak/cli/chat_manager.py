@@ -233,10 +233,11 @@ If anyone mentions self-harm, suicide, depression, or feeling hopeless:
                         print(f"\r                        \r")
                         
                         if available:
-                            # Header with legend
-                            print(f"  {DIM}Current:{RESET} {CYAN}{model}{RESET}")
-                            print(f"  {DIM}🧠=Thinking  ⚡=Fast  👁️=Vision  💻=Code{RESET}")
-                            print()
+                            # Table header
+                            print(f"  {DIM}Current:{RESET} {CYAN}{model}{RESET}\n")
+                            print(f"  {DIM}┌────┬──────────────────────────┬────────────────────┬────────┐{RESET}")
+                            print(f"  {DIM}│{RESET} #  {DIM}│{RESET} Model                    {DIM}│{RESET} Type               {DIM}│{RESET} Size   {DIM}│{RESET}")
+                            print(f"  {DIM}├────┼──────────────────────────┼────────────────────┼────────┤{RESET}")
                             
                             for i, m in enumerate(available, 1):
                                 name = m.get('model') or m.get('name') or str(m)
@@ -246,14 +247,16 @@ If anyone mentions self-harm, suicide, depression, or feeling hopeless:
                                 
                                 is_current = (name == model or model in name)
                                 
-                                # Display with capabilities
+                                # Truncate long names
+                                display_name = name[:22] + '..' if len(name) > 24 else name
+                                caps = info['caps'][:18] if len(info['caps']) > 18 else info['caps']
+                                
                                 if is_current:
-                                    print(f"  {GREEN}[{i}]{RESET} {GREEN}{name}{RESET}")
-                                    print(f"      {info['caps']} {DIM}• {info['speed']} • {size_gb:.1f}GB{RESET} {GREEN}← current{RESET}")
+                                    print(f"  {DIM}│{RESET} {GREEN}{i:<2}{RESET} {DIM}│{RESET} {GREEN}{display_name:<24}{RESET} {DIM}│{RESET} {caps:<18} {DIM}│{RESET} {size_gb:.1f}GB {DIM}│{RESET} {GREEN}◀{RESET}")
                                 else:
-                                    print(f"  [{CYAN}{i}{RESET}] {name}")
-                                    print(f"      {info['caps']} {DIM}• {info['speed']} • {size_gb:.1f}GB{RESET}")
+                                    print(f"  {DIM}│{RESET} {CYAN}{i:<2}{RESET} {DIM}│{RESET} {display_name:<24} {DIM}│{RESET} {caps:<18} {DIM}│{RESET} {size_gb:.1f}GB {DIM}│{RESET}")
                             
+                            print(f"  {DIM}└────┴──────────────────────────┴────────────────────┴────────┘{RESET}")
                             print(f"\n  [{GREEN}0{RESET}] ↩️  Back to chat\n")
                             
                             # Prompt for selection
