@@ -48,10 +48,10 @@ def print_agent_menu():
     print()
     
     print(f"  \033[90m┌───────────────────────────────────────────────────────────────┐\033[0m")
-    print(f"  \033[90m│  💡 Build and manage your AI workforce                       │\033[0m")
+    print(f"  \033[90m│  💡 Build and manage your AI workforce                        │\033[0m")
     print(f"  \033[90m│                                                               │\033[0m")
-    print(f"  \033[90m│    🤖 Agents → Specialized AI with custom roles/tools        │\033[0m")
-    print(f"  \033[90m│    👥 Crews  → Teams of agents working together              │\033[0m")
+    print(f"  \033[90m│    🤖 Agents  → Specialized AI with custom roles/tools        │\033[0m")
+    print(f"  \033[90m│    👥 Crews   → Teams of agents working together              │\033[0m")
     print(f"  \033[90m│                                                               │\033[0m")
     print(f"  \033[90m└───────────────────────────────────────────────────────────────┘\033[0m")
     print()
