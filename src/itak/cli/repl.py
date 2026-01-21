@@ -79,9 +79,9 @@ class iTaKREPL:
                     if choice == 0:
                         print(f"\n{YELLOW}Goodbye!{RESET}\n")
                         return
-                    if 1 <= choice <= 4:
+                    if 1 <= choice <= 5:
                         break
-                    print(f"  {YELLOW}Please enter 0-4, or just type your question{RESET}")
+                    print(f"  {YELLOW}Please enter 0-5, or just type your question{RESET}")
                 except ValueError:
                     # Not a number - treat as chat message and auto-select Chat (option 2)
                     choice = 2
@@ -106,35 +106,30 @@ class iTaKREPL:
                 print(f"\n{YELLOW}Error running wizard: {e}{RESET}\n")
         
         elif choice == 2:
-            # Chat Mode - Clear screen for fresh view
-            os.system('cls' if os.name == 'nt' else 'clear')
-            print()
-            print_welcome_tips()
-            
-            # If user typed a message at the menu, process it immediately
-            if initial_message:
-                # Show the prompt so user knows what was sent
-                print(f"{CYAN}>{RESET} {initial_message}")
-                print()
-                self.history.append(initial_message)
-                self.process_prompt(initial_message)
-            
-            # Main loop
-            while self.running:
-                try:
-                    self.run_once()
-                except KeyboardInterrupt:
-                    print(f"\n\n{DIM}Use /exit to quit or Ctrl+C again to force exit.{RESET}")
-                    try:
-                        self.run_once()
-                    except KeyboardInterrupt:
-                        self.running = False
-                        print(f"\n{YELLOW}Goodbye!{RESET}\n")
-                except EOFError:
-                    self.running = False
-                    print(f"\n{YELLOW}Goodbye!{RESET}\n")
+            # Chat Mode - Now goes to submenu
+            try:
+                from .chat_manager import run_chat_menu
+                run_chat_menu()
+                # After returning from chat menu, restart main menu
+                self.start()
+            except ImportError as e:
+                print(f"\n{YELLOW}Chat Manager module not available: {e}{RESET}\n")
+            except Exception as e:
+                print(f"\n{YELLOW}Error: {e}{RESET}\n")
         
         elif choice == 3:
+            # AI Agents Mode
+            try:
+                from .agent_manager import run_agent_menu
+                run_agent_menu()
+                # After returning from agent menu, restart main menu
+                self.start()
+            except ImportError as e:
+                print(f"\n{YELLOW}Agent Manager module not available: {e}{RESET}\n")
+            except Exception as e:
+                print(f"\n{YELLOW}Error: {e}{RESET}\n")
+        
+        elif choice == 4:
             # API Gateway Mode
             try:
                 from .api_manager import run_api_menu
@@ -146,7 +141,7 @@ class iTaKREPL:
             except Exception as e:
                 print(f"\n{YELLOW}Error: {e}{RESET}\n")
         
-        elif choice == 4:
+        elif choice == 5:
             # Optional Services Mode
             try:
                 from .optional_services import run_optional_services_menu
