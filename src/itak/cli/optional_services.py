@@ -279,9 +279,14 @@ def run_optional_services_menu():
         print_optional_menu()
         
         try:
-            choice = input(f"  Choice [0]: ").strip()
+            choice = input(f"  Choice [0]: ").strip().lower()
             
-            if not choice or choice == '0':
+            # Handle exit commands
+            if choice in ['/exit', 'exit', '/quit', 'quit']:
+                import sys
+                sys.exit(0)
+            
+            if not choice or choice == '0' or choice in ['/back', 'back']:
                 return
             
             choice_num = int(choice)
