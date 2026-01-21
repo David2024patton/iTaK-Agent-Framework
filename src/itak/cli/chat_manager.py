@@ -159,27 +159,64 @@ If anyone mentions self-harm, suicide, depression, or feeling hopeless:
                 
                 # Model switch command
                 if user_input.lower() == '/model':
-                    # Model capability metadata
+                    # Comprehensive model capability database
+                    # Format: 'pattern': {'caps': 'capabilities', 'speed': 'response time'}
                     MODEL_INFO = {
-                        'qwen3': {'icon': '🧠', 'type': 'Thinking', 'speed': 'Slower'},
-                        'qwq': {'icon': '🧠', 'type': 'Thinking', 'speed': 'Slower'},
-                        'deepseek': {'icon': '🧠', 'type': 'Thinking', 'speed': 'Slower'},
-                        'gemma': {'icon': '⚡', 'type': 'Fast', 'speed': 'Quick'},
-                        'llama': {'icon': '⚡', 'type': 'Fast', 'speed': 'Quick'},
-                        'phi': {'icon': '⚡', 'type': 'Fast', 'speed': 'Quick'},
-                        'llava': {'icon': '👁️', 'type': 'Vision', 'speed': 'Medium'},
-                        'moondream': {'icon': '👁️', 'type': 'Vision', 'speed': 'Quick'},
-                        'codellama': {'icon': '💻', 'type': 'Code', 'speed': 'Medium'},
-                        'mistral': {'icon': '⚡', 'type': 'Fast', 'speed': 'Quick'},
-                        'mixtral': {'icon': '🔥', 'type': 'Large', 'speed': 'Slow'},
+                        # Qwen models
+                        'qwen3-vl': {'caps': '🧠👁️ Thinking+Vision', 'speed': 'Slower'},
+                        'qwen-vl': {'caps': '👁️ Vision', 'speed': 'Medium'},
+                        'qwen3': {'caps': '🧠 Thinking', 'speed': 'Slower'},
+                        'qwen2.5-coder': {'caps': '💻 Code', 'speed': 'Medium'},
+                        'qwen2.5': {'caps': '⚡ Fast', 'speed': 'Quick'},
+                        'qwq': {'caps': '🧠 Thinking', 'speed': 'Slower'},
+                        
+                        # DeepSeek models
+                        'deepseek-r1': {'caps': '🧠 Thinking', 'speed': 'Slower'},
+                        'deepseek-coder': {'caps': '💻 Code', 'speed': 'Medium'},
+                        'deepseek-v3': {'caps': '🧠 Thinking', 'speed': 'Slower'},
+                        
+                        # Llama models
+                        'llama3.2-vision': {'caps': '👁️ Vision', 'speed': 'Medium'},
+                        'llama3.3': {'caps': '⚡ Fast', 'speed': 'Quick'},
+                        'llama3.2': {'caps': '⚡ Fast', 'speed': 'Quick'},
+                        'llama3.1': {'caps': '⚡ Fast', 'speed': 'Quick'},
+                        'codellama': {'caps': '💻 Code', 'speed': 'Medium'},
+                        
+                        # Gemma models
+                        'gemma3': {'caps': '⚡ Fast', 'speed': 'Quick'},
+                        'gemma2': {'caps': '⚡ Fast', 'speed': 'Quick'},
+                        'codegemma': {'caps': '💻 Code', 'speed': 'Medium'},
+                        
+                        # Phi models
+                        'phi4': {'caps': '🧠 Thinking', 'speed': 'Medium'},
+                        'phi3.5': {'caps': '⚡ Fast', 'speed': 'Quick'},
+                        'phi3': {'caps': '⚡ Fast', 'speed': 'Quick'},
+                        
+                        # Vision models
+                        'llava': {'caps': '👁️ Vision', 'speed': 'Medium'},
+                        'bakllava': {'caps': '👁️ Vision', 'speed': 'Medium'},
+                        'moondream': {'caps': '👁️ Vision', 'speed': 'Quick'},
+                        'minicpm-v': {'caps': '👁️ Vision', 'speed': 'Medium'},
+                        
+                        # Mistral models
+                        'mistral': {'caps': '⚡ Fast', 'speed': 'Quick'},
+                        'mixtral': {'caps': '🔥 Large', 'speed': 'Slow'},
+                        
+                        # Other
+                        'starcoder': {'caps': '💻 Code', 'speed': 'Medium'},
+                        'wizardcoder': {'caps': '💻 Code', 'speed': 'Medium'},
+                        'nous-hermes': {'caps': '⚡ Fast', 'speed': 'Quick'},
+                        'neural-chat': {'caps': '💬 Chat', 'speed': 'Quick'},
+                        'openchat': {'caps': '💬 Chat', 'speed': 'Quick'},
                     }
                     
                     def get_model_info(name):
                         name_lower = name.lower()
-                        for key, info in MODEL_INFO.items():
+                        # Check specific patterns first (longer patterns)
+                        for key in sorted(MODEL_INFO.keys(), key=len, reverse=True):
                             if key in name_lower:
-                                return info
-                        return {'icon': '💬', 'type': 'Chat', 'speed': 'Medium'}
+                                return MODEL_INFO[key]
+                        return {'caps': '💬 Chat', 'speed': 'Medium'}
                     
                     # Clear and show model selector
                     clear_screen()
@@ -209,11 +246,13 @@ If anyone mentions self-harm, suicide, depression, or feeling hopeless:
                                 
                                 is_current = (name == model or model in name)
                                 
-                                # Clean single-line format
+                                # Display with capabilities
                                 if is_current:
-                                    print(f"  {GREEN}[{i}]{RESET} {info['icon']} {GREEN}{name:<25}{RESET} {DIM}{size_gb:.1f}GB{RESET} {GREEN}← current{RESET}")
+                                    print(f"  {GREEN}[{i}]{RESET} {GREEN}{name}{RESET}")
+                                    print(f"      {info['caps']} {DIM}• {info['speed']} • {size_gb:.1f}GB{RESET} {GREEN}← current{RESET}")
                                 else:
-                                    print(f"  [{CYAN}{i}{RESET}] {info['icon']} {name:<25} {DIM}{size_gb:.1f}GB{RESET}")
+                                    print(f"  [{CYAN}{i}{RESET}] {name}")
+                                    print(f"      {info['caps']} {DIM}• {info['speed']} • {size_gb:.1f}GB{RESET}")
                             
                             print(f"\n  [{GREEN}0{RESET}] ↩️  Back to chat\n")
                             
@@ -235,7 +274,7 @@ If anyone mentions self-harm, suicide, depression, or feeling hopeless:
                                             
                                             clear_screen()
                                             print(f"\n  {GREEN}✓ Switched to: {model}{RESET}")
-                                            print(f"  {DIM}{info['icon']} {info['type']} • {info['speed']} response times{RESET}")
+                                            print(f"  {info['caps']} {DIM}• {info['speed']} response times{RESET}")
                                             print(f"  {DIM}Loading model... first message may take 10-30s{RESET}\n")
                                         else:
                                             print(f"\n  {YELLOW}Invalid selection{RESET}\n")
