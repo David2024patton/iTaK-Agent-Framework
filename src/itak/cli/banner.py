@@ -379,7 +379,7 @@ def print_menu():
     """Print the interactive CLI menu."""
     print(f"\n   {BOLD}What would you like to do?{RESET}\n")
     
-    print(f"    [{Theme.CYAN}1{RESET}] 🧙 {Theme.CYAN}Wizard{RESET}            {DIM}Create a new project{RESET}")
+    print(f"    [{Theme.CYAN}1{RESET}] 🧙 {Theme.CYAN}Wizard Code{RESET}       {DIM}Create a new project{RESET}")
     print(f"    [{Theme.CYAN}2{RESET}] 💬 {Theme.CYAN}Chat{RESET}              {DIM}General coding help{RESET}")
     print()
     print(f"    [{Theme.CYAN}3{RESET}] ⚡ {Theme.CYAN}API Gateway{RESET}       {DIM}FastAPI & tunnels{RESET}")
