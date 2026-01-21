@@ -256,7 +256,7 @@ def auto(prompt, model, output):
             ),
             tools=tools,
             llm=model,
-            verbose=True,
+            verbose=False,  # Suppress tool schema output
             max_iterations=20  # Give it enough turns to search and edit
         )
 
