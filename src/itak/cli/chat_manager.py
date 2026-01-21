@@ -54,8 +54,21 @@ def natural_chat():
     import time
     
     clear_screen()
-    print(f"\n  {BOLD}{MAGENTA}💬 Natural Chat{RESET}")
-    print(f"  {DIM}Quick Q&A with Ollama - type /back to return{RESET}\n")
+    
+    # Styled header box
+    print(f"\n  \033[35m╔══════════════════════════════════════════════════════════════╗\033[0m")
+    print(f"  \033[35m║  💬 Natural Chat                                             ║\033[0m")
+    print(f"  \033[35m╚══════════════════════════════════════════════════════════════╝\033[0m")
+    print()
+    
+    print(f"  \033[90m┌───────────────────────────────────────────────────────────────┐\033[0m")
+    print(f"  \033[90m│  💡 Quick Q&A with your local LLM                             │\033[0m")
+    print(f"  \033[90m│                                                               │\033[0m")
+    print(f"  \033[90m│    /model     → Switch to a different model                   │\033[0m")
+    print(f"  \033[90m│    /back      → Return to menu                                │\033[0m")
+    print(f"  \033[90m│                                                               │\033[0m")
+    print(f"  \033[90m└───────────────────────────────────────────────────────────────┘\033[0m")
+    print()
     
     # Fast models recommendation
     FAST_MODELS = ['qwen3:1.7b', 'qwen3:4b', 'gemma3:4b', 'llama3.2:3b', 'phi4-mini:3.8b']
@@ -64,11 +77,11 @@ def natural_chat():
         import ollama
         
         # Check available models
-        print(f"  {DIM}Checking Ollama models...{RESET}", end="", flush=True)
+        print(f"  {DIM}Checking Ollama...{RESET}", end="", flush=True)
         try:
             models_response = ollama.list()
             available = [m['name'] for m in models_response.get('models', [])]
-            print(f" {GREEN}✓{RESET}")
+            print(f" {GREEN}✓{RESET} ({len(available)} models)")
         except:
             available = []
             print(f" {YELLOW}?{RESET}")
@@ -85,13 +98,8 @@ def natural_chat():
             if not model:
                 model = 'qwen3:4b'  # Default
         
-        print(f"\n  {BOLD}Model:{RESET} {CYAN}{model}{RESET}")
-        
-        # Show tips
-        print(f"\n  {DIM}💡 Tips:{RESET}")
-        print(f"  {DIM}   • First response may take 10-30s to load the model{RESET}")
-        print(f"  {DIM}   • Type /model to switch models{RESET}")
-        print(f"  {DIM}   • For faster responses, try: qwen3:1.7b or gemma3:4b{RESET}")
+        print(f"  {BOLD}Model:{RESET} {CYAN}{model}{RESET}")
+        print(f"  {DIM}First response may take 10-30s to load{RESET}")
         print()
         
         history = []
@@ -181,13 +189,25 @@ def natural_chat():
 
 
 def agent_chat():
-    """Run chat with a CrewAI agent."""
+    """Run chat with a Wizard (CrewAI agent)."""
     import click
     import subprocess
     
     clear_screen()
-    print(f"\n  {BOLD}{MAGENTA}🤖 Agent Chat{RESET}")
-    print(f"  {DIM}AI with tools - type /back to return{RESET}\n")
+    
+    # Styled header box
+    print(f"\n  \033[35m╔══════════════════════════════════════════════════════════════╗\033[0m")
+    print(f"  \033[35m║  🧙 Wizard Chat                                              ║\033[0m")
+    print(f"  \033[35m╚══════════════════════════════════════════════════════════════╝\033[0m")
+    print()
+    
+    print(f"  \033[90m┌───────────────────────────────────────────────────────────────┐\033[0m")
+    print(f"  \033[90m│  💡 AI wizard with powers (code, search, files)               │\033[0m")
+    print(f"  \033[90m│                                                               │\033[0m")
+    print(f"  \033[90m│    /back      → Return to menu                                │\033[0m")
+    print(f"  \033[90m│                                                               │\033[0m")
+    print(f"  \033[90m└───────────────────────────────────────────────────────────────┘\033[0m")
+    print()
     
     # Check for saved agents
     agents_dir = Path.home() / '.itak' / 'agents'
@@ -232,12 +252,24 @@ def agent_chat():
 
 
 def crew_chat():
-    """Run a crew of agents."""
+    """Run a Guild (team of wizards)."""
     import click
     
     clear_screen()
-    print(f"\n  {BOLD}{MAGENTA}👥 Crew Chat{RESET}")
-    print(f"  {DIM}Run a team of agents - type /back to return{RESET}\n")
+    
+    # Styled header box
+    print(f"\n  \033[35m╔══════════════════════════════════════════════════════════════╗\033[0m")
+    print(f"  \033[35m║  🏰 Guild Chat                                               ║\033[0m")
+    print(f"  \033[35m╚══════════════════════════════════════════════════════════════╝\033[0m")
+    print()
+    
+    print(f"  \033[90m┌───────────────────────────────────────────────────────────────┐\033[0m")
+    print(f"  \033[90m│  💡 Run a team of specialized wizards together                │\033[0m")
+    print(f"  \033[90m│                                                               │\033[0m")
+    print(f"  \033[90m│    Select a guild below to start the workflow                 │\033[0m")
+    print(f"  \033[90m│                                                               │\033[0m")
+    print(f"  \033[90m└───────────────────────────────────────────────────────────────┘\033[0m")
+    print()
     
     # Check for saved crews
     crews_dir = Path.home() / '.itak' / 'crews'
