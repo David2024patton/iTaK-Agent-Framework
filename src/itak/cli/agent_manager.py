@@ -135,6 +135,7 @@ def create_agent():
     print(f"  {GREEN}[1]{RESET} 🤖 {WHITE}AI-Assisted{RESET}     {DIM}Describe what you need, AI designs it{RESET}")
     print(f"  {GREEN}[2]{RESET} 📝 {WHITE}Manual{RESET}          {DIM}Define everything step-by-step{RESET}")
     print(f"  {GREEN}[3]{RESET} 📋 {WHITE}Templates{RESET}       {DIM}Start from a pre-built wizard{RESET}")
+    print(f"  {GREEN}[4]{RESET} 💬 {WHITE}Brainstorm{RESET}      {DIM}Chat with AI to discover wizard ideas{RESET}")
     print()
     print(f"  {GREEN}[0]{RESET} ↩️  {WHITE}Back{RESET}")
     print()
@@ -152,6 +153,8 @@ def create_agent():
             create_wizard_manual()
         elif choice == '3':
             create_wizard_from_template()
+        elif choice == '4':
+            brainstorm_wizard()
             
     except (KeyboardInterrupt, click.Abort):
         pass
@@ -450,6 +453,357 @@ def create_wizard_manual():
         pass
 
 
+def brainstorm_wizard():
+    """Interactive AI brainstorming for wizard ideas."""
+    import click
+    
+    clear_screen()
+    
+    print(f"\n  \033[35m╔══════════════════════════════════════════════════════════════╗\033[0m")
+    print(f"  \033[35m║  💬 Wizard Brainstorm                                        ║\033[0m")
+    print(f"  \033[35m╚══════════════════════════════════════════════════════════════╝\033[0m")
+    print()
+    
+    print(f"  \033[90m┌───────────────────────────────────────────────────────────────┐\033[0m")
+    print(f"  \033[90m│  💡 Chat with AI to brainstorm wizard ideas!                  │\033[0m")
+    print(f"  \033[90m│                                                               │\033[0m")
+    print(f"  \033[90m│    Tell me what kind of tasks you want to automate.          │\033[0m")
+    print(f"  \033[90m│    I'll suggest wizard concepts you can create!              │\033[0m")
+    print(f"  \033[90m│                                                               │\033[0m")
+    print(f"  \033[90m│    /create - Create a wizard from our discussion             │\033[0m")
+    print(f"  \033[90m│    /back   - Return to menu                                  │\033[0m")
+    print(f"  \033[90m└───────────────────────────────────────────────────────────────┘\033[0m")
+    print()
+    
+    try:
+        import ollama
+        
+        system_prompt = """You are a helpful AI assistant specialized in designing AI agent wizards.
+
+Your role is to help users brainstorm ideas for wizards (AI agents) they could create.
+
+When the user describes a task or problem:
+1. Suggest specific wizard concepts with creative names
+2. Recommend what role/specialty the wizard should have
+3. Suggest what tools/powers the wizard would need
+4. Give practical examples of what the wizard could do
+
+Available tools/powers for wizards:
+- file_read: Read files from the filesystem
+- file_write: Create and modify files
+- code_search: Search through code using ripgrep
+- web_search: Search the internet for information
+- shell: Execute shell commands
+
+Be enthusiastic, creative, and practical! Use wizard/magic themed language.
+Keep responses concise but informative.
+
+When the user seems ready to create a wizard, summarize the concept clearly."""
+
+        history = [{'role': 'system', 'content': system_prompt}]
+        
+        print(f"  {MAGENTA}✦{RESET} {DIM}AI Brainstorm ready. What would you like to automate?{RESET}")
+        print()
+        
+        while True:
+            try:
+                user_input = click.prompt(click.style("  You", fg="green"), default="", show_default=False).strip()
+                
+                if not user_input:
+                    continue
+                
+                if user_input.lower() in ['/exit', 'exit', '/quit', 'quit']:
+                    print(f"\n{YELLOW}Goodbye!{RESET}\n")
+                    sys.exit(0)
+                    
+                if user_input.lower() in ['/back', 'back']:
+                    return
+                
+                if user_input.lower() == '/create':
+                    # Extract wizard concept from conversation
+                    print(f"\n  {MAGENTA}✦{RESET} {DIM}Generating wizard from our discussion...{RESET}")
+                    
+                    extract_prompt = """Based on our brainstorming conversation, extract the best wizard concept.
+Respond with ONLY a JSON object like this:
+{"name": "Creative Wizard Name", "role": "Specific Role Title", "goal": "What the wizard achieves", "tools": ["tool1", "tool2"]}
+
+Use only these tool names: file_read, file_write, code_search, web_search, shell"""
+                    
+                    history.append({'role': 'user', 'content': extract_prompt})
+                    
+                    try:
+                        response = ollama.chat(model='qwen3-vl:2b', messages=history, options={'temperature': 0.3})
+                        response_text = response['message']['content']
+                        
+                        import json
+                        import re
+                        json_match = re.search(r'\{[^{}]+\}', response_text.replace('\n', ' '))
+                        
+                        if json_match:
+                            result = json.loads(json_match.group())
+                            
+                            name = result.get('name', 'New Wizard')
+                            role = result.get('role', 'AI Assistant')
+                            goal = result.get('goal', 'Help users')
+                            tools = result.get('tools', ['file_read'])
+                            
+                            # Validate tools
+                            valid_tools = ['file_read', 'file_write', 'code_search', 'web_search', 'shell']
+                            tools = [t for t in tools if t in valid_tools]
+                            
+                            print()
+                            print(f"  {BOLD}Wizard Concept:{RESET}")
+                            print(f"    {BOLD}Name:{RESET}    {CYAN}{name}{RESET}")
+                            print(f"    {BOLD}Role:{RESET}    {role}")
+                            print(f"    {BOLD}Mission:{RESET} {goal}")
+                            print(f"    {BOLD}Powers:{RESET}  {', '.join(tools)}")
+                            print()
+                            
+                            confirm = click.prompt(click.style("  Create this wizard? [Y/n]", fg="cyan"), default="y", show_default=False).strip().lower()
+                            
+                            if confirm in ['y', 'yes', '']:
+                                save_wizard(name, role, goal, tools, 'ollama/qwen3-vl:2b')
+                                return
+                            else:
+                                print(f"  {DIM}Okay, let's keep brainstorming!{RESET}")
+                                print()
+                        else:
+                            print(f"  {YELLOW}Couldn't extract wizard concept. Keep discussing!{RESET}")
+                            print()
+                    except Exception as e:
+                        print(f"  {RED}Error: {e}{RESET}")
+                    
+                    continue
+                
+                # Regular chat
+                history.append({'role': 'user', 'content': user_input})
+                
+                print(f"\n  {MAGENTA}AI:{RESET} ", end="", flush=True)
+                
+                response = ollama.chat(model='qwen3-vl:2b', messages=history, stream=True)
+                
+                full_response = ""
+                for chunk in response:
+                    content = chunk.get('message', {}).get('content', '')
+                    print(content, end="", flush=True)
+                    full_response += content
+                
+                print("\n")
+                history.append({'role': 'assistant', 'content': full_response})
+                
+            except (KeyboardInterrupt, click.Abort):
+                print(f"\n\n  {DIM}Cancelled{RESET}")
+                break
+                
+    except Exception as e:
+        print(f"  {RED}Error: {e}{RESET}")
+        print(f"  {DIM}Make sure Ollama is running{RESET}")
+    
+    input("\n  Press Enter to continue...")
+
+
+def brainstorm_guild():
+    """Interactive AI brainstorming for guild ideas."""
+    import click
+    
+    clear_screen()
+    
+    print(f"\n  \033[35m╔══════════════════════════════════════════════════════════════╗\033[0m")
+    print(f"  \033[35m║  💬 Guild Brainstorm                                         ║\033[0m")
+    print(f"  \033[35m╚══════════════════════════════════════════════════════════════╝\033[0m")
+    print()
+    
+    # Load available wizards
+    agents = list(AGENTS_DIR.glob('*.yaml'))
+    
+    if not agents:
+        print(f"  {YELLOW}⚠️  No wizards created yet.{RESET}")
+        print(f"  {DIM}Create some wizards first, then come back to brainstorm guilds!{RESET}")
+        input("\n  Press Enter to continue...")
+        return
+    
+    wizard_info = []
+    for agent_file in agents:
+        try:
+            with open(agent_file) as f:
+                agent = yaml.safe_load(f)
+            wizard_info.append({
+                'id': agent_file.stem,
+                'name': agent.get('name', agent_file.stem),
+                'role': agent.get('role', 'N/A'),
+                'tools': agent.get('tools', [])
+            })
+        except:
+            pass
+    
+    print(f"  \033[90m┌───────────────────────────────────────────────────────────────┐\033[0m")
+    print(f"  \033[90m│  💡 Chat with AI to brainstorm guild compositions!            │\033[0m")
+    print(f"  \033[90m│                                                               │\033[0m")
+    print(f"  \033[90m│    Tell me what project you want to build.                    │\033[0m")
+    print(f"  \033[90m│    I'll suggest which wizards should work together!           │\033[0m")
+    print(f"  \033[90m│                                                               │\033[0m")
+    print(f"  \033[90m│    /create - Create a guild from our discussion               │\033[0m")
+    print(f"  \033[90m│    /back   - Return to menu                                   │\033[0m")
+    print(f"  \033[90m└───────────────────────────────────────────────────────────────┘\033[0m")
+    print()
+    
+    # Show available wizards
+    print(f"  {DIM}Your Available Wizards:{RESET}")
+    for w in wizard_info:
+        print(f"    🧙 {w['name']} - {w['role']}")
+    print()
+    
+    try:
+        import ollama
+        
+        wizard_list = "\n".join([
+            f"- {w['id']}: {w['name']} (Role: {w['role']}, Tools: {', '.join(w['tools'])})"
+            for w in wizard_info
+        ])
+        
+        system_prompt = f"""You are a helpful AI assistant specialized in designing AI agent teams (guilds).
+
+Your role is to help users brainstorm which wizards should work together in a guild.
+
+AVAILABLE WIZARDS:
+{wizard_list}
+
+When the user describes a project:
+1. Suggest which wizards from the list above would work best together
+2. Explain WHY each wizard would be valuable for the project
+3. Recommend sequential or hierarchical workflow
+4. Give examples of how the team would collaborate
+
+Be enthusiastic and practical! Use guild/team themed language.
+Keep responses concise but informative.
+
+When the user is ready, summarize the recommended team composition."""
+
+        history = [{'role': 'system', 'content': system_prompt}]
+        
+        print(f"  {MAGENTA}✦{RESET} {DIM}AI Brainstorm ready. What project do you want to build?{RESET}")
+        print()
+        
+        while True:
+            try:
+                user_input = click.prompt(click.style("  You", fg="green"), default="", show_default=False).strip()
+                
+                if not user_input:
+                    continue
+                
+                if user_input.lower() in ['/exit', 'exit', '/quit', 'quit']:
+                    print(f"\n{YELLOW}Goodbye!{RESET}\n")
+                    sys.exit(0)
+                    
+                if user_input.lower() in ['/back', 'back']:
+                    return
+                
+                if user_input.lower() == '/create':
+                    # Extract guild concept from conversation
+                    print(f"\n  {MAGENTA}✦{RESET} {DIM}Generating guild from our discussion...{RESET}")
+                    
+                    valid_ids = [w['id'] for w in wizard_info]
+                    
+                    extract_prompt = f"""Based on our brainstorming conversation, extract the best guild composition.
+Respond with ONLY a JSON object like this:
+{{"name": "Creative Guild Name", "wizards": ["wizard_id1", "wizard_id2"], "workflow": "sequential"}}
+
+CRITICAL: Only use wizard IDs from this list: {', '.join(valid_ids)}
+Choose workflow: "sequential" (step-by-step) or "hierarchical" (managed)"""
+                    
+                    history.append({'role': 'user', 'content': extract_prompt})
+                    
+                    try:
+                        response = ollama.chat(model='qwen3-vl:2b', messages=history, options={'temperature': 0.3})
+                        response_text = response['message']['content']
+                        
+                        import json
+                        import re
+                        json_match = re.search(r'\{[^{}]+\}', response_text.replace('\n', ' '))
+                        
+                        if json_match:
+                            result = json.loads(json_match.group())
+                            
+                            guild_name = result.get('name', 'New Guild')
+                            selected_ids = result.get('wizards', [])
+                            workflow = result.get('workflow', 'sequential')
+                            
+                            # Validate wizard IDs
+                            selected_ids = [w for w in selected_ids if w in valid_ids]
+                            
+                            if not selected_ids:
+                                print(f"  {YELLOW}AI couldn't match wizards. Keep discussing!{RESET}")
+                                print()
+                                continue
+                            
+                            workflow_emoji = "👑" if workflow == 'hierarchical' else "➡️"
+                            
+                            print()
+                            print(f"  {BOLD}Guild Concept:{RESET}")
+                            print(f"    {BOLD}Name:{RESET}     {CYAN}{guild_name}{RESET}")
+                            print(f"    {BOLD}Wizards:{RESET}  {', '.join(selected_ids)}")
+                            print(f"    {BOLD}Workflow:{RESET} {workflow_emoji} {workflow.capitalize()}")
+                            print()
+                            
+                            confirm = click.prompt(click.style("  Create this guild? [Y/n]", fg="cyan"), default="y", show_default=False).strip().lower()
+                            
+                            if confirm in ['y', 'yes', '']:
+                                safe_name = guild_name.lower().replace(' ', '_').replace('-', '_')
+                                guild_def = {
+                                    'name': guild_name,
+                                    'agents': selected_ids,
+                                    'workflow': workflow,
+                                    'verbose': False,
+                                }
+                                
+                                ensure_dirs()
+                                guild_file = CREWS_DIR / f"{safe_name}.yaml"
+                                
+                                with open(guild_file, 'w') as f:
+                                    yaml.dump(guild_def, f, default_flow_style=False)
+                                
+                                print(f"\n  {GREEN}✓ Guild '{guild_name}' created!{RESET}")
+                                print(f"  {DIM}Saved to: {guild_file}{RESET}")
+                                input("\n  Press Enter to continue...")
+                                return
+                            else:
+                                print(f"  {DIM}Okay, let's keep brainstorming!{RESET}")
+                                print()
+                        else:
+                            print(f"  {YELLOW}Couldn't extract guild concept. Keep discussing!{RESET}")
+                            print()
+                    except Exception as e:
+                        print(f"  {RED}Error: {e}{RESET}")
+                    
+                    continue
+                
+                # Regular chat
+                history.append({'role': 'user', 'content': user_input})
+                
+                print(f"\n  {MAGENTA}AI:{RESET} ", end="", flush=True)
+                
+                response = ollama.chat(model='qwen3-vl:2b', messages=history, stream=True)
+                
+                full_response = ""
+                for chunk in response:
+                    content = chunk.get('message', {}).get('content', '')
+                    print(content, end="", flush=True)
+                    full_response += content
+                
+                print("\n")
+                history.append({'role': 'assistant', 'content': full_response})
+                
+            except (KeyboardInterrupt, click.Abort):
+                print(f"\n\n  {DIM}Cancelled{RESET}")
+                break
+                
+    except Exception as e:
+        print(f"  {RED}Error: {e}{RESET}")
+        print(f"  {DIM}Make sure Ollama is running{RESET}")
+    
+    input("\n  Press Enter to continue...")
+
+
 def save_wizard(name, role, goal, tools, llm):
     """Save wizard to YAML file."""
     safe_name = name.lower().replace(' ', '_').replace('-', '_')
@@ -540,6 +894,7 @@ def create_crew():
     print(f"  {GREEN}[1]{RESET} 🤖 {WHITE}AI-Assisted{RESET}     {DIM}Describe your project, AI picks the team{RESET}")
     print(f"  {GREEN}[2]{RESET} 📝 {WHITE}Manual{RESET}          {DIM}Select wizards yourself{RESET}")
     print(f"  {GREEN}[3]{RESET} 📋 {WHITE}Templates{RESET}       {DIM}Start from a pre-built guild{RESET}")
+    print(f"  {GREEN}[4]{RESET} 💬 {WHITE}Brainstorm{RESET}      {DIM}Chat with AI to discover guild ideas{RESET}")
     print()
     print(f"  {GREEN}[0]{RESET} ↩️  {WHITE}Back{RESET}")
     print()
@@ -557,6 +912,8 @@ def create_crew():
             create_guild_manual()
         elif choice == '3':
             create_guild_from_template()
+        elif choice == '4':
+            brainstorm_guild()
             
     except (KeyboardInterrupt, click.Abort):
         pass
