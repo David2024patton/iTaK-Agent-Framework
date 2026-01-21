@@ -65,7 +65,7 @@ class iTaKREPL:
         while True:
             try:
                 # Use a clean, non-indented prompt that naturally follows the menu
-                raw_input = click.prompt(click.style("   Choice", fg="cyan"), default="6")
+                raw_input = click.prompt(click.style("   Choice", fg="cyan"), default="2")
                 stripped = raw_input.strip().lower()
                 
                 # Handle exit commands at menu level
@@ -76,12 +76,12 @@ class iTaKREPL:
                 # Try to parse as number
                 try:
                     choice = int(raw_input.strip())
-                    if 1 <= choice <= 8:
+                    if 1 <= choice <= 4:
                         break
-                    print(f"  {YELLOW}Please enter 1-8, or just type your question{RESET}")
+                    print(f"  {YELLOW}Please enter 1-4, or just type your question{RESET}")
                 except ValueError:
-                    # Not a number - treat as chat message and auto-select option 6
-                    choice = 6
+                    # Not a number - treat as chat message and auto-select Chat (option 2)
+                    choice = 2
                     initial_message = raw_input.strip()
                     break
                     
@@ -89,8 +89,21 @@ class iTaKREPL:
                 return
         
         # Handle Choice
-        if choice == 6:
-            # Clear screen for fresh Chat mode view
+        if choice == 1:
+            # Wizard Mode - Clear screen for fresh view
+            os.system('cls' if os.name == 'nt' else 'clear')
+            try:
+                from .wizard import run_project_wizard
+                run_project_wizard()  # No pre-selection, wizard asks for type
+                # After returning from wizard, restart main menu
+                self.start()
+            except ImportError:
+                print(f"\n{YELLOW}Wizard module not available.{RESET}\n")
+            except Exception as e:
+                print(f"\n{YELLOW}Error running wizard: {e}{RESET}\n")
+        
+        elif choice == 2:
+            # Chat Mode - Clear screen for fresh view
             os.system('cls' if os.name == 'nt' else 'clear')
             print(f"\n  {BOLD}{MAGENTA}💬 Chat Mode{RESET}")
             print(f"  {DIM}Type your questions, or /menu to go back{RESET}\n")
@@ -120,7 +133,7 @@ class iTaKREPL:
                     self.running = False
                     print(f"\n{YELLOW}Goodbye!{RESET}\n")
         
-        elif choice == 7:
+        elif choice == 3:
             # API Gateway Mode
             try:
                 from .api_manager import run_api_menu
@@ -132,7 +145,7 @@ class iTaKREPL:
             except Exception as e:
                 print(f"\n{YELLOW}Error: {e}{RESET}\n")
         
-        elif choice == 8:
+        elif choice == 4:
             # Optional Services Mode
             try:
                 from .optional_services import run_optional_services_menu
@@ -143,19 +156,6 @@ class iTaKREPL:
                 print(f"\n{YELLOW}Optional Services module not available.{RESET}\n")
             except Exception as e:
                 print(f"\n{YELLOW}Error: {e}{RESET}\n")
-        
-        else:
-            # Wizard Mode [1-5] - Clear screen for fresh view
-            os.system('cls' if os.name == 'nt' else 'clear')
-            try:
-                from .wizard import run_project_wizard
-                run_project_wizard(project_type_idx=choice)
-                # After returning from wizard, restart main menu
-                self.start()
-            except ImportError:
-                print(f"\n{YELLOW}Wizard module not available.{RESET}\n")
-            except Exception as e:
-                print(f"\n{YELLOW}Error running wizard: {e}{RESET}\n")
     
     def run_once(self):
         """Run one iteration of the REPL."""

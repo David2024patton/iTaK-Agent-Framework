@@ -355,21 +355,10 @@ def print_menu():
     """Print the interactive CLI menu."""
     print(f"\n   {BOLD}What would you like to do?{RESET}\n")
     
-    options = [
-        ("1", "🌐", "Web App"),
-        ("2", "🐍", "Python Script"),
-        ("3", "⚡", "API/Backend"),
-        ("4", "🤖", "AI Agent"),
-        ("5", "📝", "Custom"),
-    ]
-    
-    for key, icon, label in options:
-        print(f"    [{key}] {icon} {label}")
-        
-    print()
-    print(f"    [{Theme.CYAN}6{RESET}] 💬 {Theme.CYAN}Chat{RESET}              {DIM}General coding help{RESET}")
-    print(f"    [{Theme.CYAN}7{RESET}] ⚡ {Theme.CYAN}API Gateway{RESET}       {DIM}FastAPI & tunnels{RESET}")
-    print(f"    [{Theme.CYAN}8{RESET}] 🧩 {Theme.CYAN}Optional Services{RESET} {DIM}Supabase, ComfyUI, etc{RESET}")
+    print(f"    [{Theme.CYAN}1{RESET}] 🧙 {Theme.CYAN}Wizard{RESET}            {DIM}Create a new project{RESET}")
+    print(f"    [{Theme.CYAN}2{RESET}] 💬 {Theme.CYAN}Chat{RESET}              {DIM}General coding help{RESET}")
+    print(f"    [{Theme.CYAN}3{RESET}] ⚡ {Theme.CYAN}API Gateway{RESET}       {DIM}FastAPI & tunnels{RESET}")
+    print(f"    [{Theme.CYAN}4{RESET}] 🧩 {Theme.CYAN}Optional Services{RESET} {DIM}Supabase, ComfyUI, etc{RESET}")
     print()
 
 # ... (Existing animate_intro) ...
