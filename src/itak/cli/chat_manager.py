@@ -259,6 +259,11 @@ If anyone mentions self-harm, suicide, depression, or feeling hopeless:
                             try:
                                 choice = click.prompt(click.style("  Select", fg="cyan"), default="0", show_default=False).strip()
                                 
+                                # Exit CLI
+                                if choice.lower() in ['/exit', 'exit', '/quit', 'quit']:
+                                    print(f"\n{YELLOW}Goodbye!{RESET}\n")
+                                    sys.exit(0)
+                                
                                 if choice == '0' or choice == '':
                                     clear_screen()
                                     print(f"\n  {DIM}Back to chat with {CYAN}{model}{RESET}\n")
