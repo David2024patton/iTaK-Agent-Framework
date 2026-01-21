@@ -76,9 +76,12 @@ class iTaKREPL:
                 # Try to parse as number
                 try:
                     choice = int(raw_input.strip())
+                    if choice == 0:
+                        print(f"\n{YELLOW}Goodbye!{RESET}\n")
+                        return
                     if 1 <= choice <= 4:
                         break
-                    print(f"  {YELLOW}Please enter 1-4, or just type your question{RESET}")
+                    print(f"  {YELLOW}Please enter 0-4, or just type your question{RESET}")
                 except ValueError:
                     # Not a number - treat as chat message and auto-select Chat (option 2)
                     choice = 2

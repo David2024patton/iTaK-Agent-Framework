@@ -399,6 +399,8 @@ def print_menu():
     print(f"    [{Theme.CYAN}3{RESET}] ⚡ {Theme.CYAN}API Gateway{RESET}       {DIM}FastAPI & tunnels{RESET}")
     print(f"    [{Theme.CYAN}4{RESET}] 🧩 {Theme.CYAN}Optional Services{RESET} {DIM}Supabase, ComfyUI, etc{RESET}")
     print()
+    print(f"    [{Theme.CYAN}0{RESET}] ↩️  {Theme.CYAN}Exit{RESET}")
+    print()
 
 # ... (Existing animate_intro) ...
 
