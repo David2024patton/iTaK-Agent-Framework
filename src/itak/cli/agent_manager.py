@@ -84,7 +84,7 @@ WIZARD_TEMPLATES = {
         'goal': 'Write clean, efficient, well-documented code',
         'backstory': 'An experienced developer with mastery of multiple languages and best practices',
         'tools': ['file_read', 'file_write', 'code_search', 'shell'],
-        'llm': 'ollama/qwen3:4b'
+        'llm': 'ollama/qwen3-vl:2b'
     },
     'researcher': {
         'name': 'Research Wizard',
@@ -196,7 +196,7 @@ Respond ONLY with valid JSON in this exact format:
 Available tools: file_read, file_write, code_search, web_search, shell
 Keep the response short. Only output the JSON, nothing else."""
 
-            response = ollama.chat(model='qwen3:4b', messages=[
+            response = ollama.chat(model='qwen3-vl:2b', messages=[
                 {'role': 'user', 'content': prompt}
             ], options={'temperature': 0.3})
             
@@ -227,13 +227,13 @@ Keep the response short. Only output the JSON, nothing else."""
             print(f"  {BOLD}Role:{RESET}    {role}")
             print(f"  {BOLD}Mission:{RESET} {goal}")
             print(f"  {BOLD}Powers:{RESET}  {', '.join(tools)}")
-            print(f"  {BOLD}Brain:{RESET}   ollama/qwen3:4b")
+            print(f"  {BOLD}Brain:{RESET}   ollama/qwen3-vl:2b")
             print()
             
             confirm = click.prompt(click.style("  Create this wizard? [Y/n]", fg="cyan"), default="y", show_default=False).strip().lower()
             
             if confirm in ['y', 'yes', '']:
-                save_wizard(name, role, goal, tools, 'ollama/qwen3:4b')
+                save_wizard(name, role, goal, tools, 'ollama/qwen3-vl:2b')
             else:
                 print(f"\n  {YELLOW}Cancelled{RESET}")
                 input("\n  Press Enter to continue...")
@@ -439,7 +439,7 @@ def create_wizard_manual():
         
         # Step 5: Model
         print(f"  {BOLD}Step 5 of 5: Brain{RESET}")
-        llm = click.prompt(click.style("  Model", fg="cyan"), default="ollama/qwen3:4b", show_default=False).strip()
+        llm = click.prompt(click.style("  Model", fg="cyan"), default="ollama/qwen3-vl:2b", show_default=False).strip()
         if llm.lower() in ['/exit', 'exit']:
             return
         print(f"  {GREEN}✓{RESET} {llm}\n")

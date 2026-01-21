@@ -157,7 +157,7 @@ def natural_chat():
                     model = fast
                     break
             if not model:
-                model = 'qwen3:4b'  # Default
+                model = 'qwen3-vl:2b'  # Default
         
         print(f"  {BOLD}Model:{RESET} {CYAN}{model}{RESET}")
         print(f"  {DIM}First response may take 10-30s to load{RESET}")
@@ -265,8 +265,7 @@ def natural_chat():
                         
                         if available:
                             print(f"  {DIM}Current:{RESET} {CYAN}{model}{RESET}\n")
-                            print(f"  {DIM}#   Model                      Type   Size{RESET}")
-                            print(f"  {DIM}─────────────────────────────────────────────────{RESET}")
+                            print(f"  {DIM}#   Model                         Type    Size{RESET}")
                             
                             for i, m in enumerate(available, 1):
                                 name = m.get('model') or m.get('name') or str(m)
@@ -278,9 +277,9 @@ def natural_chat():
                                 display_name = name[:26] + '..' if len(name) > 28 else name
                                 
                                 if is_current:
-                                    print(f"  {GREEN}{i:<3} {display_name:<28} {info['emoji']:<6}     {size_gb:.1f}GB ◀{RESET}")
+                                    print(f"  {GREEN}{i:<3} {display_name:<30} {info['emoji']:<6} {size_gb:>5.1f}GB ◀{RESET}")
                                 else:
-                                    print(f"  {CYAN}{i:<3}{RESET} {display_name:<28} {info['emoji']:<6}     {DIM}{size_gb:.1f}GB{RESET}")
+                                    print(f"  {CYAN}{i:<3}{RESET} {display_name:<30} {info['emoji']:<6} {DIM}{size_gb:>5.1f}GB{RESET}")
                             
                             print(f"\n  {GREEN}0{RESET}   ↩️  Back to chat\n")
                             
@@ -333,7 +332,7 @@ def natural_chat():
                                 pass
                         else:
                             print(f"  {YELLOW}No models installed.{RESET}")
-                            print(f"  {DIM}Run: ollama pull qwen3:4b{RESET}")
+                            print(f"  {DIM}Run: ollama pull qwen3-vl:2b{RESET}")
                             input("\n  Press Enter to continue...")
                     except Exception as e:
                         print(f"\r  {RED}Could not fetch models: {e}{RESET}")
@@ -503,7 +502,7 @@ def agent_chat():
     name = wizard.get('name', agent_file.stem)
     role = wizard.get('role', 'AI Assistant')
     goal = wizard.get('goal', 'Help users')
-    llm = wizard.get('llm', 'ollama/qwen3:4b')
+    llm = wizard.get('llm', 'ollama/qwen3-vl:2b')
     tools = wizard.get('tools', [])
     
     # Extract model name from llm string (e.g., "ollama/qwen3:4b" -> "qwen3:4b")
