@@ -66,7 +66,8 @@ def natural_chat():
     print(f"  \033[90m│                                                               │\033[0m")
     print(f"  \033[90m│    /model     → Switch to a different model                   │\033[0m")
     print(f"  \033[90m│    /save      → Export chat to markdown file                  │\033[0m")
-    print(f"  \033[90m│    /back      → Return to menu                                │\033[0m")
+    print(f"  \033[90m│    /menu or 0 → Return to main menu                           │\033[0m")
+    print(f"  \033[90m│    /exit      → Quit iTaK CLI                                 │\033[0m")
     print(f"  \033[90m│                                                               │\033[0m")
     print(f"  \033[90m└───────────────────────────────────────────────────────────────┘\033[0m")
     print()
@@ -120,7 +121,13 @@ def natural_chat():
                 if not user_input:
                     continue
                 
-                if user_input.lower() in ['/back', '/menu', '/exit', '/quit', '0']:
+                # Exit CLI completely
+                if user_input.lower() in ['/exit', '/quit', 'exit', 'quit']:
+                    print(f"\n{YELLOW}Goodbye!{RESET}\n")
+                    sys.exit(0)
+                
+                # Go back to menu
+                if user_input.lower() in ['/back', '/menu', '0']:
                     return
                 
                 # Model switch command
