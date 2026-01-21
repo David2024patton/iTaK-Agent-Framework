@@ -51,19 +51,50 @@ def print_chat_menu():
 def natural_chat():
     """Run simple chat with Ollama."""
     import click
+    import time
     
     clear_screen()
     print(f"\n  {BOLD}{MAGENTA}💬 Natural Chat{RESET}")
     print(f"  {DIM}Quick Q&A with Ollama - type /back to return{RESET}\n")
     
+    # Fast models recommendation
+    FAST_MODELS = ['qwen3:1.7b', 'qwen3:4b', 'gemma3:4b', 'llama3.2:3b', 'phi4-mini:3.8b']
+    
     try:
         import ollama
         
-        model = os.environ.get('OLLAMA_MODEL', 'qwen3:4b')
-        history = []
+        # Check available models
+        print(f"  {DIM}Checking Ollama models...{RESET}", end="", flush=True)
+        try:
+            models_response = ollama.list()
+            available = [m['name'] for m in models_response.get('models', [])]
+            print(f" {GREEN}✓{RESET}")
+        except:
+            available = []
+            print(f" {YELLOW}?{RESET}")
         
-        print(f"  {DIM}Model: {model}{RESET}")
-        print(f"  {DIM}Type your message and press Enter{RESET}\n")
+        # Get model from env or pick a fast one
+        model = os.environ.get('OLLAMA_MODEL', '')
+        
+        if not model:
+            # Try to pick a fast model that's available
+            for fast in FAST_MODELS:
+                if any(fast.split(':')[0] in m for m in available):
+                    model = fast
+                    break
+            if not model:
+                model = 'qwen3:4b'  # Default
+        
+        print(f"\n  {BOLD}Model:{RESET} {CYAN}{model}{RESET}")
+        
+        # Show tips
+        print(f"\n  {DIM}💡 Tips:{RESET}")
+        print(f"  {DIM}   • First response may take 10-30s to load the model{RESET}")
+        print(f"  {DIM}   • Type /model to switch models{RESET}")
+        print(f"  {DIM}   • For faster responses, try: qwen3:1.7b or gemma3:4b{RESET}")
+        print()
+        
+        history = []
         
         while True:
             try:
@@ -75,25 +106,63 @@ def natural_chat():
                 if user_input.lower() in ['/back', '/menu', '/exit', '/quit', '0']:
                     return
                 
+                # Model switch command
+                if user_input.lower().startswith('/model'):
+                    parts = user_input.split(maxsplit=1)
+                    if len(parts) > 1:
+                        model = parts[1].strip()
+                        print(f"\n  {GREEN}✓ Switched to: {model}{RESET}\n")
+                        history = []  # Clear history for new model
+                    else:
+                        print(f"\n  {BOLD}Available models:{RESET}")
+                        if available:
+                            for m in available[:10]:
+                                print(f"    • {m}")
+                        else:
+                            print(f"    {DIM}Run 'ollama list' to see models{RESET}")
+                        print(f"\n  {DIM}Usage: /model qwen3:4b{RESET}\n")
+                    continue
+                
                 # Add to history
                 history.append({'role': 'user', 'content': user_input})
                 
-                # Stream response
-                print(f"\n  {MAGENTA}✦{RESET} ", end="", flush=True)
+                # Show thinking indicator
+                print(f"\n  {MAGENTA}✦{RESET} {DIM}Thinking...{RESET}", end="", flush=True)
+                start_time = time.time()
                 
                 response_text = ""
-                stream = ollama.chat(
-                    model=model,
-                    messages=history,
-                    stream=True
-                )
+                first_chunk = True
                 
-                for chunk in stream:
-                    content = chunk['message']['content']
-                    print(content, end="", flush=True)
-                    response_text += content
-                
-                print("\n")
+                try:
+                    stream = ollama.chat(
+                        model=model,
+                        messages=history,
+                        stream=True
+                    )
+                    
+                    for chunk in stream:
+                        if first_chunk:
+                            # Clear the "Thinking..." text
+                            print(f"\r  {MAGENTA}✦{RESET} ", end="", flush=True)
+                            first_chunk = False
+                        
+                        content = chunk['message']['content']
+                        print(content, end="", flush=True)
+                        response_text += content
+                    
+                    elapsed = time.time() - start_time
+                    print(f"\n  {DIM}({elapsed:.1f}s){RESET}\n")
+                    
+                    # Warn if slow
+                    if elapsed > 30:
+                        print(f"  {YELLOW}💡 Slow response. Try: /model qwen3:1.7b for faster chat{RESET}\n")
+                    
+                except Exception as e:
+                    print(f"\r  {RED}✗ Error: {e}{RESET}\n")
+                    print(f"  {DIM}Make sure Ollama is running and model exists{RESET}")
+                    print(f"  {DIM}Try: ollama pull {model}{RESET}\n")
+                    history.pop()  # Remove failed message from history
+                    continue
                 
                 # Add response to history
                 history.append({'role': 'assistant', 'content': response_text})
