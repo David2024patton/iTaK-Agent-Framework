@@ -265,8 +265,66 @@ function checkDockerDesktopWindows() {
     return result !== null;
 }
 
+function checkDockerInWSL() {
+    // Check if Docker works inside WSL
+    try {
+        const result = execSync('wsl docker --version', { encoding: 'utf8', stdio: 'pipe' });
+        return result !== null;
+    } catch {
+        return false;
+    }
+}
+
+function promptUser(question) {
+    // Synchronous prompt for user input
+    const readline = require('readline');
+    const rl = readline.createInterface({
+        input: process.stdin,
+        output: process.stdout
+    });
+
+    return new Promise((resolve) => {
+        rl.question(question, (answer) => {
+            rl.close();
+            resolve(answer.trim().toLowerCase());
+        });
+    });
+}
+
 async function installDockerWindows() {
-    console.log('  📦 Docker Desktop not found. Installing...\n');
+    console.log('  📦 Docker not found. Setting up Docker...\\n');
+
+    // Check if Docker works in WSL first
+    if (checkDockerInWSL()) {
+        console.log('  ✅ Docker found in WSL!');
+        return true;
+    }
+
+    // Ask user which method they prefer
+    console.log('  ┌─────────────────────────────────────────────────────────────┐');
+    console.log('  │  Docker Installation Options                                │');
+    console.log('  ├─────────────────────────────────────────────────────────────┤');
+    console.log('  │  [1] WSL Docker (Recommended)                               │');
+    console.log('  │      - Lighter weight, runs inside Linux                    │');
+    console.log('  │      - No GUI, command-line only                            │');
+    console.log('  │                                                             │');
+    console.log('  │  [2] Docker Desktop                                         │');
+    console.log('  │      - Full GUI application                                 │');
+    console.log('  │      - Easier to manage containers visually                 │');
+    console.log('  └─────────────────────────────────────────────────────────────┘');
+    console.log();
+
+    const choice = await promptUser('  Choose [1] or [2] (default: 1): ');
+
+    if (choice === '2') {
+        return await installDockerDesktop();
+    } else {
+        return await installDockerInWSL();
+    }
+}
+
+async function installDockerDesktop() {
+    console.log('\\n  📦 Installing Docker Desktop...\\n');
 
     const archKey = IS_ARM ? 'arm64' : 'x64';
     const url = DOCKER_URLS.win32[archKey];
@@ -277,12 +335,72 @@ async function installDockerWindows() {
     const success = await downloadAndRunInstaller(url, filename, ['install', '--quiet']);
 
     if (success) {
-        console.log('\n  ✅ Docker Desktop installed!');
-        console.log('  Please start Docker Desktop and run `npm install` again.\n');
+        console.log('\\n  ✅ Docker Desktop installed!');
+        console.log('  Please start Docker Desktop and run `npm install` again.\\n');
         return 'launch_required';
     }
 
     return false;
+}
+
+async function installDockerInWSL() {
+    console.log('\\n  📦 Installing Docker inside WSL...\\n');
+
+    // Check WSL is installed
+    if (!checkWSL()) {
+        console.log('  ⚠️  WSL is not installed.');
+
+        if (!isAdmin()) {
+            console.log('\\n  ╔═══════════════════════════════════════════════════════════════╗');
+            console.log('  ║  ⚠️  ADMIN REQUIRED                                            ║');
+            console.log('  ╠═══════════════════════════════════════════════════════════════╣');
+            console.log('  ║  WSL installation requires administrator privileges.          ║');
+            console.log('  ║                                                               ║');
+            console.log('  ║  Please run this command in an Administrator terminal:       ║');
+            console.log('  ║                                                               ║');
+            console.log('  ║    wsl --install                                              ║');
+            console.log('  ║                                                               ║');
+            console.log('  ║  Then restart your computer and run `npm install` again.     ║');
+            console.log('  ╚═══════════════════════════════════════════════════════════════╝');
+            console.log();
+            return false;
+        }
+
+        // Try to install WSL
+        const wslResult = installWSL();
+        if (wslResult === 'restart_required') {
+            return 'restart_required';
+        }
+        if (!wslResult) {
+            return false;
+        }
+    }
+
+    // Install Docker inside WSL using the official install script
+    console.log('  Running Docker install script inside WSL...');
+    console.log('  (This may take a few minutes)\\n');
+
+    try {
+        // Run Docker install script inside WSL
+        spawnSync('wsl', ['-e', 'sh', '-c', 'curl -fsSL https://get.docker.com | sudo sh'], {
+            stdio: 'inherit',
+            shell: true
+        });
+
+        // Add current user to docker group
+        exec('wsl -e sh -c "sudo usermod -aG docker $USER"');
+
+        // Start Docker service
+        exec('wsl -e sh -c "sudo service docker start"');
+
+        console.log('\\n  ✅ Docker installed in WSL!');
+        console.log('  ℹ️  Docker will run inside WSL for better performance.\\n');
+        return true;
+    } catch (e) {
+        console.log(`  ❌ Failed to install Docker in WSL: ${e.message}`);
+        console.log('  Falling back to Docker Desktop...\\n');
+        return await installDockerDesktop();
+    }
 }
 
 function checkOllamaWindows() {
@@ -291,7 +409,7 @@ function checkOllamaWindows() {
 }
 
 async function installOllamaWindows() {
-    console.log('  📦 Ollama not found. Installing...\n');
+    console.log('  📦 Ollama not found. Installing...\\n');
 
     const url = OLLAMA_URLS.win32;
     const filename = 'OllamaSetup.exe';
@@ -299,7 +417,7 @@ async function installOllamaWindows() {
     const success = await downloadAndRunInstaller(url, filename, ['/SILENT']);
 
     if (success) {
-        console.log('\n  ✅ Ollama installed!');
+        console.log('\\n  ✅ Ollama installed!');
         return true;
     }
 
