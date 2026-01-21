@@ -122,13 +122,32 @@ def natural_chat():
                         print(f"\n  {GREEN}✓ Switched to: {model}{RESET}\n")
                         history = []  # Clear history for new model
                     else:
-                        print(f"\n  {BOLD}Available models:{RESET}")
-                        if available:
-                            for m in available[:10]:
-                                print(f"    • {m}")
-                        else:
-                            print(f"    {DIM}Run 'ollama list' to see models{RESET}")
-                        print(f"\n  {DIM}Usage: /model qwen3:4b{RESET}\n")
+                        # Fetch fresh model list
+                        print(f"\n  {DIM}Fetching models...{RESET}", end="", flush=True)
+                        try:
+                            models_response = ollama.list()
+                            available = models_response.get('models', [])
+                            print(f"\r                        \r")  # Clear line
+                            
+                            if available:
+                                print(f"  {BOLD}Installed Models:{RESET}\n")
+                                for m in available:
+                                    name = m.get('name', 'unknown')
+                                    size_bytes = m.get('size', 0)
+                                    size_gb = size_bytes / (1024**3)
+                                    
+                                    # Mark current model
+                                    if name == model:
+                                        print(f"    {GREEN}▸ {name}{RESET} {DIM}({size_gb:.1f}GB) ← current{RESET}")
+                                    else:
+                                        print(f"    • {CYAN}{name}{RESET} {DIM}({size_gb:.1f}GB){RESET}")
+                                
+                                print(f"\n  {DIM}Usage: /model {available[0].get('name', 'modelname')}{RESET}\n")
+                            else:
+                                print(f"  {YELLOW}No models installed.{RESET}")
+                                print(f"  {DIM}Run: ollama pull qwen3:4b{RESET}\n")
+                        except Exception as e:
+                            print(f"\r  {YELLOW}Could not fetch models: {e}{RESET}\n")
                     continue
                 
                 # Add to history
