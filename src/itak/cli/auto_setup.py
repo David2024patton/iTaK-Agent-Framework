@@ -12,7 +12,7 @@ import click
 # Configuration
 SETUP_MARKER = Path.home() / ".itak" / ".setup_complete"
 CONFIG_FILE = Path.home() / ".itak" / "config.json"
-DEFAULT_MODEL = "qwen3-vl:2b"
+DEFAULT_MODEL = "ollama/qwen3-vl:2b"
 DEFAULT_MODEL_SIZE = "3.3GB"
 
 
