@@ -292,7 +292,7 @@ function promptUser(question) {
 }
 
 async function installDockerWindows() {
-    console.log('  📦 Docker not found. Setting up Docker...\\n');
+    console.log('  📦 Docker not found. Setting up Docker via WSL...\\n');
 
     // Check if Docker works in WSL first
     if (checkDockerInWSL()) {
@@ -300,27 +300,11 @@ async function installDockerWindows() {
         return true;
     }
 
-    // Ask user which method they prefer
-    console.log('  ┌─────────────────────────────────────────────────────────────┐');
-    console.log('  │  Docker Installation Options                                │');
-    console.log('  ├─────────────────────────────────────────────────────────────┤');
-    console.log('  │  [1] WSL Docker (Recommended)                               │');
-    console.log('  │      - Lighter weight, runs inside Linux                    │');
-    console.log('  │      - No GUI, command-line only                            │');
-    console.log('  │                                                             │');
-    console.log('  │  [2] Docker Desktop                                         │');
-    console.log('  │      - Full GUI application                                 │');
-    console.log('  │      - Easier to manage containers visually                 │');
-    console.log('  └─────────────────────────────────────────────────────────────┘');
-    console.log();
+    // Always use WSL Docker by default
+    console.log('  ℹ️  Installing Docker inside WSL (recommended)');
+    console.log('  💡 Want a GUI? Download Docker Desktop: https://docker.com/products/docker-desktop\\n');
 
-    const choice = await promptUser('  Choose [1] or [2] (default: 1): ');
-
-    if (choice === '2') {
-        return await installDockerDesktop();
-    } else {
-        return await installDockerInWSL();
-    }
+    return await installDockerInWSL();
 }
 
 async function installDockerDesktop() {
