@@ -1175,56 +1175,221 @@ def edit_wizard(agent_file, agent):
 
 
 def list_crews():
-    """List and manage crews."""
+    """List and manage guilds with edit/delete options."""
     import click
     
     while True:
         clear_screen()
-        print(f"\n  {BOLD}{MAGENTA}📋 Saved Crews{RESET}\n")
         
-        crews = list(CREWS_DIR.glob('*.yaml'))
+        print(f"\n  \033[35m╔══════════════════════════════════════════════════════════════╗\033[0m")
+        print(f"  \033[35m║  📋 Manage Guilds                                            ║\033[0m")
+        print(f"  \033[35m╚══════════════════════════════════════════════════════════════╝\033[0m")
+        print()
         
-        if not crews:
-            print(f"  {DIM}No crews defined yet.{RESET}")
-            print(f"  {DIM}Use 'Create Crew' to build one.{RESET}")
+        guilds = list(CREWS_DIR.glob('*.yaml'))
+        
+        if not guilds:
+            print(f"  {DIM}No guilds created yet.{RESET}")
+            print(f"  {DIM}Use Create Guild to build one.{RESET}")
             input("\n  Press Enter to go back...")
             return
         
-        for i, crew_file in enumerate(crews, 1):
+        # List all guilds
+        guild_data = []
+        for i, guild_file in enumerate(guilds, 1):
             try:
-                with open(crew_file) as f:
-                    crew = yaml.safe_load(f)
-                print(f"  [{i}] {CYAN}{crew.get('name', crew_file.stem)}{RESET}")
-                print(f"      {DIM}Agents: {', '.join(crew.get('agents', []))}{RESET}")
-                print(f"      {DIM}Workflow: {crew.get('workflow', 'sequential')}{RESET}")
+                with open(guild_file) as f:
+                    guild = yaml.safe_load(f)
+                guild_data.append((guild_file, guild))
+                workflow = guild.get('workflow', 'sequential')
+                workflow_emoji = "👑" if workflow == 'hierarchical' else "➡️"
+                print(f"  {GREEN}[{i}]{RESET} 🏰 {CYAN}{guild.get('name', guild_file.stem)}{RESET}")
+                print(f"      {DIM}Wizards: {', '.join(guild.get('agents', []))}{RESET}")
+                print(f"      {DIM}Workflow: {workflow_emoji} {workflow.capitalize()}{RESET}")
+                print()
             except:
-                print(f"  [{i}] {crew_file.stem} {YELLOW}(error reading){RESET}")
+                guild_data.append((guild_file, None))
+                print(f"  [{i}] {guild_file.stem} {YELLOW}(error reading){RESET}")
+                print()
         
-        print(f"\n  {DIM}Enter number to delete, or 0 to go back{RESET}")
+        print(f"  {GREEN}[0]{RESET} ↩️  Back")
+        print()
+        print(f"  {DIM}Select a guild to view/edit/delete{RESET}")
+        print()
         
         try:
-            choice = click.prompt(click.style("  Choice", fg="cyan"), default="0").strip()
+            choice = click.prompt(click.style("  Select guild", fg="cyan"), default="0", show_default=False).strip()
             
+            check_exit(choice)
             if choice == '0' or choice == '':
                 return
             
             try:
                 idx = int(choice) - 1
-                if 0 <= idx < len(crews):
-                    crew_file = crews[idx]
-                    confirm = click.prompt(
-                        click.style(f"  Delete {crew_file.stem}? (y/N)", fg="yellow"),
-                        default="n"
-                    ).strip().lower()
-                    
-                    if confirm == 'y':
-                        crew_file.unlink()
-                        print(f"  {GREEN}✅ Deleted{RESET}")
+                if 0 <= idx < len(guild_data):
+                    guild_file, guild = guild_data[idx]
+                    if guild:
+                        manage_guild(guild_file, guild)
             except ValueError:
                 pass
                 
-        except KeyboardInterrupt:
+        except (KeyboardInterrupt, click.Abort):
             return
+
+
+def manage_guild(guild_file, guild):
+    """Manage a single guild - view, edit, delete."""
+    import click
+    
+    while True:
+        clear_screen()
+        
+        name = guild.get('name', guild_file.stem)
+        agents = guild.get('agents', [])
+        workflow = guild.get('workflow', 'sequential')
+        workflow_emoji = "👑" if workflow == 'hierarchical' else "➡️"
+        
+        print(f"\n  \033[35m╔══════════════════════════════════════════════════════════════╗\033[0m")
+        print(f"  \033[35m║  🏰 {name:<56} ║\033[0m")
+        print(f"  \033[35m╚══════════════════════════════════════════════════════════════╝\033[0m")
+        print()
+        
+        print(f"  {BOLD}Wizards:{RESET}  {', '.join(agents) if agents else 'None'}")
+        print(f"  {BOLD}Workflow:{RESET} {workflow_emoji} {workflow.capitalize()}")
+        print()
+        print(f"  {DIM}File: {guild_file}{RESET}")
+        print()
+        
+        print(f"  {GREEN}[1]{RESET} ✏️  {WHITE}Edit{RESET}       {DIM}Modify this guild{RESET}")
+        print(f"  {GREEN}[2]{RESET} 🗑️  {WHITE}Delete{RESET}     {DIM}Remove this guild{RESET}")
+        print()
+        print(f"  {GREEN}[0]{RESET} ↩️  Back")
+        print()
+        
+        try:
+            choice = click.prompt(click.style("  Action", fg="cyan"), default="0", show_default=False).strip()
+            
+            check_exit(choice)
+            if choice == '0' or choice == '':
+                return
+            
+            if choice == '1':
+                # Edit guild
+                edit_guild(guild_file, guild)
+                # Reload guild data after edit
+                try:
+                    with open(guild_file) as f:
+                        guild = yaml.safe_load(f)
+                except:
+                    return
+                    
+            elif choice == '2':
+                # Delete guild
+                confirm = click.prompt(
+                    click.style(f"  Type '{name}' to confirm delete", fg="red"),
+                    default=""
+                ).strip()
+                
+                if confirm == name:
+                    guild_file.unlink()
+                    print(f"\n  {GREEN}✓ Guild deleted{RESET}")
+                    input("\n  Press Enter to continue...")
+                    return
+                else:
+                    print(f"\n  {YELLOW}Cancelled - name didn't match{RESET}")
+                    input("\n  Press Enter to continue...")
+                    
+        except (KeyboardInterrupt, click.Abort):
+            return
+
+
+def edit_guild(guild_file, guild):
+    """Edit an existing guild."""
+    import click
+    
+    clear_screen()
+    
+    name = guild.get('name', guild_file.stem)
+    
+    print(f"\n  \033[35m╔══════════════════════════════════════════════════════════════╗\033[0m")
+    print(f"  \033[35m║  ✏️  Edit Guild: {name:<43} ║\033[0m")
+    print(f"  \033[35m╚══════════════════════════════════════════════════════════════╝\033[0m")
+    print()
+    
+    print(f"  {DIM}Press Enter to keep current value, or type new value{RESET}")
+    print(f"  {DIM}Type /exit to cancel{RESET}")
+    print()
+    
+    try:
+        # Name
+        print(f"  {BOLD}Name{RESET} {DIM}(current: {guild.get('name', 'N/A')}){RESET}")
+        new_name = click.prompt(click.style("  Name", fg="cyan"), default=guild.get('name', ''), show_default=False).strip()
+        if check_exit(new_name):
+            return
+        if new_name:
+            guild['name'] = new_name
+        print(f"  {GREEN}✓{RESET}\n")
+        
+        # Wizards
+        agents_dir = Path.home() / '.itak' / 'agents'
+        available_agents = list(agents_dir.glob('*.yaml'))
+        
+        if available_agents:
+            current_wizards = guild.get('agents', [])
+            print(f"  {BOLD}Wizards{RESET} {DIM}(current: {', '.join(current_wizards)}){RESET}")
+            
+            for i, agent_file in enumerate(available_agents, 1):
+                marker = "●" if agent_file.stem in current_wizards else "○"
+                print(f"    [{CYAN}{i}{RESET}] {marker} 🧙 {agent_file.stem}")
+            
+            # Get current numbers
+            current_nums = []
+            for i, a in enumerate(available_agents, 1):
+                if a.stem in current_wizards:
+                    current_nums.append(str(i))
+            default_wizards = ','.join(current_nums)
+            
+            print(f"\n  {DIM}Enter numbers separated by commas{RESET}")
+            wizard_input = click.prompt(click.style("  Wizards", fg="cyan"), default=default_wizards, show_default=False).strip()
+            if check_exit(wizard_input):
+                return
+            
+            selected = []
+            try:
+                for num in wizard_input.split(','):
+                    idx = int(num.strip()) - 1
+                    if 0 <= idx < len(available_agents):
+                        selected.append(available_agents[idx].stem)
+            except:
+                pass
+            
+            if selected:
+                guild['agents'] = selected
+            print(f"  {GREEN}✓{RESET}\n")
+        
+        # Workflow
+        current_workflow = guild.get('workflow', 'sequential')
+        print(f"  {BOLD}Workflow{RESET} {DIM}(current: {current_workflow}){RESET}")
+        print(f"    [{CYAN}1{RESET}] ➡️  Sequential")
+        print(f"    [{CYAN}2{RESET}] 👑 Hierarchical")
+        
+        default_wf = "2" if current_workflow == 'hierarchical' else "1"
+        workflow = click.prompt(click.style("  Style", fg="cyan"), default=default_wf, show_default=False).strip()
+        if check_exit(workflow):
+            return
+        guild['workflow'] = 'hierarchical' if workflow == '2' else 'sequential'
+        print(f"  {GREEN}✓{RESET}\n")
+        
+        # Save
+        with open(guild_file, 'w') as f:
+            yaml.dump(guild, f, default_flow_style=False)
+        
+        print(f"  {GREEN}✓ Guild updated!{RESET}")
+        input("\n  Press Enter to continue...")
+        
+    except (KeyboardInterrupt, click.Abort):
+        pass
+
 
 
 def run_agent_menu():
