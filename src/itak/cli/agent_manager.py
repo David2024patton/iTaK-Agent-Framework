@@ -490,8 +490,37 @@ def save_wizard(name, role, goal, tools, llm):
 
 
 
+# Pre-built guild templates with example compositions
+GUILD_TEMPLATES = {
+    'web_dev': {
+        'name': 'Web Dev Guild',
+        'description': 'Full-stack web development team',
+        'recommended_wizards': ['coder', 'researcher', 'writer'],
+        'workflow': 'sequential'
+    },
+    'research': {
+        'name': 'Research Guild',
+        'description': 'Deep research and analysis team',
+        'recommended_wizards': ['researcher', 'analyst', 'writer'],
+        'workflow': 'sequential'
+    },
+    'content': {
+        'name': 'Content Guild',
+        'description': 'Content creation and writing team',
+        'recommended_wizards': ['writer', 'researcher'],
+        'workflow': 'sequential'
+    },
+    'automation': {
+        'name': 'Automation Guild',
+        'description': 'Script and automation team',
+        'recommended_wizards': ['coder', 'analyst'],
+        'workflow': 'sequential'
+    },
+}
+
+
 def create_crew():
-    """Create a new Guild (team of wizards) with themed UI."""
+    """Create a new Guild (team of wizards) with mode selection."""
     import click
     
     clear_screen()
@@ -503,10 +532,300 @@ def create_crew():
     print()
     
     print(f"  \033[90m┌───────────────────────────────────────────────────────────────┐\033[0m")
-    print(f"  \033[90m│  💡 Build a team of wizards that work together               │\033[0m")
-    print(f"  \033[90m│                                                               │\033[0m")
-    print(f"  \033[90m│    Type /exit to quit | Enter to accept defaults             │\033[0m")
+    print(f"  \033[90m│  💡 Choose how you want to create your guild                  │\033[0m")
     print(f"  \033[90m└───────────────────────────────────────────────────────────────┘\033[0m")
+    print()
+    
+    # Mode selection
+    print(f"  {GREEN}[1]{RESET} 🤖 {WHITE}AI-Assisted{RESET}     {DIM}Describe your project, AI picks the team{RESET}")
+    print(f"  {GREEN}[2]{RESET} 📝 {WHITE}Manual{RESET}          {DIM}Select wizards yourself{RESET}")
+    print(f"  {GREEN}[3]{RESET} 📋 {WHITE}Templates{RESET}       {DIM}Start from a pre-built guild{RESET}")
+    print()
+    print(f"  {GREEN}[0]{RESET} ↩️  {WHITE}Back{RESET}")
+    print()
+    
+    try:
+        choice = click.prompt(click.style("  Select", fg="cyan"), default="0", show_default=False).strip()
+        
+        check_exit(choice)
+        if choice == '0' or choice == '':
+            return
+        
+        if choice == '1':
+            create_guild_ai_assisted()
+        elif choice == '2':
+            create_guild_manual()
+        elif choice == '3':
+            create_guild_from_template()
+            
+    except (KeyboardInterrupt, click.Abort):
+        pass
+
+
+def create_guild_ai_assisted():
+    """AI-assisted guild creation - AI picks wizards based on task description."""
+    import click
+    
+    clear_screen()
+    
+    print(f"\n  \033[35m╔══════════════════════════════════════════════════════════════╗\033[0m")
+    print(f"  \033[35m║  🤖 AI-Assisted Guild Creation                               ║\033[0m")
+    print(f"  \033[35m╚══════════════════════════════════════════════════════════════╝\033[0m")
+    print()
+    
+    # Check for existing wizards
+    agents = list(AGENTS_DIR.glob('*.yaml'))
+    
+    if not agents:
+        print(f"  {YELLOW}⚠️  No wizards created yet.{RESET}")
+        print(f"  {DIM}Create some wizards first at Wizards → Create Wizard.{RESET}")
+        input("\n  Press Enter to continue...")
+        return
+    
+    # Load wizard info
+    wizard_info = []
+    for agent_file in agents:
+        try:
+            with open(agent_file) as f:
+                agent = yaml.safe_load(f)
+            wizard_info.append({
+                'id': agent_file.stem,
+                'name': agent.get('name', agent_file.stem),
+                'role': agent.get('role', 'N/A'),
+                'tools': agent.get('tools', [])
+            })
+        except:
+            pass
+    
+    if not wizard_info:
+        print(f"  {YELLOW}No valid wizards found.{RESET}")
+        input("\n  Press Enter to continue...")
+        return
+    
+    # Show available wizards
+    print(f"  {DIM}Available Wizards:{RESET}")
+    for w in wizard_info:
+        print(f"    🧙 {w['name']} ({w['role']})")
+        print(f"       {DIM}Tools: {', '.join(w['tools'])}{RESET}")
+    print()
+    
+    print(f"  {DIM}Type /exit to cancel{RESET}")
+    print()
+    
+    try:
+        # Get project description
+        print(f"  {BOLD}What are you building?{RESET}")
+        print(f"  {DIM}Example: 'A web scraper that saves data to CSV'{RESET}")
+        description = click.prompt(click.style("  Project", fg="cyan"), default="", show_default=False).strip()
+        
+        check_exit(description)
+        if not description:
+            return
+        
+        print(f"\n  {MAGENTA}✦{RESET} {DIM}Analyzing wizards for your project...{RESET}")
+        
+        # Build prompt for AI
+        wizard_list = "\n".join([
+            f"- {w['id']}: {w['name']} (Role: {w['role']}, Tools: {', '.join(w['tools'])})"
+            for w in wizard_info
+        ])
+        
+        prompt = f"""You are an AI team coordinator. Given a project description and available wizards, select the best team.
+
+PROJECT: {description}
+
+AVAILABLE WIZARDS:
+{wizard_list}
+
+Select 2-4 wizards that would work best together for this project.
+Respond with ONLY a JSON object like this:
+{{"guild_name": "Name for the team", "wizards": ["wizard_id1", "wizard_id2"], "workflow": "sequential", "reasoning": "Brief explanation"}}
+
+Choose "sequential" for step-by-step work or "hierarchical" for managed teamwork.
+Only include wizard IDs that exist in the list above."""
+
+        try:
+            import ollama
+            response = ollama.chat(model='qwen3-vl:2b', messages=[
+                {'role': 'user', 'content': prompt}
+            ], options={'temperature': 0.3})
+            
+            response_text = response['message']['content']
+            
+            # Parse JSON from response
+            import json
+            import re
+            json_match = re.search(r'\{[^{}]+\}', response_text.replace('\n', ' '))
+            
+            if json_match:
+                result = json.loads(json_match.group())
+                
+                guild_name = result.get('guild_name', 'AI Guild')
+                selected_ids = result.get('wizards', [])
+                workflow = result.get('workflow', 'sequential')
+                reasoning = result.get('reasoning', '')
+                
+                # Validate selected wizards exist
+                valid_ids = [w['id'] for w in wizard_info]
+                selected_ids = [w for w in selected_ids if w in valid_ids]
+                
+                if not selected_ids:
+                    print(f"  {YELLOW}AI couldn't find matching wizards. Try manual mode.{RESET}")
+                    input("\n  Press Enter to continue...")
+                    return
+                
+                # Show recommendation
+                clear_screen()
+                print(f"\n  \033[32m╔══════════════════════════════════════════════════════════════╗\033[0m")
+                print(f"  \033[32m║  ✦ AI Recommendation                                         ║\033[0m")
+                print(f"  \033[32m╚══════════════════════════════════════════════════════════════╝\033[0m")
+                print()
+                
+                print(f"  {BOLD}Guild:{RESET}    {CYAN}{guild_name}{RESET}")
+                print(f"  {BOLD}Workflow:{RESET} {'👑 Hierarchical' if workflow == 'hierarchical' else '➡️ Sequential'}")
+                print()
+                print(f"  {BOLD}Team Composition:{RESET}")
+                for wid in selected_ids:
+                    w = next((x for x in wizard_info if x['id'] == wid), None)
+                    if w:
+                        print(f"    🧙 {w['name']} - {w['role']}")
+                print()
+                
+                if reasoning:
+                    print(f"  {DIM}Reasoning: {reasoning}{RESET}")
+                    print()
+                
+                confirm = click.prompt(click.style("  Create this guild? [Y/n]", fg="cyan"), default="y", show_default=False).strip().lower()
+                
+                if confirm in ['y', 'yes', '']:
+                    # Save guild
+                    safe_name = guild_name.lower().replace(' ', '_').replace('-', '_')
+                    crew_def = {
+                        'name': guild_name,
+                        'agents': selected_ids,
+                        'workflow': workflow,
+                        'verbose': False,
+                    }
+                    
+                    ensure_dirs()
+                    crew_file = CREWS_DIR / f"{safe_name}.yaml"
+                    
+                    with open(crew_file, 'w') as f:
+                        yaml.dump(crew_def, f, default_flow_style=False)
+                    
+                    print(f"\n  {GREEN}✓ Guild '{guild_name}' created!{RESET}")
+                    print(f"  {DIM}Saved to: {crew_file}{RESET}")
+                else:
+                    print(f"\n  {YELLOW}Cancelled{RESET}")
+            else:
+                print(f"  {YELLOW}Couldn't parse AI response. Try manual mode.{RESET}")
+                
+        except Exception as e:
+            print(f"  {RED}Error: {e}{RESET}")
+            print(f"  {DIM}Make sure Ollama is running{RESET}")
+            
+    except (KeyboardInterrupt, click.Abort):
+        print(f"\n  {DIM}Cancelled{RESET}")
+    
+    input("\n  Press Enter to continue...")
+
+
+def create_guild_from_template():
+    """Create guild from pre-built template."""
+    import click
+    
+    clear_screen()
+    
+    print(f"\n  \033[35m╔══════════════════════════════════════════════════════════════╗\033[0m")
+    print(f"  \033[35m║  📋 Guild Templates                                          ║\033[0m")
+    print(f"  \033[35m╚══════════════════════════════════════════════════════════════╝\033[0m")
+    print()
+    
+    templates = list(GUILD_TEMPLATES.items())
+    
+    for i, (key, template) in enumerate(templates, 1):
+        print(f"  {GREEN}[{i}]{RESET} 🏰 {WHITE}{template['name']}{RESET}")
+        print(f"      {DIM}{template['description']}{RESET}")
+        print(f"      {DIM}Needs: {', '.join(template['recommended_wizards'])}{RESET}")
+        print()
+    
+    print(f"  {GREEN}[0]{RESET} ↩️  Back")
+    print()
+    
+    try:
+        choice = click.prompt(click.style("  Select template", fg="cyan"), default="0", show_default=False).strip()
+        
+        check_exit(choice)
+        if choice == '0' or choice == '':
+            return
+        
+        try:
+            idx = int(choice) - 1
+            if idx < 0 or idx >= len(templates):
+                return
+        except ValueError:
+            return
+        
+        key, template = templates[idx]
+        
+        # Check if required wizards exist
+        agents = list(AGENTS_DIR.glob('*.yaml'))
+        existing_ids = [a.stem for a in agents]
+        
+        # Find matching wizards
+        matched = []
+        for rec in template['recommended_wizards']:
+            # Try to find a wizard that matches the recommended type
+            for agent_file in agents:
+                if rec in agent_file.stem.lower():
+                    matched.append(agent_file.stem)
+                    break
+        
+        if not matched:
+            print(f"\n  {YELLOW}⚠️  No matching wizards found.{RESET}")
+            print(f"  {DIM}Create wizards with names containing: {', '.join(template['recommended_wizards'])}{RESET}")
+            input("\n  Press Enter to continue...")
+            return
+        
+        # Get custom name
+        print(f"\n  {BOLD}Guild Name{RESET}")
+        name = click.prompt(click.style("  Name", fg="cyan"), default=template['name'], show_default=False).strip()
+        check_exit(name)
+        
+        safe_name = name.lower().replace(' ', '_').replace('-', '_')
+        
+        # Save
+        crew_def = {
+            'name': name,
+            'agents': matched,
+            'workflow': template['workflow'],
+            'verbose': False,
+        }
+        
+        ensure_dirs()
+        crew_file = CREWS_DIR / f"{safe_name}.yaml"
+        
+        with open(crew_file, 'w') as f:
+            yaml.dump(crew_def, f, default_flow_style=False)
+        
+        print(f"\n  {GREEN}✓ Guild '{name}' created with {len(matched)} wizard(s)!{RESET}")
+        print(f"  {DIM}Wizards: {', '.join(matched)}{RESET}")
+        
+    except (KeyboardInterrupt, click.Abort):
+        pass
+    
+    input("\n  Press Enter to continue...")
+
+
+def create_guild_manual():
+    """Manual guild creation - user selects wizards themselves."""
+    import click
+    
+    clear_screen()
+    
+    print(f"\n  \033[35m╔══════════════════════════════════════════════════════════════╗\033[0m")
+    print(f"  \033[35m║  📝 Manual Guild Creation                                    ║\033[0m")
+    print(f"  \033[35m╚══════════════════════════════════════════════════════════════╝\033[0m")
     print()
     
     # Check for existing wizards
@@ -519,6 +838,7 @@ def create_crew():
         return
     
     print(f"  {DIM}Found {len(agents)} wizard(s) available{RESET}")
+    print(f"  {DIM}Type /exit to cancel{RESET}")
     print()
     
     try:
@@ -591,7 +911,7 @@ def create_crew():
             'name': name,
             'agents': selected_agents,
             'workflow': workflow_type,
-            'verbose': True,
+            'verbose': False,
         }
         
         # Save to file
