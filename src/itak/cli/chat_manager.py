@@ -277,8 +277,14 @@ If anyone mentions self-harm, suicide, depression, or feeling hopeless:
                                             history = [{'role': 'system', 'content': system_prompt}]
                                             
                                             clear_screen()
-                                            print(f"\n  {GREEN}✓ Switched to: {model}{RESET}")
-                                            print(f"  {info['emoji']} {DIM}{info['speed']} response times{RESET}")
+                                            print(f"\n  \033[32m╔══════════════════════════════════════════════════════════════╗\033[0m")
+                                            print(f"  \033[32m║  ✓ Model Switched                                            ║\033[0m")
+                                            print(f"  \033[32m╚══════════════════════════════════════════════════════════════╝\033[0m")
+                                            print()
+                                            print(f"  {BOLD}Model:{RESET}  {CYAN}{model}{RESET}")
+                                            print(f"  {BOLD}Type:{RESET}   {info['emoji']}")
+                                            print(f"  {BOLD}Speed:{RESET}  {DIM}{info['speed']} response times{RESET}")
+                                            print()
                                             print(f"  {DIM}Loading model... first message may take 10-30s{RESET}\n")
                                         else:
                                             print(f"\n  {YELLOW}Invalid selection{RESET}\n")
@@ -287,7 +293,12 @@ If anyone mentions self-harm, suicide, depression, or feeling hopeless:
                                         model = choice
                                         history = [{'role': 'system', 'content': system_prompt}]
                                         clear_screen()
-                                        print(f"\n  {GREEN}✓ Switched to: {model}{RESET}")
+                                        print(f"\n  \033[32m╔══════════════════════════════════════════════════════════════╗\033[0m")
+                                        print(f"  \033[32m║  ✓ Model Switched                                            ║\033[0m")
+                                        print(f"  \033[32m╚══════════════════════════════════════════════════════════════╝\033[0m")
+                                        print()
+                                        print(f"  {BOLD}Model:{RESET}  {CYAN}{model}{RESET}")
+                                        print()
                                         print(f"  {DIM}Loading model... first message may take 10-30s{RESET}\n")
                             except (KeyboardInterrupt, click.Abort):
                                 pass
