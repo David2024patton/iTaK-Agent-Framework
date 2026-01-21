@@ -129,6 +129,8 @@ class iTaKREPL:
             try:
                 from .wizard import run_project_wizard
                 run_project_wizard(project_type_idx=choice)
+                # After returning from wizard, restart main menu
+                self.start()
             except ImportError:
                 print(f"\n{YELLOW}Wizard module not available.{RESET}\n")
             except Exception as e:
