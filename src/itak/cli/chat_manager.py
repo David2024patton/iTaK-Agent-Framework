@@ -159,64 +159,62 @@ If anyone mentions self-harm, suicide, depression, or feeling hopeless:
                 
                 # Model switch command
                 if user_input.lower() == '/model':
-                    # Comprehensive model capability database
-                    # Format: 'pattern': {'caps': 'capabilities', 'speed': 'response time'}
+                    # Comprehensive model capability database - emoji only for type
                     MODEL_INFO = {
                         # Qwen models
-                        'qwen3-vl': {'caps': '🧠👁️ Thinking+Vision', 'speed': 'Slower'},
-                        'qwen-vl': {'caps': '👁️ Vision', 'speed': 'Medium'},
-                        'qwen3': {'caps': '🧠 Thinking', 'speed': 'Slower'},
-                        'qwen2.5-coder': {'caps': '💻 Code', 'speed': 'Medium'},
-                        'qwen2.5': {'caps': '⚡ Fast', 'speed': 'Quick'},
-                        'qwq': {'caps': '🧠 Thinking', 'speed': 'Slower'},
+                        'qwen3-vl': {'emoji': '🧠👁️', 'speed': 'Slower'},
+                        'qwen-vl': {'emoji': '👁️', 'speed': 'Medium'},
+                        'qwen3': {'emoji': '🧠', 'speed': 'Slower'},
+                        'qwen2.5-coder': {'emoji': '💻', 'speed': 'Medium'},
+                        'qwen2.5': {'emoji': '⚡', 'speed': 'Quick'},
+                        'qwq': {'emoji': '🧠', 'speed': 'Slower'},
                         
                         # DeepSeek models
-                        'deepseek-r1': {'caps': '🧠 Thinking', 'speed': 'Slower'},
-                        'deepseek-coder': {'caps': '💻 Code', 'speed': 'Medium'},
-                        'deepseek-v3': {'caps': '🧠 Thinking', 'speed': 'Slower'},
+                        'deepseek-r1': {'emoji': '🧠', 'speed': 'Slower'},
+                        'deepseek-coder': {'emoji': '💻', 'speed': 'Medium'},
+                        'deepseek-v3': {'emoji': '🧠', 'speed': 'Slower'},
                         
                         # Llama models
-                        'llama3.2-vision': {'caps': '👁️ Vision', 'speed': 'Medium'},
-                        'llama3.3': {'caps': '⚡ Fast', 'speed': 'Quick'},
-                        'llama3.2': {'caps': '⚡ Fast', 'speed': 'Quick'},
-                        'llama3.1': {'caps': '⚡ Fast', 'speed': 'Quick'},
-                        'codellama': {'caps': '💻 Code', 'speed': 'Medium'},
+                        'llama3.2-vision': {'emoji': '👁️', 'speed': 'Medium'},
+                        'llama3.3': {'emoji': '⚡', 'speed': 'Quick'},
+                        'llama3.2': {'emoji': '⚡', 'speed': 'Quick'},
+                        'llama3.1': {'emoji': '⚡', 'speed': 'Quick'},
+                        'codellama': {'emoji': '💻', 'speed': 'Medium'},
                         
                         # Gemma models
-                        'gemma3': {'caps': '⚡ Fast', 'speed': 'Quick'},
-                        'gemma2': {'caps': '⚡ Fast', 'speed': 'Quick'},
-                        'codegemma': {'caps': '💻 Code', 'speed': 'Medium'},
+                        'gemma3': {'emoji': '⚡', 'speed': 'Quick'},
+                        'gemma2': {'emoji': '⚡', 'speed': 'Quick'},
+                        'codegemma': {'emoji': '💻', 'speed': 'Medium'},
                         
                         # Phi models
-                        'phi4': {'caps': '🧠 Thinking', 'speed': 'Medium'},
-                        'phi3.5': {'caps': '⚡ Fast', 'speed': 'Quick'},
-                        'phi3': {'caps': '⚡ Fast', 'speed': 'Quick'},
+                        'phi4': {'emoji': '🧠', 'speed': 'Medium'},
+                        'phi3.5': {'emoji': '⚡', 'speed': 'Quick'},
+                        'phi3': {'emoji': '⚡', 'speed': 'Quick'},
                         
                         # Vision models
-                        'llava': {'caps': '👁️ Vision', 'speed': 'Medium'},
-                        'bakllava': {'caps': '👁️ Vision', 'speed': 'Medium'},
-                        'moondream': {'caps': '👁️ Vision', 'speed': 'Quick'},
-                        'minicpm-v': {'caps': '👁️ Vision', 'speed': 'Medium'},
+                        'llava': {'emoji': '👁️', 'speed': 'Medium'},
+                        'bakllava': {'emoji': '👁️', 'speed': 'Medium'},
+                        'moondream': {'emoji': '👁️', 'speed': 'Quick'},
+                        'minicpm-v': {'emoji': '👁️', 'speed': 'Medium'},
                         
                         # Mistral models
-                        'mistral': {'caps': '⚡ Fast', 'speed': 'Quick'},
-                        'mixtral': {'caps': '🔥 Large', 'speed': 'Slow'},
+                        'mistral': {'emoji': '⚡', 'speed': 'Quick'},
+                        'mixtral': {'emoji': '🔥', 'speed': 'Slow'},
                         
                         # Other
-                        'starcoder': {'caps': '💻 Code', 'speed': 'Medium'},
-                        'wizardcoder': {'caps': '💻 Code', 'speed': 'Medium'},
-                        'nous-hermes': {'caps': '⚡ Fast', 'speed': 'Quick'},
-                        'neural-chat': {'caps': '💬 Chat', 'speed': 'Quick'},
-                        'openchat': {'caps': '💬 Chat', 'speed': 'Quick'},
+                        'starcoder': {'emoji': '💻', 'speed': 'Medium'},
+                        'wizardcoder': {'emoji': '💻', 'speed': 'Medium'},
+                        'nous-hermes': {'emoji': '⚡', 'speed': 'Quick'},
+                        'neural-chat': {'emoji': '💬', 'speed': 'Quick'},
+                        'openchat': {'emoji': '💬', 'speed': 'Quick'},
                     }
                     
                     def get_model_info(name):
                         name_lower = name.lower()
-                        # Check specific patterns first (longer patterns)
                         for key in sorted(MODEL_INFO.keys(), key=len, reverse=True):
                             if key in name_lower:
                                 return MODEL_INFO[key]
-                        return {'caps': '💬 Chat', 'speed': 'Medium'}
+                        return {'emoji': '💬', 'speed': 'Medium'}
                     
                     # Clear and show model selector
                     clear_screen()
@@ -226,6 +224,10 @@ If anyone mentions self-harm, suicide, depression, or feeling hopeless:
                     print(f"  \033[35m╚══════════════════════════════════════════════════════════════╝\033[0m")
                     print()
                     
+                    # Key/Legend
+                    print(f"  {DIM}Key:{RESET} 🧠 Thinking  ⚡ Fast  👁️ Vision  💻 Code  🔥 Large  💬 Chat")
+                    print()
+                    
                     print(f"  {DIM}Fetching models...{RESET}", end="", flush=True)
                     try:
                         models_response = ollama.list()
@@ -233,10 +235,9 @@ If anyone mentions self-harm, suicide, depression, or feeling hopeless:
                         print(f"\r                        \r")
                         
                         if available:
-                            # Simple header
                             print(f"  {DIM}Current:{RESET} {CYAN}{model}{RESET}\n")
-                            print(f"  {DIM}#   Model                      Type                 Size{RESET}")
-                            print(f"  {DIM}────────────────────────────────────────────────────────────{RESET}")
+                            print(f"  {DIM}#   Model                      Type   Size{RESET}")
+                            print(f"  {DIM}──────────────────────────────────────────{RESET}")
                             
                             for i, m in enumerate(available, 1):
                                 name = m.get('model') or m.get('name') or str(m)
@@ -245,14 +246,12 @@ If anyone mentions self-harm, suicide, depression, or feeling hopeless:
                                 info = get_model_info(name)
                                 
                                 is_current = (name == model or model in name)
-                                
-                                # Truncate long names
-                                display_name = name[:24] + '..' if len(name) > 26 else name
+                                display_name = name[:26] + '..' if len(name) > 28 else name
                                 
                                 if is_current:
-                                    print(f"  {GREEN}{i:<3} {display_name:<26} {info['caps']:<20} {size_gb:.1f}GB ◀{RESET}")
+                                    print(f"  {GREEN}{i:<3} {display_name:<28} {info['emoji']:<4}  {size_gb:.1f}GB ◀{RESET}")
                                 else:
-                                    print(f"  {CYAN}{i:<3}{RESET} {display_name:<26} {info['caps']:<20} {DIM}{size_gb:.1f}GB{RESET}")
+                                    print(f"  {CYAN}{i:<3}{RESET} {display_name:<28} {info['emoji']:<4}  {DIM}{size_gb:.1f}GB{RESET}")
                             
                             print(f"\n  {GREEN}0{RESET}   ↩️  Back to chat\n")
                             
@@ -274,7 +273,7 @@ If anyone mentions self-harm, suicide, depression, or feeling hopeless:
                                             
                                             clear_screen()
                                             print(f"\n  {GREEN}✓ Switched to: {model}{RESET}")
-                                            print(f"  {info['caps']} {DIM}• {info['speed']} response times{RESET}")
+                                            print(f"  {info['emoji']} {DIM}{info['speed']} response times{RESET}")
                                             print(f"  {DIM}Loading model... first message may take 10-30s{RESET}\n")
                                         else:
                                             print(f"\n  {YELLOW}Invalid selection{RESET}\n")
