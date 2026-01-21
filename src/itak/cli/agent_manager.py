@@ -240,7 +240,7 @@ Keep the response short. Only output the JSON, nothing else."""
 
 
 def create_wizard_from_template():
-    """Create wizard from pre-built template."""
+    """Create wizard from pre-built template with full customization."""
     import click
     
     clear_screen()
@@ -273,21 +273,86 @@ def create_wizard_from_template():
             if 0 <= idx < len(templates):
                 key, template = templates[idx]
                 
-                # Ask for custom name
-                print(f"\n  {DIM}Customize the wizard name (or press Enter for default){RESET}")
-                custom_name = click.prompt(
-                    click.style("  Name", fg="cyan"), 
-                    default=template['name'], 
-                    show_default=False
-                ).strip()
+                # Show customization screen
+                clear_screen()
+                print(f"\n  \033[35m╔══════════════════════════════════════════════════════════════╗\033[0m")
+                print(f"  \033[35m║  ✏️  Customize Template: {template['name']:<34} ║\033[0m")
+                print(f"  \033[35m╚══════════════════════════════════════════════════════════════╝\033[0m")
+                print()
                 
-                save_wizard(
-                    custom_name,
-                    template['role'],
-                    template['goal'],
-                    template['tools'],
-                    template['llm']
-                )
+                print(f"  {DIM}Press Enter to keep defaults, or type to change{RESET}")
+                print(f"  {DIM}Type /exit to cancel{RESET}")
+                print()
+                
+                # Name
+                print(f"  {BOLD}Name{RESET} {DIM}(current: {template['name']}){RESET}")
+                name = click.prompt(click.style("  Name", fg="cyan"), default=template['name'], show_default=False).strip()
+                if name.lower() in ['/exit', 'exit']:
+                    return
+                print(f"  {GREEN}✓{RESET} {name}\n")
+                
+                # Role
+                print(f"  {BOLD}Role{RESET} {DIM}(current: {template['role']}){RESET}")
+                role = click.prompt(click.style("  Role", fg="cyan"), default=template['role'], show_default=False).strip()
+                if role.lower() in ['/exit', 'exit']:
+                    return
+                print(f"  {GREEN}✓{RESET} {role}\n")
+                
+                # Goal/Mission
+                print(f"  {BOLD}Mission{RESET} {DIM}(current: {template['goal'][:50]}...){RESET}")
+                goal = click.prompt(click.style("  Mission", fg="cyan"), default=template['goal'], show_default=False).strip()
+                if goal.lower() in ['/exit', 'exit']:
+                    return
+                print(f"  {GREEN}✓{RESET} {goal}\n")
+                
+                # Powers - show current and allow change
+                available_tools = [
+                    ('📖 file_read', 'file_read'),
+                    ('✍️ file_write', 'file_write'),
+                    ('🔍 code_search', 'code_search'),
+                    ('🌐 web_search', 'web_search'),
+                    ('⚡ shell', 'shell'),
+                ]
+                
+                # Convert current tools to numbers
+                current_nums = []
+                for t in template['tools']:
+                    for i, (_, tool_id) in enumerate(available_tools, 1):
+                        if t == tool_id:
+                            current_nums.append(str(i))
+                default_powers = ','.join(current_nums)
+                
+                print(f"  {BOLD}Powers{RESET} {DIM}(current: {', '.join(template['tools'])}){RESET}")
+                for i, (display, _) in enumerate(available_tools, 1):
+                    marker = "●" if str(i) in current_nums else "○"
+                    print(f"    [{CYAN}{i}{RESET}] {marker} {display}")
+                
+                tool_input = click.prompt(click.style("  Powers", fg="cyan"), default=default_powers, show_default=False).strip()
+                if tool_input.lower() in ['/exit', 'exit']:
+                    return
+                
+                selected_tools = []
+                for num in tool_input.split(','):
+                    try:
+                        i = int(num.strip()) - 1
+                        if 0 <= i < len(available_tools):
+                            selected_tools.append(available_tools[i][1])
+                    except:
+                        pass
+                if not selected_tools:
+                    selected_tools = template['tools']
+                print(f"  {GREEN}✓{RESET} {len(selected_tools)} powers\n")
+                
+                # Model/Brain
+                print(f"  {BOLD}Brain{RESET} {DIM}(current: {template['llm']}){RESET}")
+                llm = click.prompt(click.style("  Model", fg="cyan"), default=template['llm'], show_default=False).strip()
+                if llm.lower() in ['/exit', 'exit']:
+                    return
+                print(f"  {GREEN}✓{RESET} {llm}\n")
+                
+                # Save wizard
+                save_wizard(name, role, goal, selected_tools, llm)
+                
             else:
                 print(f"\n  {YELLOW}Invalid selection{RESET}")
                 input("\n  Press Enter to continue...")
