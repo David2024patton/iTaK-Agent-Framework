@@ -125,37 +125,49 @@ def start_service(service_key):
     """Start an optional service using docker compose with profile."""
     service = OPTIONAL_SERVICES[service_key]
     
-    print(f"\n  {DIM}Starting {service['name']}...{RESET}")
+    print(f"\n  {CYAN}🚀 Installing {service['name']}...{RESET}")
+    print(f"  {DIM}This may take a few minutes for first-time setup{RESET}")
+    print()
     
     try:
         compose_file = DOCKER_DIR / 'docker-compose.yml'
+        
+        # Check if image needs to be pulled
+        print(f"  {DIM}[1/3] Pulling Docker image...{RESET}", flush=True)
+        
         result = subprocess.run(
             ['docker', 'compose', '-f', str(compose_file), '-p', 'api-gateway',
              '--profile', 'optional', 'up', '-d', service['container']],
             capture_output=True, text=True, cwd=str(DOCKER_DIR)
         )
         
+        print(f"  {DIM}[2/3] Starting container...{RESET}", flush=True)
+        
         # Also start extra containers if any
         if 'extra_containers' in service:
             for extra in service['extra_containers']:
+                print(f"  {DIM}[2/3] Starting {extra}...{RESET}", flush=True)
                 subprocess.run(
                     ['docker', 'compose', '-f', str(compose_file), '-p', 'api-gateway',
                      '--profile', 'optional', 'up', '-d', extra],
                     capture_output=True, text=True, cwd=str(DOCKER_DIR)
                 )
         
+        print(f"  {DIM}[3/3] Configuring...{RESET}", flush=True)
+        
         if result.returncode == 0:
             # Update .env file
             update_env_file(service['env_var'], service['url'])
-            print(f"  {GREEN}✅ {service['name']} installed and started!{RESET}")
+            print(f"\n  {GREEN}✅ {service['name']} installed and started!{RESET}")
             print(f"     {DIM}{service['url']}{RESET}")
             return True
         else:
-            print(f"  {RED}❌ Failed to start {service['name']}{RESET}")
-            print(f"     {DIM}{result.stderr[:200]}{RESET}")
+            print(f"\n  {RED}❌ Failed to start {service['name']}{RESET}")
+            if result.stderr:
+                print(f"     {DIM}{result.stderr[:200]}{RESET}")
             return False
     except Exception as e:
-        print(f"  {RED}❌ Error: {e}{RESET}")
+        print(f"\n  {RED}❌ Error: {e}{RESET}")
         return False
 
 
@@ -213,7 +225,7 @@ def print_optional_menu():
     clear_screen()
     
     print(f"\n  \033[35m╔══════════════════════════════════════════════════════════════╗\033[0m")
-    print(f"  \033[35m║\033[0m  🧩 {BOLD}Optional Services{RESET}                                       \033[35m║\033[0m")
+    print(f"  \033[35m║\033[0m  🧩 {BOLD}Optional Services{RESET}                                      \033[35m║\033[0m")
     print(f"  \033[35m╚══════════════════════════════════════════════════════════════╝\033[0m")
     print()
     
