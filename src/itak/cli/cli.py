@@ -191,6 +191,79 @@ def setup(force):
 
 
 @iTaK.command()
+def update():
+    """Update iTaK to the latest version from GitHub.
+    
+    Pulls the latest changes from the main branch.
+    You can run this from any directory.
+    
+    Example: itak update
+    """
+    import subprocess
+    from pathlib import Path
+    
+    # Find the iTaK installation directory
+    # Try common locations
+    possible_paths = [
+        Path.home() / '.itak' / 'iTaK-Agent-Framework',
+        Path('d:/test/iTaK-Agent-Framework'),
+        Path('d:/test/testing'),
+    ]
+    
+    # Also try to find via pip show
+    try:
+        result = subprocess.run(
+            ['pip', 'show', 'itak'],
+            capture_output=True, text=True, check=False
+        )
+        for line in result.stdout.split('\n'):
+            if line.startswith('Location:'):
+                loc = Path(line.split(':', 1)[1].strip())
+                if (loc.parent / '.git').exists():
+                    possible_paths.insert(0, loc.parent)
+    except:
+        pass
+    
+    # Find the git repo
+    repo_path = None
+    for path in possible_paths:
+        if path.exists() and (path / '.git').exists():
+            repo_path = path
+            break
+    
+    if not repo_path:
+        click.secho("⚠️  Could not find iTaK git repository.", fg="yellow")
+        click.secho("   Try running from the iTaK installation directory:", fg="white")
+        click.secho("   cd d:\\test\\iTaK-Agent-Framework && git pull origin main", dim=True)
+        return
+    
+    click.secho(f"\n✦ Updating iTaK from: {repo_path}", fg="magenta")
+    click.secho("  Pulling latest changes...\n", dim=True)
+    
+    try:
+        result = subprocess.run(
+            ['git', 'pull', 'origin', 'main'],
+            cwd=repo_path,
+            capture_output=True, text=True, check=False
+        )
+        
+        if result.returncode == 0:
+            output = result.stdout.strip()
+            if 'Already up to date' in output:
+                click.secho("✓ Already up to date!", fg="green")
+            else:
+                click.secho("✓ Updated successfully!", fg="green")
+                click.secho(f"\n{output}", dim=True)
+        else:
+            click.secho(f"⚠️  Git pull failed: {result.stderr}", fg="red")
+            
+    except FileNotFoundError:
+        click.secho("⚠️  Git not found. Make sure git is installed.", fg="red")
+    except Exception as e:
+        click.secho(f"⚠️  Error: {e}", fg="red")
+
+
+@iTaK.command()
 @click.argument("prompt", nargs=-1, required=True)
 @click.option("--model", "-m", default=None, help="Model to use (default: ollama/qwen3-vl:2b)")
 @click.option("--output", "-o", default=".", help="Output directory for generated files")
