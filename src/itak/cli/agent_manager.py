@@ -27,6 +27,14 @@ def clear_screen():
     os.system('cls' if os.name == 'nt' else 'clear')
 
 
+def check_exit(value):
+    """Check if user wants to exit CLI. Exits if so, returns False otherwise."""
+    if value.lower() in ['/exit', 'exit', '/quit', 'quit']:
+        print(f"\n{YELLOW}Goodbye!{RESET}\n")
+        sys.exit(0)
+    return value.lower() == '/back'
+
+
 def ensure_dirs():
     """Ensure config directories exist."""
     AGENTS_DIR.mkdir(parents=True, exist_ok=True)
@@ -134,7 +142,8 @@ def create_agent():
     try:
         choice = click.prompt(click.style("  Select", fg="cyan"), default="0", show_default=False).strip()
         
-        if choice.lower() in ['/exit', 'exit', '0', '']:
+        check_exit(choice)  # Will exit CLI if user typed exit
+        if choice == '0' or choice == '':
             return
         
         if choice == '1':
