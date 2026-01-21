@@ -70,87 +70,129 @@ def print_agent_menu():
 
 
 def create_agent():
-    """Wizard to create a new agent."""
+    """Wizard to create a new wizard (agent)."""
     import click
+    import sys
     
     clear_screen()
-    print(f"\n  {BOLD}{MAGENTA}🤖 Create New Agent{RESET}")
-    print(f"  {DIM}Define your specialized AI agent{RESET}\n")
+    
+    # Themed header
+    print(f"\n  \033[35m╔══════════════════════════════════════════════════════════════╗\033[0m")
+    print(f"  \033[35m║  🧙 Create New Wizard                                        ║\033[0m")
+    print(f"  \033[35m╚══════════════════════════════════════════════════════════════╝\033[0m")
+    print()
+    
+    print(f"  \033[90m┌───────────────────────────────────────────────────────────────┐\033[0m")
+    print(f"  \033[90m│  💡 Define a specialized AI wizard with unique powers         │\033[0m")
+    print(f"  \033[90m│                                                               │\033[0m")
+    print(f"  \033[90m│     Type /exit at any time to cancel                          │\033[0m")
+    print(f"  \033[90m└───────────────────────────────────────────────────────────────┘\033[0m")
+    print()
     
     try:
-        # Agent name
-        name = click.prompt(click.style("  Agent name", fg="cyan"), default="").strip()
-        if not name:
-            print(f"  {YELLOW}Cancelled{RESET}")
+        # Step 1: Name
+        print(f"  {BOLD}Step 1 of 5: Wizard Name{RESET}")
+        print(f"  {DIM}Give your wizard a memorable name{RESET}")
+        name = click.prompt(click.style("  Name", fg="cyan"), default="", show_default=False).strip()
+        
+        if not name or name.lower() in ['/exit', 'exit']:
+            print(f"\n  {YELLOW}Cancelled{RESET}")
+            input("\n  Press Enter to continue...")
             return
         
-        # Sanitize name for filename
         safe_name = name.lower().replace(' ', '_').replace('-', '_')
+        print(f"  {GREEN}✓{RESET} {name}\n")
         
-        # Role
-        print(f"\n  {DIM}What is this agent's role? (e.g., 'Senior Python Developer'){RESET}")
-        role = click.prompt(click.style("  Role", fg="cyan"), default="AI Assistant").strip()
+        # Step 2: Role
+        print(f"  {BOLD}Step 2 of 5: Role{RESET}")
+        print(f"  {DIM}What is this wizard's specialty? (e.g., 'Senior Python Developer'){RESET}")
+        role = click.prompt(click.style("  Role", fg="cyan"), default="AI Assistant", show_default=False).strip()
+        if role.lower() in ['/exit', 'exit']:
+            print(f"\n  {YELLOW}Cancelled{RESET}")
+            return
+        print(f"  {GREEN}✓{RESET} {role}\n")
         
-        # Goal
-        print(f"\n  {DIM}What is this agent's main goal?{RESET}")
-        goal = click.prompt(click.style("  Goal", fg="cyan"), default="Help users accomplish tasks").strip()
+        # Step 3: Goal
+        print(f"  {BOLD}Step 3 of 5: Mission{RESET}")
+        print(f"  {DIM}What is this wizard's primary mission?{RESET}")
+        goal = click.prompt(click.style("  Mission", fg="cyan"), default="Help users accomplish tasks", show_default=False).strip()
+        if goal.lower() in ['/exit', 'exit']:
+            print(f"\n  {YELLOW}Cancelled{RESET}")
+            return
+        print(f"  {GREEN}✓{RESET} {goal}\n")
         
-        # Backstory
-        print(f"\n  {DIM}Give this agent a backstory (personality, expertise){RESET}")
-        backstory = click.prompt(
-            click.style("  Backstory", fg="cyan"), 
-            default="An experienced professional with deep expertise"
-        ).strip()
+        # Step 4: Powers (Tools)
+        print(f"  {BOLD}Step 4 of 5: Powers{RESET}")
+        print(f"  {DIM}Select the magical powers for this wizard{RESET}\n")
         
-        # Tools
-        print(f"\n  {BOLD}Available Tools:{RESET}")
         available_tools = [
-            ('file_read', 'Read files from disk'),
-            ('file_write', 'Write/create files'),
-            ('code_search', 'Search code with ripgrep'),
-            ('web_search', 'Search the web'),
-            ('shell', 'Execute shell commands'),
+            ('📖 file_read', 'file_read', 'Read files from disk'),
+            ('✍️ file_write', 'file_write', 'Write/create files'),
+            ('🔍 code_search', 'code_search', 'Search code with ripgrep'),
+            ('🌐 web_search', 'web_search', 'Search the web'),
+            ('⚡ shell', 'shell', 'Execute shell commands'),
         ]
         
-        for i, (tool, desc) in enumerate(available_tools, 1):
-            print(f"    [{i}] {tool}: {DIM}{desc}{RESET}")
+        for i, (display, tool, desc) in enumerate(available_tools, 1):
+            print(f"    [{CYAN}{i}{RESET}] {display}  {DIM}{desc}{RESET}")
         
-        print(f"\n  {DIM}Enter tool numbers separated by commas (e.g., 1,2,3){RESET}")
-        tool_input = click.prompt(click.style("  Tools", fg="cyan"), default="1,2,3").strip()
+        print(f"\n  {DIM}Enter numbers separated by commas (e.g., 1,2,3){RESET}")
+        tool_input = click.prompt(click.style("  Powers", fg="cyan"), default="1,2,3", show_default=False).strip()
+        
+        if tool_input.lower() in ['/exit', 'exit']:
+            print(f"\n  {YELLOW}Cancelled{RESET}")
+            return
         
         selected_tools = []
         try:
             for num in tool_input.split(','):
                 idx = int(num.strip()) - 1
                 if 0 <= idx < len(available_tools):
-                    selected_tools.append(available_tools[idx][0])
+                    selected_tools.append(available_tools[idx][1])
         except:
             selected_tools = ['file_read', 'file_write', 'code_search']
         
-        # LLM
-        print(f"\n  {DIM}Which LLM should this agent use?{RESET}")
-        llm = click.prompt(click.style("  LLM", fg="cyan"), default="ollama/qwen3:4b").strip()
+        print(f"  {GREEN}✓{RESET} {len(selected_tools)} powers selected\n")
         
-        # Build agent definition
+        # Step 5: LLM
+        print(f"  {BOLD}Step 5 of 5: Brain{RESET}")
+        print(f"  {DIM}Which model will power this wizard?{RESET}")
+        llm = click.prompt(click.style("  Model", fg="cyan"), default="ollama/qwen3:4b", show_default=False).strip()
+        if llm.lower() in ['/exit', 'exit']:
+            print(f"\n  {YELLOW}Cancelled{RESET}")
+            return
+        print(f"  {GREEN}✓{RESET} {llm}\n")
+        
+        # Build and save
         agent_def = {
             'name': name,
             'role': role,
             'goal': goal,
-            'backstory': backstory,
+            'backstory': f"A skilled {role} wizard with expertise in their craft",
             'tools': selected_tools,
             'llm': llm,
             'verbose': True,
             'allow_delegation': False,
         }
         
-        # Save to file
         ensure_dirs()
         agent_file = AGENTS_DIR / f"{safe_name}.yaml"
         
         with open(agent_file, 'w') as f:
             yaml.dump(agent_def, f, default_flow_style=False)
         
-        print(f"\n  {GREEN}✅ Agent '{name}' created!{RESET}")
+        # Success screen
+        clear_screen()
+        print(f"\n  \033[32m╔══════════════════════════════════════════════════════════════╗\033[0m")
+        print(f"  \033[32m║  ✓ Wizard Created!                                           ║\033[0m")
+        print(f"  \033[32m╚══════════════════════════════════════════════════════════════╝\033[0m")
+        print()
+        print(f"  {BOLD}Name:{RESET}    {CYAN}{name}{RESET}")
+        print(f"  {BOLD}Role:{RESET}    {role}")
+        print(f"  {BOLD}Mission:{RESET} {goal}")
+        print(f"  {BOLD}Powers:{RESET}  {', '.join(selected_tools)}")
+        print(f"  {BOLD}Brain:{RESET}   {llm}")
+        print()
         print(f"  {DIM}Saved to: {agent_file}{RESET}")
         
     except KeyboardInterrupt:
