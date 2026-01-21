@@ -103,7 +103,15 @@ def natural_chat():
         print(f"  {DIM}First response may take 10-30s to load{RESET}")
         print()
         
-        history = []
+        # System prompt with formatting guidelines
+        system_prompt = """You are a helpful AI assistant. Follow these formatting rules strictly:
+1. NEVER use dashes (—, -, –) or horizontal lines in your responses
+2. NEVER use the word "fluff" or phrases like "no fluff" or "without fluff"
+3. Use bullet points with • or numbered lists instead of dashes
+4. Keep responses concise and direct
+5. Be friendly and helpful"""
+        
+        history = [{'role': 'system', 'content': system_prompt}]
         
         while True:
             try:
