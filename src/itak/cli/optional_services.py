@@ -211,8 +211,22 @@ def install_with_credentials(service_key):
 def print_optional_menu():
     """Print the optional services menu."""
     clear_screen()
-    print(f"\n  {BOLD}🧩 Optional Services{RESET}")
-    print(f"  {DIM}Install heavy services on-demand{RESET}\n")
+    
+    print(f"\n  \033[35m╔══════════════════════════════════════════════════════════════╗\033[0m")
+    print(f"  \033[35m║\033[0m  🧩 {BOLD}Optional Services{RESET}                                       \033[35m║\033[0m")
+    print(f"  \033[35m╚══════════════════════════════════════════════════════════════╝\033[0m")
+    print()
+    
+    print(f"  \033[90m┌───────────────────────────────────────────────────────────────┐\033[0m")
+    print(f"  \033[90m│  💡 Heavy services installed on-demand                        │\033[0m")
+    print(f"  \033[90m│                                                               │\033[0m")
+    print(f"  \033[90m│    🗄️  Redis      → Caching, queues, session storage          │\033[0m")
+    print(f"  \033[90m│    🎙️  Whisper    → Speech-to-text (GPU accelerated)          │\033[0m")
+    print(f"  \033[90m│    🎨 ComfyUI    → AI image generation (GPU required)        │\033[0m")
+    print(f"  \033[90m│    🐘 Supabase   → PostgreSQL + Studio Dashboard             │\033[0m")
+    print(f"  \033[90m│                                                               │\033[0m")
+    print(f"  \033[90m└───────────────────────────────────────────────────────────────┘\033[0m")
+    print()
     
     has_gpu = check_nvidia_gpu()
     

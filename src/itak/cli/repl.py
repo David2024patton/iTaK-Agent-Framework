@@ -105,9 +105,7 @@ class iTaKREPL:
         elif choice == 2:
             # Chat Mode - Clear screen for fresh view
             os.system('cls' if os.name == 'nt' else 'clear')
-            print(f"\n  {BOLD}{MAGENTA}💬 Chat Mode{RESET}")
-            print(f"  {DIM}Type your questions, or /menu to go back{RESET}\n")
-            
+            print()
             print_welcome_tips()
             
             # If user typed a message at the menu, process it immediately

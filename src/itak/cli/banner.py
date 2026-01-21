@@ -300,11 +300,25 @@ def print_banner(style: str = "dash_3d", theme_key: str = None):
 
 # --- CLI HELPERS (Keep existing interface) ---
 def print_welcome_tips():
-    print(f"{DIM}Try these prompts:{RESET}")
-    print()
-    print(f"  {CYAN}>{RESET} {WHITE}Explain async/await in Python{RESET}")
-    print(f"  {CYAN}>{RESET} {WHITE}Write a regex for email validation{RESET}")
-    print(f"  {CYAN}>{RESET} {WHITE}REST vs GraphQL differences?{RESET}")
+    print(f"  ╔══════════════════════════════════════════════════════════════╗", end="")
+    print(f"\033[35m")  # Magenta
+    print(f"  ║  💬 Chat Mode - Your AI Coding Assistant                     ║")
+    print(f"  ╚══════════════════════════════════════════════════════════════╝")
+    print(RESET)
+    
+    print(f"  ┌───────────────────────────────────────────────────────────────┐", end="")
+    print(f"\033[90m")  # Dim
+    print(f"  │  💡 What can you ask?                                         │")
+    print(f"  │                                                               │")
+    print(f"  │    📖 Explain   → Python async, Git branching, REST vs GraphQL│")
+    print(f"  │    ✍️  Write     → Regex patterns, SQL queries, shell scripts │")
+    print(f"  │    🐛 Debug     → Error messages, stack traces, logic issues  │")
+    print(f"  │    🔧 Refactor  → Optimize code, improve structure            │")
+    print(f"  │    📁 @files    → Mention @path/to/file for context           │")
+    print(f"  │                                                               │")
+    print(f"  └───────────────────────────────────────────────────────────────┘")
+    print(RESET)
+    print(f"  {DIM}Type /help for commands, /menu to go back{RESET}")
     print()
 
 def print_model_info(model: str = "qwen3-vl:4b"):

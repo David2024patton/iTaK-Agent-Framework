@@ -211,8 +211,21 @@ def print_api_menu():
     clear_screen()
     config = load_config()
     
-    print(f"\n  {BOLD}{CYAN}⚡ API Gateway Manager{RESET}")
-    print(f"  {DIM}Manage local services and remote access{RESET}\n")
+    print(f"\n  \033[35m╔══════════════════════════════════════════════════════════════╗\033[0m")
+    print(f"  \033[35m║\033[0m  ⚡ {BOLD}API Gateway Manager{RESET}                                     \033[35m║\033[0m")
+    print(f"  \033[35m╚══════════════════════════════════════════════════════════════╝\033[0m")
+    print()
+    
+    print(f"  \033[90m┌───────────────────────────────────────────────────────────────┐\033[0m")
+    print(f"  \033[90m│  💡 What can you do?                                          │\033[0m")
+    print(f"  \033[90m│                                                               │\033[0m")
+    print(f"  \033[90m│    🔗 Tunnels     → Cloudflare or FRP to expose local APIs    │\033[0m")
+    print(f"  \033[90m│    🌐 VPS         → Connect to your remote server             │\033[0m")
+    print(f"  \033[90m│    📊 Status      → Check all services and ports              │\033[0m")
+    print(f"  \033[90m│    🧩 Services    → Supabase, ComfyUI, SearXNG, etc.          │\033[0m")
+    print(f"  \033[90m│                                                               │\033[0m")
+    print(f"  \033[90m└───────────────────────────────────────────────────────────────┘\033[0m")
+    print()
     
     # Show current endpoints
     print(f"  {BOLD}Local Endpoints:{RESET}")
