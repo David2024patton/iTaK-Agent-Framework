@@ -237,7 +237,7 @@ If anyone mentions self-harm, suicide, depression, or feeling hopeless:
                         if available:
                             print(f"  {DIM}Current:{RESET} {CYAN}{model}{RESET}\n")
                             print(f"  {DIM}#   Model                      Type   Size{RESET}")
-                            print(f"  {DIM}──────────────────────────────────────────{RESET}")
+                            print(f"  {DIM}─────────────────────────────────────────────────{RESET}")
                             
                             for i, m in enumerate(available, 1):
                                 name = m.get('model') or m.get('name') or str(m)
@@ -249,9 +249,9 @@ If anyone mentions self-harm, suicide, depression, or feeling hopeless:
                                 display_name = name[:26] + '..' if len(name) > 28 else name
                                 
                                 if is_current:
-                                    print(f"  {GREEN}{i:<3} {display_name:<28} {info['emoji']:<4}  {size_gb:.1f}GB ◀{RESET}")
+                                    print(f"  {GREEN}{i:<3} {display_name:<28} {info['emoji']:<6}     {size_gb:.1f}GB ◀{RESET}")
                                 else:
-                                    print(f"  {CYAN}{i:<3}{RESET} {display_name:<28} {info['emoji']:<4}  {DIM}{size_gb:.1f}GB{RESET}")
+                                    print(f"  {CYAN}{i:<3}{RESET} {display_name:<28} {info['emoji']:<6}     {DIM}{size_gb:.1f}GB{RESET}")
                             
                             print(f"\n  {GREEN}0{RESET}   ↩️  Back to chat\n")
                             
