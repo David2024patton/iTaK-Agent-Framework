@@ -132,28 +132,24 @@ def start_service(service_key):
     try:
         compose_file = DOCKER_DIR / 'docker-compose.yml'
         
-        # Check if image needs to be pulled
-        print(f"  {DIM}[1/3] Pulling Docker image...{RESET}", flush=True)
+        print(f"  {DIM}Pulling Docker image (please wait)...{RESET}\n")
         
+        # Use stdio='inherit' so user sees docker pull progress
         result = subprocess.run(
             ['docker', 'compose', '-f', str(compose_file), '-p', 'api-gateway',
              '--profile', 'optional', 'up', '-d', service['container']],
-            capture_output=True, text=True, cwd=str(DOCKER_DIR)
+            cwd=str(DOCKER_DIR)  # Let output flow to terminal
         )
-        
-        print(f"  {DIM}[2/3] Starting container...{RESET}", flush=True)
         
         # Also start extra containers if any
         if 'extra_containers' in service:
             for extra in service['extra_containers']:
-                print(f"  {DIM}[2/3] Starting {extra}...{RESET}", flush=True)
+                print(f"\n  {DIM}Starting {extra}...{RESET}")
                 subprocess.run(
                     ['docker', 'compose', '-f', str(compose_file), '-p', 'api-gateway',
                      '--profile', 'optional', 'up', '-d', extra],
-                    capture_output=True, text=True, cwd=str(DOCKER_DIR)
+                    cwd=str(DOCKER_DIR)
                 )
-        
-        print(f"  {DIM}[3/3] Configuring...{RESET}", flush=True)
         
         if result.returncode == 0:
             # Update .env file
@@ -163,8 +159,6 @@ def start_service(service_key):
             return True
         else:
             print(f"\n  {RED}❌ Failed to start {service['name']}{RESET}")
-            if result.stderr:
-                print(f"     {DIM}{result.stderr[:200]}{RESET}")
             return False
     except Exception as e:
         print(f"\n  {RED}❌ Error: {e}{RESET}")
@@ -229,15 +223,15 @@ def print_optional_menu():
     print(f"  \033[35m╚══════════════════════════════════════════════════════════════╝\033[0m")
     print()
     
-    print(f"  \033[90m┌───────────────────────────────────────────────────────────────┐\033[0m")
-    print(f"  \033[90m│  💡 Heavy services installed on-demand                        │\033[0m")
-    print(f"  \033[90m│                                                               │\033[0m")
-    print(f"  \033[90m│    🗄️ Redis    → Caching, queues, sessions                   │\033[0m")
-    print(f"  \033[90m│    🎙️ Whisper  → Speech-to-text (GPU)                         │\033[0m")
-    print(f"  \033[90m│    🎨 ComfyUI  → AI image generation (GPU)                    │\033[0m")
-    print(f"  \033[90m│    🐘 Supabase → PostgreSQL + Studio                          │\033[0m")
-    print(f"  \033[90m│                                                               │\033[0m")
-    print(f"  \033[90m└───────────────────────────────────────────────────────────────┘\033[0m")
+    print(f"  \033[90m┌──────────────────────────────────────────────────────────────┐\033[0m")
+    print(f"  \033[90m│  💡 Heavy services installed on-demand                       │\033[0m")
+    print(f"  \033[90m│                                                              │\033[0m")
+    print(f"  \033[90m│    🗄️  Redis    → Caching, queues, sessions                  │\033[0m")
+    print(f"  \033[90m│    🎙️  Whisper  → Speech-to-text (GPU)                       │\033[0m")
+    print(f"  \033[90m│    🎨 ComfyUI  → AI image generation (GPU)                   │\033[0m")
+    print(f"  \033[90m│    🐘 Supabase → PostgreSQL + Studio                         │\033[0m")
+    print(f"  \033[90m│                                                              │\033[0m")
+    print(f"  \033[90m└──────────────────────────────────────────────────────────────┘\033[0m")
     print()
     
     has_gpu = check_nvidia_gpu()
@@ -266,6 +260,9 @@ def print_optional_menu():
         print(f"      {DIM}{service['desc']}{RESET}")
         idx += 1
     
+    print()
+    print(f"  [{idx}] {CYAN}Install All Services{RESET}")
+    print(f"      {DIM}Start all optional services at once{RESET}")
     print(f"\n  [0] ← Back to Main Menu\n")
 
 
@@ -283,6 +280,20 @@ def run_optional_services_menu():
             choice_num = int(choice)
             services_list = list(OPTIONAL_SERVICES.keys())
             
+            # Install All option
+            if choice_num == len(services_list) + 1:
+                print(f"\n  {CYAN}🚀 Installing all services...{RESET}\n")
+                for service_key in services_list:
+                    service = OPTIONAL_SERVICES[service_key]
+                    status = get_container_status(service['container'])
+                    if status != 'running':
+                        if service['needs_credentials']:
+                            install_with_credentials(service_key)
+                        else:
+                            start_service(service_key)
+                input("\n  Press Enter to continue...")
+                continue
+            
             if 1 <= choice_num <= len(services_list):
                 service_key = services_list[choice_num - 1]
                 service = OPTIONAL_SERVICES[service_key]
@@ -298,12 +309,12 @@ def run_optional_services_menu():
                         print(f"\n  {YELLOW}⚠️  Warning: {service['name']} requires an NVIDIA GPU{RESET}")
                         confirm = input(f"  {DIM}Try anyway? (y/N): {RESET}").strip().lower()
                         if confirm != 'y':
-                            input("\n  Press any key to continue...")
+                            input("\n  Press Enter to continue...")
                             continue
                     
                     start_service(service_key)
                 
-                input("\n  Press any key to continue...")
+                input("\n  Press Enter to continue...")
             else:
                 print(f"  {YELLOW}Invalid choice{RESET}")
                 
@@ -315,3 +326,4 @@ def run_optional_services_menu():
 
 if __name__ == '__main__':
     run_optional_services_menu()
+
