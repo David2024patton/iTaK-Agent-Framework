@@ -572,56 +572,237 @@ def create_crew():
 
 
 def list_agents():
-    """List and manage agents."""
+    """List and manage wizards with edit/delete options."""
     import click
     
     while True:
         clear_screen()
-        print(f"\n  {BOLD}{MAGENTA}📋 Saved Agents{RESET}\n")
+        
+        print(f"\n  \033[35m╔══════════════════════════════════════════════════════════════╗\033[0m")
+        print(f"  \033[35m║  📋 Manage Wizards                                           ║\033[0m")
+        print(f"  \033[35m╚══════════════════════════════════════════════════════════════╝\033[0m")
+        print()
         
         agents = list(AGENTS_DIR.glob('*.yaml'))
         
         if not agents:
-            print(f"  {DIM}No agents defined yet.{RESET}")
-            print(f"  {DIM}Use 'Create Agent' to build one.{RESET}")
+            print(f"  {DIM}No wizards created yet.{RESET}")
+            print(f"  {DIM}Use Create Wizard to build one.{RESET}")
             input("\n  Press Enter to go back...")
             return
         
+        # List all wizards
+        wizard_data = []
         for i, agent_file in enumerate(agents, 1):
             try:
                 with open(agent_file) as f:
                     agent = yaml.safe_load(f)
-                print(f"  [{i}] {CYAN}{agent.get('name', agent_file.stem)}{RESET}")
+                wizard_data.append((agent_file, agent))
+                print(f"  {GREEN}[{i}]{RESET} 🧙 {CYAN}{agent.get('name', agent_file.stem)}{RESET}")
                 print(f"      {DIM}Role: {agent.get('role', 'N/A')}{RESET}")
-                print(f"      {DIM}Tools: {', '.join(agent.get('tools', []))}{RESET}")
+                print(f"      {DIM}Powers: {', '.join(agent.get('tools', []))}{RESET}")
+                print()
             except:
+                wizard_data.append((agent_file, None))
                 print(f"  [{i}] {agent_file.stem} {YELLOW}(error reading){RESET}")
+                print()
         
-        print(f"\n  {DIM}Enter number to delete, or 0 to go back{RESET}")
+        print(f"  {GREEN}[0]{RESET} ↩️  Back")
+        print()
+        print(f"  {DIM}Select a wizard to view/edit/delete{RESET}")
+        print()
         
         try:
-            choice = click.prompt(click.style("  Choice", fg="cyan"), default="0").strip()
+            choice = click.prompt(click.style("  Select wizard", fg="cyan"), default="0", show_default=False).strip()
             
+            check_exit(choice)
             if choice == '0' or choice == '':
                 return
             
             try:
                 idx = int(choice) - 1
-                if 0 <= idx < len(agents):
-                    agent_file = agents[idx]
-                    confirm = click.prompt(
-                        click.style(f"  Delete {agent_file.stem}? (y/N)", fg="yellow"),
-                        default="n"
-                    ).strip().lower()
-                    
-                    if confirm == 'y':
-                        agent_file.unlink()
-                        print(f"  {GREEN}✅ Deleted{RESET}")
+                if 0 <= idx < len(wizard_data):
+                    agent_file, agent = wizard_data[idx]
+                    if agent:
+                        # Show wizard details with actions
+                        manage_wizard(agent_file, agent)
             except ValueError:
                 pass
                 
-        except KeyboardInterrupt:
+        except (KeyboardInterrupt, click.Abort):
             return
+
+
+def manage_wizard(agent_file, agent):
+    """Manage a single wizard - view, edit, delete."""
+    import click
+    
+    while True:
+        clear_screen()
+        
+        name = agent.get('name', agent_file.stem)
+        role = agent.get('role', 'N/A')
+        goal = agent.get('goal', 'N/A')
+        tools = agent.get('tools', [])
+        llm = agent.get('llm', 'ollama/qwen3:4b')
+        
+        print(f"\n  \033[35m╔══════════════════════════════════════════════════════════════╗\033[0m")
+        print(f"  \033[35m║  🧙 {name:<56} ║\033[0m")
+        print(f"  \033[35m╚══════════════════════════════════════════════════════════════╝\033[0m")
+        print()
+        
+        print(f"  {BOLD}Role:{RESET}    {role}")
+        print(f"  {BOLD}Mission:{RESET} {goal}")
+        print(f"  {BOLD}Powers:{RESET}  {', '.join(tools) if tools else 'None'}")
+        print(f"  {BOLD}Brain:{RESET}   {llm}")
+        print()
+        print(f"  {DIM}File: {agent_file}{RESET}")
+        print()
+        
+        print(f"  {GREEN}[1]{RESET} ✏️  {WHITE}Edit{RESET}       {DIM}Modify this wizard{RESET}")
+        print(f"  {GREEN}[2]{RESET} 🗑️  {WHITE}Delete{RESET}     {DIM}Remove this wizard{RESET}")
+        print()
+        print(f"  {GREEN}[0]{RESET} ↩️  Back")
+        print()
+        
+        try:
+            choice = click.prompt(click.style("  Action", fg="cyan"), default="0", show_default=False).strip()
+            
+            check_exit(choice)
+            if choice == '0' or choice == '':
+                return
+            
+            if choice == '1':
+                # Edit wizard
+                edit_wizard(agent_file, agent)
+                # Reload agent data after edit
+                try:
+                    with open(agent_file) as f:
+                        agent = yaml.safe_load(f)
+                except:
+                    return
+                    
+            elif choice == '2':
+                # Delete wizard
+                confirm = click.prompt(
+                    click.style(f"  Type '{name}' to confirm delete", fg="red"),
+                    default=""
+                ).strip()
+                
+                if confirm == name:
+                    agent_file.unlink()
+                    print(f"\n  {GREEN}✓ Wizard deleted{RESET}")
+                    input("\n  Press Enter to continue...")
+                    return
+                else:
+                    print(f"\n  {YELLOW}Cancelled - name didn't match{RESET}")
+                    input("\n  Press Enter to continue...")
+                    
+        except (KeyboardInterrupt, click.Abort):
+            return
+
+
+def edit_wizard(agent_file, agent):
+    """Edit an existing wizard."""
+    import click
+    
+    clear_screen()
+    
+    name = agent.get('name', agent_file.stem)
+    
+    print(f"\n  \033[35m╔══════════════════════════════════════════════════════════════╗\033[0m")
+    print(f"  \033[35m║  ✏️  Edit Wizard: {name:<42} ║\033[0m")
+    print(f"  \033[35m╚══════════════════════════════════════════════════════════════╝\033[0m")
+    print()
+    
+    print(f"  {DIM}Press Enter to keep current value, or type new value{RESET}")
+    print(f"  {DIM}Type /exit to cancel{RESET}")
+    print()
+    
+    try:
+        # Name
+        print(f"  {BOLD}Name{RESET} {DIM}(current: {agent.get('name', 'N/A')}){RESET}")
+        new_name = click.prompt(click.style("  Name", fg="cyan"), default=agent.get('name', ''), show_default=False).strip()
+        if check_exit(new_name):
+            return
+        if new_name:
+            agent['name'] = new_name
+        print(f"  {GREEN}✓{RESET}\n")
+        
+        # Role
+        print(f"  {BOLD}Role{RESET} {DIM}(current: {agent.get('role', 'N/A')}){RESET}")
+        new_role = click.prompt(click.style("  Role", fg="cyan"), default=agent.get('role', ''), show_default=False).strip()
+        if check_exit(new_role):
+            return
+        if new_role:
+            agent['role'] = new_role
+        print(f"  {GREEN}✓{RESET}\n")
+        
+        # Goal
+        print(f"  {BOLD}Mission{RESET} {DIM}(current: {agent.get('goal', 'N/A')}){RESET}")
+        new_goal = click.prompt(click.style("  Mission", fg="cyan"), default=agent.get('goal', ''), show_default=False).strip()
+        if check_exit(new_goal):
+            return
+        if new_goal:
+            agent['goal'] = new_goal
+        print(f"  {GREEN}✓{RESET}\n")
+        
+        # Tools
+        available_tools = [
+            ('📖 file_read', 'file_read'),
+            ('✍️ file_write', 'file_write'),
+            ('🔍 code_search', 'code_search'),
+            ('🌐 web_search', 'web_search'),
+            ('⚡ shell', 'shell'),
+        ]
+        
+        current_tools = agent.get('tools', [])
+        current_nums = []
+        for t in current_tools:
+            for i, (_, tool_id) in enumerate(available_tools, 1):
+                if t == tool_id:
+                    current_nums.append(str(i))
+        default_powers = ','.join(current_nums)
+        
+        print(f"  {BOLD}Powers{RESET} {DIM}(current: {', '.join(current_tools)}){RESET}")
+        for i, (display, _) in enumerate(available_tools, 1):
+            marker = "●" if str(i) in current_nums else "○"
+            print(f"    [{CYAN}{i}{RESET}] {marker} {display}")
+        
+        tool_input = click.prompt(click.style("  Powers", fg="cyan"), default=default_powers, show_default=False).strip()
+        if check_exit(tool_input):
+            return
+        
+        selected_tools = []
+        for num in tool_input.split(','):
+            try:
+                i = int(num.strip()) - 1
+                if 0 <= i < len(available_tools):
+                    selected_tools.append(available_tools[i][1])
+            except:
+                pass
+        if selected_tools:
+            agent['tools'] = selected_tools
+        print(f"  {GREEN}✓{RESET}\n")
+        
+        # LLM
+        print(f"  {BOLD}Brain{RESET} {DIM}(current: {agent.get('llm', 'ollama/qwen3:4b')}){RESET}")
+        new_llm = click.prompt(click.style("  Model", fg="cyan"), default=agent.get('llm', 'ollama/qwen3:4b'), show_default=False).strip()
+        if check_exit(new_llm):
+            return
+        if new_llm:
+            agent['llm'] = new_llm
+        print(f"  {GREEN}✓{RESET}\n")
+        
+        # Save
+        with open(agent_file, 'w') as f:
+            yaml.dump(agent, f, default_flow_style=False)
+        
+        print(f"  {GREEN}✓ Wizard updated!{RESET}")
+        input("\n  Press Enter to continue...")
+        
+    except (KeyboardInterrupt, click.Abort):
+        pass
 
 
 def list_crews():

@@ -22,6 +22,31 @@ def clear_screen():
     os.system('cls' if os.name == 'nt' else 'clear')
 
 
+def word_wrap(text, width=70, indent="  "):
+    """Wrap text to terminal width with proper indentation."""
+    import textwrap
+    import shutil
+    
+    # Get terminal width, default to 80
+    try:
+        term_width = shutil.get_terminal_size().columns - 4
+        width = min(width, term_width)
+    except:
+        pass
+    
+    lines = text.split('\n')
+    wrapped_lines = []
+    
+    for line in lines:
+        if len(line) > width:
+            wrapped = textwrap.fill(line, width=width, initial_indent="", subsequent_indent="")
+            wrapped_lines.append(wrapped)
+        else:
+            wrapped_lines.append(line)
+    
+    return '\n'.join(wrapped_lines)
+
+
 def print_chat_menu():
     """Print the chat submenu."""
     clear_screen()
