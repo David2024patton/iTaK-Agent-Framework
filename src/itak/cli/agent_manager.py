@@ -491,38 +491,70 @@ def save_wizard(name, role, goal, tools, llm):
 
 
 def create_crew():
-    """Wizard to create a new crew."""
+    """Create a new Guild (team of wizards) with themed UI."""
     import click
     
     clear_screen()
-    print(f"\n  {BOLD}{MAGENTA}👥 Create New Crew{RESET}")
-    print(f"  {DIM}Build a team of agents that work together{RESET}\n")
     
-    # Check for existing agents
+    # Themed header
+    print(f"\n  \033[35m╔══════════════════════════════════════════════════════════════╗\033[0m")
+    print(f"  \033[35m║  🏰 Create New Guild                                         ║\033[0m")
+    print(f"  \033[35m╚══════════════════════════════════════════════════════════════╝\033[0m")
+    print()
+    
+    print(f"  \033[90m┌───────────────────────────────────────────────────────────────┐\033[0m")
+    print(f"  \033[90m│  💡 Build a team of wizards that work together               │\033[0m")
+    print(f"  \033[90m│                                                               │\033[0m")
+    print(f"  \033[90m│    Type /exit to quit | Enter to accept defaults             │\033[0m")
+    print(f"  \033[90m└───────────────────────────────────────────────────────────────┘\033[0m")
+    print()
+    
+    # Check for existing wizards
     agents = list(AGENTS_DIR.glob('*.yaml'))
     
     if not agents:
-        print(f"  {YELLOW}⚠️  No agents defined yet.{RESET}")
-        print(f"  {DIM}Create some agents first with 'Create Agent'.{RESET}")
+        print(f"  {YELLOW}⚠️  No wizards created yet.{RESET}")
+        print(f"  {DIM}Create some wizards first at Wizards → Create Wizard.{RESET}")
         input("\n  Press Enter to continue...")
         return
     
+    print(f"  {DIM}Found {len(agents)} wizard(s) available{RESET}")
+    print()
+    
     try:
-        # Crew name
-        name = click.prompt(click.style("  Crew name", fg="cyan"), default="").strip()
+        # Step 1: Guild name
+        print(f"  {BOLD}Step 1 of 3: Guild Name{RESET}")
+        print(f"  {DIM}Give your team an epic name{RESET}")
+        name = click.prompt(click.style("  Name", fg="cyan"), default="", show_default=False).strip()
+        
+        check_exit(name)
         if not name:
             print(f"  {YELLOW}Cancelled{RESET}")
+            input("\n  Press Enter to continue...")
             return
         
         safe_name = name.lower().replace(' ', '_').replace('-', '_')
+        print(f"  {GREEN}✓{RESET} {name}\n")
         
-        # Show available agents
-        print(f"\n  {BOLD}Available Agents:{RESET}")
+        # Step 2: Select wizards
+        print(f"  {BOLD}Step 2 of 3: Recruit Wizards{RESET}")
+        print(f"  {DIM}Choose which wizards join this guild{RESET}")
+        print()
+        
         for i, agent_file in enumerate(agents, 1):
-            print(f"    [{i}] {agent_file.stem}")
+            try:
+                with open(agent_file) as f:
+                    agent = yaml.safe_load(f)
+                print(f"    [{CYAN}{i}{RESET}] 🧙 {agent.get('name', agent_file.stem)}")
+                print(f"        {DIM}{agent.get('role', 'N/A')}{RESET}")
+            except:
+                print(f"    [{CYAN}{i}{RESET}] {agent_file.stem}")
         
-        print(f"\n  {DIM}Select agents by number, separated by commas (e.g., 1,2,3){RESET}")
-        agent_input = click.prompt(click.style("  Agents", fg="cyan"), default="").strip()
+        print()
+        print(f"  {DIM}Enter numbers separated by commas (e.g., 1,2,3){RESET}")
+        agent_input = click.prompt(click.style("  Wizards", fg="cyan"), default="", show_default=False).strip()
+        
+        check_exit(agent_input)
         
         selected_agents = []
         try:
@@ -534,18 +566,27 @@ def create_crew():
             pass
         
         if not selected_agents:
-            print(f"  {YELLOW}No agents selected{RESET}")
+            print(f"  {YELLOW}No wizards selected{RESET}")
+            input("\n  Press Enter to continue...")
             return
         
-        # Workflow type
-        print(f"\n  {BOLD}Workflow Types:{RESET}")
-        print(f"    [1] Sequential - Agents work one after another")
-        print(f"    [2] Hierarchical - Manager assigns tasks to agents")
+        print(f"  {GREEN}✓{RESET} {len(selected_agents)} wizard(s) recruited\n")
         
-        workflow = click.prompt(click.style("  Workflow", fg="cyan"), default="1").strip()
+        # Step 3: Workflow type
+        print(f"  {BOLD}Step 3 of 3: Workflow Style{RESET}")
+        print(f"  {DIM}How should the wizards coordinate?{RESET}")
+        print()
+        print(f"    [{CYAN}1{RESET}] ➡️  Sequential   {DIM}Wizards work one after another{RESET}")
+        print(f"    [{CYAN}2{RESET}] 👑 Hierarchical {DIM}Leader assigns tasks to wizards{RESET}")
+        print()
+        
+        workflow = click.prompt(click.style("  Style", fg="cyan"), default="1", show_default=False).strip()
+        check_exit(workflow)
         workflow_type = "hierarchical" if workflow == "2" else "sequential"
+        workflow_emoji = "👑" if workflow == "2" else "➡️"
+        print(f"  {GREEN}✓{RESET} {workflow_emoji} {workflow_type.capitalize()}\n")
         
-        # Build crew definition
+        # Build guild definition
         crew_def = {
             'name': name,
             'agents': selected_agents,
@@ -560,15 +601,23 @@ def create_crew():
         with open(crew_file, 'w') as f:
             yaml.dump(crew_def, f, default_flow_style=False)
         
-        print(f"\n  {GREEN}✅ Crew '{name}' created with {len(selected_agents)} agents!{RESET}")
+        # Success message
+        clear_screen()
+        print(f"\n  \033[32m╔══════════════════════════════════════════════════════════════╗\033[0m")
+        print(f"  \033[32m║  ✓ Guild Created!                                            ║\033[0m")
+        print(f"  \033[32m╚══════════════════════════════════════════════════════════════╝\033[0m")
+        print()
+        print(f"  {BOLD}Name:{RESET}     {CYAN}{name}{RESET}")
+        print(f"  {BOLD}Wizards:{RESET}  {', '.join(selected_agents)}")
+        print(f"  {BOLD}Workflow:{RESET} {workflow_emoji} {workflow_type.capitalize()}")
+        print()
         print(f"  {DIM}Saved to: {crew_file}{RESET}")
         
-    except KeyboardInterrupt:
+    except (KeyboardInterrupt, click.Abort):
         print(f"\n\n  {DIM}Cancelled{RESET}")
-    except click.Abort:
-        pass
     
     input("\n  Press Enter to continue...")
+
 
 
 def list_agents():
