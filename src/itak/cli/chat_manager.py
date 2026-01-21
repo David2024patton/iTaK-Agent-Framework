@@ -65,6 +65,7 @@ def natural_chat():
     print(f"  \033[90m│  💡 Quick Q&A with your local LLM                             │\033[0m")
     print(f"  \033[90m│                                                               │\033[0m")
     print(f"  \033[90m│    /model     → Switch to a different model                   │\033[0m")
+    print(f"  \033[90m│    /save      → Export chat to markdown file                  │\033[0m")
     print(f"  \033[90m│    /back      → Return to menu                                │\033[0m")
     print(f"  \033[90m│                                                               │\033[0m")
     print(f"  \033[90m└───────────────────────────────────────────────────────────────┘\033[0m")
@@ -163,6 +164,50 @@ def natural_chat():
                                 print(f"  {DIM}Run: ollama pull qwen3:4b{RESET}\n")
                         except Exception as e:
                             print(f"\r  {YELLOW}Could not fetch models: {e}{RESET}\n")
+                    continue
+                
+                # Save chat command
+                if user_input.lower().startswith('/save'):
+                    if not history:
+                        print(f"\n  {YELLOW}No messages to save yet.{RESET}\n")
+                        continue
+                    
+                    # Generate filename with timestamp
+                    from datetime import datetime
+                    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+                    
+                    parts = user_input.split(maxsplit=1)
+                    if len(parts) > 1:
+                        filename = parts[1].strip()
+                        if not filename.endswith('.md'):
+                            filename += '.md'
+                    else:
+                        filename = f"chat_{timestamp}.md"
+                    
+                    # Build markdown content
+                    content = f"# Chat Export\n\n"
+                    content += f"**Model:** {model}\n"
+                    content += f"**Date:** {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n"
+                    content += f"**Messages:** {len(history)}\n\n"
+                    content += "---\n\n"
+                    
+                    for msg in history:
+                        role = msg['role']
+                        text = msg['content']
+                        if role == 'user':
+                            content += f"## 🧑 You\n\n{text}\n\n"
+                        else:
+                            content += f"## 🧙 Wizard\n\n{text}\n\n"
+                    
+                    # Save file
+                    try:
+                        save_path = Path.cwd() / filename
+                        with open(save_path, 'w', encoding='utf-8') as f:
+                            f.write(content)
+                        print(f"\n  {GREEN}✓ Chat saved to: {filename}{RESET}")
+                        print(f"  {DIM}{save_path}{RESET}\n")
+                    except Exception as e:
+                        print(f"\n  {YELLOW}Could not save: {e}{RESET}\n")
                     continue
                 
                 # Add to history
