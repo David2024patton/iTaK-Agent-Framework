@@ -51,12 +51,22 @@ class iTaKREPL:
         
         # Get choice - smart input: numbers select menu, text goes to chat
         import click
+        import sys
         initial_message = None
+        
+        # Flush any stale stdin to avoid auto-input issues
+        try:
+            import msvcrt
+            while msvcrt.kbhit():
+                msvcrt.getch()
+        except ImportError:
+            pass  # Not on Windows
         
         while True:
             try:
                 # Use a clean, non-indented prompt that naturally follows the menu
                 raw_input = click.prompt(click.style("   Choice", fg="cyan"), default="6")
+                print(f"  DEBUG: Received input = '{raw_input}'")  # DEBUG
                 stripped = raw_input.strip().lower()
                 
                 # Handle exit commands at menu level
@@ -67,6 +77,7 @@ class iTaKREPL:
                 # Try to parse as number
                 try:
                     choice = int(raw_input.strip())
+                    print(f"  DEBUG: Parsed choice = {choice}")  # DEBUG
                     if 1 <= choice <= 7:
                         break
                     print(f"  {YELLOW}Please enter 1-7, or just type your question{RESET}")
