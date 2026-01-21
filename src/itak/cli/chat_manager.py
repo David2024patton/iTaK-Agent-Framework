@@ -118,11 +118,26 @@ def natural_chat():
                 if user_input.lower().startswith('/model'):
                     parts = user_input.split(maxsplit=1)
                     if len(parts) > 1:
-                        model = parts[1].strip()
-                        print(f"\n  {GREEN}✓ Switched to: {model}{RESET}\n")
-                        history = []  # Clear history for new model
+                        # Check if it's a number selection
+                        try:
+                            num = int(parts[1].strip())
+                            # User selected by number, need to fetch models
+                            models_response = ollama.list()
+                            available = models_response.get('models', [])
+                            if 1 <= num <= len(available):
+                                m = available[num - 1]
+                                model = m.get('model') or m.get('name') or str(m)
+                                print(f"\n  {GREEN}✓ Switched to: {model}{RESET}\n")
+                                history = []
+                            else:
+                                print(f"\n  {YELLOW}Invalid number. Use /model to see list.{RESET}\n")
+                        except ValueError:
+                            # Not a number, treat as model name
+                            model = parts[1].strip()
+                            print(f"\n  {GREEN}✓ Switched to: {model}{RESET}\n")
+                            history = []
                     else:
-                        # Fetch fresh model list
+                        # Show numbered model list
                         print(f"\n  {DIM}Fetching models...{RESET}", end="", flush=True)
                         try:
                             models_response = ollama.list()
@@ -130,21 +145,19 @@ def natural_chat():
                             print(f"\r                        \r")  # Clear line
                             
                             if available:
-                                print(f"  {BOLD}Installed Models:{RESET}\n")
-                                for m in available:
-                                    # Ollama API uses 'model' or 'name' depending on version
+                                print(f"\n  {BOLD}Installed Models:{RESET}\n")
+                                for i, m in enumerate(available, 1):
                                     name = m.get('model') or m.get('name') or str(m)
                                     size_bytes = m.get('size', 0)
                                     size_gb = size_bytes / (1024**3)
                                     
                                     # Mark current model
                                     if name == model or model in name:
-                                        print(f"    {GREEN}▸ {name}{RESET} {DIM}({size_gb:.1f}GB) ← current{RESET}")
+                                        print(f"    {GREEN}[{i}] ▸ {name}{RESET} {DIM}({size_gb:.1f}GB) ← current{RESET}")
                                     else:
-                                        print(f"    • {CYAN}{name}{RESET} {DIM}({size_gb:.1f}GB){RESET}")
+                                        print(f"    [{CYAN}{i}{RESET}]   {CYAN}{name}{RESET} {DIM}({size_gb:.1f}GB){RESET}")
                                 
-                                first_model = available[0].get('model') or available[0].get('name') or 'modelname'
-                                print(f"\n  {DIM}Usage: /model {first_model}{RESET}\n")
+                                print(f"\n  {DIM}Type /model 1 or /model qwen3:4b to switch{RESET}\n")
                             else:
                                 print(f"  {YELLOW}No models installed.{RESET}")
                                 print(f"  {DIM}Run: ollama pull qwen3:4b{RESET}\n")
