@@ -68,9 +68,45 @@ def print_agent_menu():
     print(f"  {GREEN}[0]{RESET} ↩️  {WHITE}Back{RESET}")
     print()
 
+# Pre-built wizard templates
+WIZARD_TEMPLATES = {
+    'coder': {
+        'name': 'Code Wizard',
+        'role': 'Senior Software Developer',
+        'goal': 'Write clean, efficient, well-documented code',
+        'backstory': 'An experienced developer with mastery of multiple languages and best practices',
+        'tools': ['file_read', 'file_write', 'code_search', 'shell'],
+        'llm': 'ollama/qwen3:4b'
+    },
+    'researcher': {
+        'name': 'Research Wizard',
+        'role': 'Web Research Specialist',
+        'goal': 'Find accurate, comprehensive information online',
+        'backstory': 'A meticulous researcher skilled at finding reliable sources',
+        'tools': ['web_search', 'file_write'],
+        'llm': 'ollama/qwen3:4b'
+    },
+    'writer': {
+        'name': 'Writer Wizard',
+        'role': 'Content Writer',
+        'goal': 'Create compelling, well-structured content',
+        'backstory': 'A creative writer with expertise in various formats',
+        'tools': ['file_read', 'file_write'],
+        'llm': 'ollama/qwen3:4b'
+    },
+    'analyst': {
+        'name': 'Data Wizard',
+        'role': 'Data Analyst',
+        'goal': 'Analyze data and provide insights',
+        'backstory': 'An expert at finding patterns and extracting meaning from data',
+        'tools': ['file_read', 'code_search', 'shell'],
+        'llm': 'ollama/qwen3:4b'
+    },
+}
+
 
 def create_agent():
-    """Wizard to create a new wizard (agent)."""
+    """Wizard to create a new wizard (agent) - with mode selection."""
     import click
     import sys
     
@@ -83,124 +119,301 @@ def create_agent():
     print()
     
     print(f"  \033[90m┌───────────────────────────────────────────────────────────────┐\033[0m")
-    print(f"  \033[90m│  💡 Define a specialized AI wizard with unique powers         │\033[0m")
-    print(f"  \033[90m│                                                               │\033[0m")
-    print(f"  \033[90m│     Type /exit at any time to cancel                          │\033[0m")
+    print(f"  \033[90m│  💡 Choose how you want to create your wizard                 │\033[0m")
     print(f"  \033[90m└───────────────────────────────────────────────────────────────┘\033[0m")
+    print()
+    
+    # Mode selection
+    print(f"  {GREEN}[1]{RESET} 🤖 {WHITE}AI-Assisted{RESET}     {DIM}Describe what you need, AI designs it{RESET}")
+    print(f"  {GREEN}[2]{RESET} 📝 {WHITE}Manual{RESET}          {DIM}Define everything step-by-step{RESET}")
+    print(f"  {GREEN}[3]{RESET} 📋 {WHITE}Templates{RESET}       {DIM}Start from a pre-built wizard{RESET}")
+    print()
+    print(f"  {GREEN}[0]{RESET} ↩️  {WHITE}Back{RESET}")
+    print()
+    
+    try:
+        choice = click.prompt(click.style("  Select", fg="cyan"), default="0", show_default=False).strip()
+        
+        if choice.lower() in ['/exit', 'exit', '0', '']:
+            return
+        
+        if choice == '1':
+            create_wizard_ai_assisted()
+        elif choice == '2':
+            create_wizard_manual()
+        elif choice == '3':
+            create_wizard_from_template()
+            
+    except (KeyboardInterrupt, click.Abort):
+        pass
+
+
+def create_wizard_ai_assisted():
+    """AI-assisted wizard creation using Ollama."""
+    import click
+    import json
+    
+    clear_screen()
+    
+    print(f"\n  \033[35m╔══════════════════════════════════════════════════════════════╗\033[0m")
+    print(f"  \033[35m║  🤖 AI-Assisted Wizard Creation                              ║\033[0m")
+    print(f"  \033[35m╚══════════════════════════════════════════════════════════════╝\033[0m")
+    print()
+    
+    print(f"  {DIM}Describe the wizard you want to create and AI will design it{RESET}")
+    print(f"  {DIM}Example: 'A Python developer who can write and test code'{RESET}")
+    print()
+    
+    try:
+        description = click.prompt(click.style("  Describe your wizard", fg="cyan"), default="", show_default=False).strip()
+        
+        if not description or description.lower() in ['/exit', 'exit']:
+            print(f"\n  {YELLOW}Cancelled{RESET}")
+            input("\n  Press Enter to continue...")
+            return
+        
+        print(f"\n  {DIM}🔮 Generating wizard configuration...{RESET}")
+        
+        # Generate using Ollama
+        try:
+            import ollama
+            
+            prompt = f"""Based on this description, create a wizard configuration:
+"{description}"
+
+Respond ONLY with valid JSON in this exact format:
+{{"name": "Wizard Name", "role": "Role Title", "goal": "Primary goal", "tools": ["file_read", "file_write"]}}
+
+Available tools: file_read, file_write, code_search, web_search, shell
+Keep the response short. Only output the JSON, nothing else."""
+
+            response = ollama.chat(model='qwen3:4b', messages=[
+                {'role': 'user', 'content': prompt}
+            ], options={'temperature': 0.3})
+            
+            # Extract JSON from response
+            content = response['message']['content']
+            
+            # Find JSON in response
+            import re
+            json_match = re.search(r'\{[^}]+\}', content, re.DOTALL)
+            if json_match:
+                wizard_config = json.loads(json_match.group())
+            else:
+                raise ValueError("No JSON found in response")
+            
+            # Show preview
+            clear_screen()
+            print(f"\n  \033[35m╔══════════════════════════════════════════════════════════════╗\033[0m")
+            print(f"  \033[35m║  🔮 AI Generated Wizard                                      ║\033[0m")
+            print(f"  \033[35m╚══════════════════════════════════════════════════════════════╝\033[0m")
+            print()
+            
+            name = wizard_config.get('name', 'AI Wizard')
+            role = wizard_config.get('role', 'AI Assistant')
+            goal = wizard_config.get('goal', 'Help with tasks')
+            tools = wizard_config.get('tools', ['file_read', 'file_write'])
+            
+            print(f"  {BOLD}Name:{RESET}    {CYAN}{name}{RESET}")
+            print(f"  {BOLD}Role:{RESET}    {role}")
+            print(f"  {BOLD}Mission:{RESET} {goal}")
+            print(f"  {BOLD}Powers:{RESET}  {', '.join(tools)}")
+            print(f"  {BOLD}Brain:{RESET}   ollama/qwen3:4b")
+            print()
+            
+            confirm = click.prompt(click.style("  Create this wizard? [Y/n]", fg="cyan"), default="y", show_default=False).strip().lower()
+            
+            if confirm in ['y', 'yes', '']:
+                save_wizard(name, role, goal, tools, 'ollama/qwen3:4b')
+            else:
+                print(f"\n  {YELLOW}Cancelled{RESET}")
+                input("\n  Press Enter to continue...")
+                
+        except Exception as e:
+            print(f"\n  {RED}AI generation failed: {e}{RESET}")
+            print(f"  {DIM}Falling back to manual mode...{RESET}")
+            input("\n  Press Enter to continue...")
+            create_wizard_manual()
+            
+    except (KeyboardInterrupt, click.Abort):
+        pass
+
+
+def create_wizard_from_template():
+    """Create wizard from pre-built template."""
+    import click
+    
+    clear_screen()
+    
+    print(f"\n  \033[35m╔══════════════════════════════════════════════════════════════╗\033[0m")
+    print(f"  \033[35m║  📋 Wizard Templates                                         ║\033[0m")
+    print(f"  \033[35m╚══════════════════════════════════════════════════════════════╝\033[0m")
+    print()
+    
+    print(f"  {DIM}Choose a pre-built wizard template to customize{RESET}")
+    print()
+    
+    templates = list(WIZARD_TEMPLATES.items())
+    for i, (key, template) in enumerate(templates, 1):
+        print(f"  {GREEN}[{i}]{RESET} {template['name']}")
+        print(f"      {DIM}{template['role']} • {template['goal'][:40]}...{RESET}")
+        print()
+    
+    print(f"  {GREEN}[0]{RESET} ↩️  Back")
+    print()
+    
+    try:
+        choice = click.prompt(click.style("  Select template", fg="cyan"), default="0", show_default=False).strip()
+        
+        if choice.lower() in ['/exit', 'exit', '0', '']:
+            return
+        
+        try:
+            idx = int(choice) - 1
+            if 0 <= idx < len(templates):
+                key, template = templates[idx]
+                
+                # Ask for custom name
+                print(f"\n  {DIM}Customize the wizard name (or press Enter for default){RESET}")
+                custom_name = click.prompt(
+                    click.style("  Name", fg="cyan"), 
+                    default=template['name'], 
+                    show_default=False
+                ).strip()
+                
+                save_wizard(
+                    custom_name,
+                    template['role'],
+                    template['goal'],
+                    template['tools'],
+                    template['llm']
+                )
+            else:
+                print(f"\n  {YELLOW}Invalid selection{RESET}")
+                input("\n  Press Enter to continue...")
+        except ValueError:
+            print(f"\n  {YELLOW}Invalid selection{RESET}")
+            input("\n  Press Enter to continue...")
+            
+    except (KeyboardInterrupt, click.Abort):
+        pass
+
+
+def create_wizard_manual():
+    """Manual step-by-step wizard creation."""
+    import click
+    
+    clear_screen()
+    
+    print(f"\n  \033[35m╔══════════════════════════════════════════════════════════════╗\033[0m")
+    print(f"  \033[35m║  📝 Manual Wizard Creation                                   ║\033[0m")
+    print(f"  \033[35m╚══════════════════════════════════════════════════════════════╝\033[0m")
+    print()
+    
+    print(f"  {DIM}Define your wizard step-by-step. Type /exit to cancel.{RESET}")
     print()
     
     try:
         # Step 1: Name
         print(f"  {BOLD}Step 1 of 5: Wizard Name{RESET}")
-        print(f"  {DIM}Give your wizard a memorable name{RESET}")
         name = click.prompt(click.style("  Name", fg="cyan"), default="", show_default=False).strip()
-        
         if not name or name.lower() in ['/exit', 'exit']:
-            print(f"\n  {YELLOW}Cancelled{RESET}")
-            input("\n  Press Enter to continue...")
             return
-        
-        safe_name = name.lower().replace(' ', '_').replace('-', '_')
         print(f"  {GREEN}✓{RESET} {name}\n")
         
         # Step 2: Role
         print(f"  {BOLD}Step 2 of 5: Role{RESET}")
-        print(f"  {DIM}What is this wizard's specialty? (e.g., 'Senior Python Developer'){RESET}")
         role = click.prompt(click.style("  Role", fg="cyan"), default="AI Assistant", show_default=False).strip()
         if role.lower() in ['/exit', 'exit']:
-            print(f"\n  {YELLOW}Cancelled{RESET}")
             return
         print(f"  {GREEN}✓{RESET} {role}\n")
         
         # Step 3: Goal
         print(f"  {BOLD}Step 3 of 5: Mission{RESET}")
-        print(f"  {DIM}What is this wizard's primary mission?{RESET}")
-        goal = click.prompt(click.style("  Mission", fg="cyan"), default="Help users accomplish tasks", show_default=False).strip()
+        goal = click.prompt(click.style("  Mission", fg="cyan"), default="Help with tasks", show_default=False).strip()
         if goal.lower() in ['/exit', 'exit']:
-            print(f"\n  {YELLOW}Cancelled{RESET}")
             return
         print(f"  {GREEN}✓{RESET} {goal}\n")
         
-        # Step 4: Powers (Tools)
+        # Step 4: Powers
         print(f"  {BOLD}Step 4 of 5: Powers{RESET}")
-        print(f"  {DIM}Select the magical powers for this wizard{RESET}\n")
-        
         available_tools = [
-            ('📖 file_read', 'file_read', 'Read files from disk'),
-            ('✍️ file_write', 'file_write', 'Write/create files'),
-            ('🔍 code_search', 'code_search', 'Search code with ripgrep'),
-            ('🌐 web_search', 'web_search', 'Search the web'),
-            ('⚡ shell', 'shell', 'Execute shell commands'),
+            ('📖 file_read', 'file_read'),
+            ('✍️ file_write', 'file_write'),
+            ('🔍 code_search', 'code_search'),
+            ('🌐 web_search', 'web_search'),
+            ('⚡ shell', 'shell'),
         ]
+        for i, (display, _) in enumerate(available_tools, 1):
+            print(f"    [{CYAN}{i}{RESET}] {display}")
         
-        for i, (display, tool, desc) in enumerate(available_tools, 1):
-            print(f"    [{CYAN}{i}{RESET}] {display}  {DIM}{desc}{RESET}")
-        
-        print(f"\n  {DIM}Enter numbers separated by commas (e.g., 1,2,3){RESET}")
-        tool_input = click.prompt(click.style("  Powers", fg="cyan"), default="1,2,3", show_default=False).strip()
-        
+        tool_input = click.prompt(click.style("  Powers (1,2,3)", fg="cyan"), default="1,2,3", show_default=False).strip()
         if tool_input.lower() in ['/exit', 'exit']:
-            print(f"\n  {YELLOW}Cancelled{RESET}")
             return
         
         selected_tools = []
-        try:
-            for num in tool_input.split(','):
+        for num in tool_input.split(','):
+            try:
                 idx = int(num.strip()) - 1
                 if 0 <= idx < len(available_tools):
                     selected_tools.append(available_tools[idx][1])
-        except:
-            selected_tools = ['file_read', 'file_write', 'code_search']
+            except:
+                pass
+        if not selected_tools:
+            selected_tools = ['file_read', 'file_write']
+        print(f"  {GREEN}✓{RESET} {len(selected_tools)} powers\n")
         
-        print(f"  {GREEN}✓{RESET} {len(selected_tools)} powers selected\n")
-        
-        # Step 5: LLM
+        # Step 5: Model
         print(f"  {BOLD}Step 5 of 5: Brain{RESET}")
-        print(f"  {DIM}Which model will power this wizard?{RESET}")
         llm = click.prompt(click.style("  Model", fg="cyan"), default="ollama/qwen3:4b", show_default=False).strip()
         if llm.lower() in ['/exit', 'exit']:
-            print(f"\n  {YELLOW}Cancelled{RESET}")
             return
         print(f"  {GREEN}✓{RESET} {llm}\n")
         
-        # Build and save
-        agent_def = {
-            'name': name,
-            'role': role,
-            'goal': goal,
-            'backstory': f"A skilled {role} wizard with expertise in their craft",
-            'tools': selected_tools,
-            'llm': llm,
-            'verbose': True,
-            'allow_delegation': False,
-        }
+        save_wizard(name, role, goal, selected_tools, llm)
         
-        ensure_dirs()
-        agent_file = AGENTS_DIR / f"{safe_name}.yaml"
-        
-        with open(agent_file, 'w') as f:
-            yaml.dump(agent_def, f, default_flow_style=False)
-        
-        # Success screen
-        clear_screen()
-        print(f"\n  \033[32m╔══════════════════════════════════════════════════════════════╗\033[0m")
-        print(f"  \033[32m║  ✓ Wizard Created!                                           ║\033[0m")
-        print(f"  \033[32m╚══════════════════════════════════════════════════════════════╝\033[0m")
-        print()
-        print(f"  {BOLD}Name:{RESET}    {CYAN}{name}{RESET}")
-        print(f"  {BOLD}Role:{RESET}    {role}")
-        print(f"  {BOLD}Mission:{RESET} {goal}")
-        print(f"  {BOLD}Powers:{RESET}  {', '.join(selected_tools)}")
-        print(f"  {BOLD}Brain:{RESET}   {llm}")
-        print()
-        print(f"  {DIM}Saved to: {agent_file}{RESET}")
-        
-    except KeyboardInterrupt:
-        print(f"\n\n  {DIM}Cancelled{RESET}")
-    except click.Abort:
+    except (KeyboardInterrupt, click.Abort):
         pass
+
+
+def save_wizard(name, role, goal, tools, llm):
+    """Save wizard to YAML file."""
+    safe_name = name.lower().replace(' ', '_').replace('-', '_')
+    
+    agent_def = {
+        'name': name,
+        'role': role,
+        'goal': goal,
+        'backstory': f"A skilled {role} wizard with expertise in their craft",
+        'tools': tools,
+        'llm': llm,
+        'verbose': True,
+        'allow_delegation': False,
+    }
+    
+    ensure_dirs()
+    agent_file = AGENTS_DIR / f"{safe_name}.yaml"
+    
+    with open(agent_file, 'w') as f:
+        yaml.dump(agent_def, f, default_flow_style=False)
+    
+    # Success screen
+    clear_screen()
+    print(f"\n  \033[32m╔══════════════════════════════════════════════════════════════╗\033[0m")
+    print(f"  \033[32m║  ✓ Wizard Created!                                           ║\033[0m")
+    print(f"  \033[32m╚══════════════════════════════════════════════════════════════╝\033[0m")
+    print()
+    print(f"  {BOLD}Name:{RESET}    {CYAN}{name}{RESET}")
+    print(f"  {BOLD}Role:{RESET}    {role}")
+    print(f"  {BOLD}Mission:{RESET} {goal}")
+    print(f"  {BOLD}Powers:{RESET}  {', '.join(tools)}")
+    print(f"  {BOLD}Brain:{RESET}   {llm}")
+    print()
+    print(f"  {DIM}Saved to: {agent_file}{RESET}")
     
     input("\n  Press Enter to continue...")
+
+
 
 
 def create_crew():
