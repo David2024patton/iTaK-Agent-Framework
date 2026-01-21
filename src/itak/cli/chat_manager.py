@@ -115,7 +115,7 @@ def natural_chat():
         
         while True:
             try:
-                user_input = click.prompt(click.style("  You [🪄]", fg="cyan"), default="").strip()
+                user_input = click.prompt(click.style("  You [✨]", fg="cyan"), default="").strip()
                 
                 if not user_input:
                     continue
