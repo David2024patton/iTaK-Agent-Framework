@@ -194,20 +194,18 @@ def setup(force):
 
 
 @iTaK.command()
-@click.option("--auto", is_flag=True, help="Enable auto-update on every itak run")
-@click.option("--off", is_flag=True, help="Disable auto-update")
-@click.option("--status", is_flag=True, help="Show auto-update status")
-def update(auto, off, status):
+@click.argument("mode", required=False, default=None)
+def update(mode):
     """Update iTaK to the latest version from GitHub.
     
     Pulls the latest changes from the main branch.
     You can run this from any directory.
     
     Examples:
-        itak update          - Update now
-        itak update --auto   - Enable auto-update on every itak run
-        itak update --off    - Disable auto-update
-        itak update --status - Check if auto-update is enabled
+        itak update        - Update now
+        itak update auto   - Enable auto-update on every itak run
+        itak update off    - Disable auto-update
+        itak update status - Check if auto-update is enabled
     """
     import subprocess
     from pathlib import Path
@@ -215,8 +213,9 @@ def update(auto, off, status):
     
     config_file = Path.home() / '.itak' / 'config.json'
     
-    # Handle auto-update toggle
-    if auto or off or status:
+    # Handle auto-update commands
+    if mode:
+        mode = mode.lower()
         config_file.parent.mkdir(parents=True, exist_ok=True)
         
         config = {}
@@ -227,17 +226,17 @@ def update(auto, off, status):
             except:
                 pass
         
-        if status:
+        if mode == 'status':
             is_auto = config.get('auto_update', False)
             if is_auto:
                 click.secho("✓ Auto-update is ENABLED", fg="green")
                 click.secho("  iTaK will pull updates on every run", dim=True)
             else:
                 click.secho("○ Auto-update is DISABLED", fg="yellow")
-                click.secho("  Use 'itak update --auto' to enable", dim=True)
+                click.secho("  Use 'itak update auto' to enable", dim=True)
             return
         
-        if auto:
+        elif mode == 'auto':
             config['auto_update'] = True
             with open(config_file, 'w') as f:
                 json.dump(config, f)
@@ -245,12 +244,16 @@ def update(auto, off, status):
             click.secho("  iTaK will pull latest changes on every run", dim=True)
             return
             
-        if off:
+        elif mode == 'off':
             config['auto_update'] = False
             with open(config_file, 'w') as f:
                 json.dump(config, f)
             click.secho("✓ Auto-update DISABLED", fg="yellow")
             click.secho("  Use 'itak update' to update manually", dim=True)
+            return
+        else:
+            click.secho(f"Unknown mode: {mode}", fg="yellow")
+            click.secho("  Use: auto, off, or status", dim=True)
             return
     
     # Do the actual update
