@@ -7,6 +7,7 @@ Interactive CLI wizard for creating new projects.
 import os
 import subprocess
 import sys
+import textwrap
 from pathlib import Path
 from typing import Optional
 
@@ -130,7 +131,12 @@ def run_project_wizard(initial_prompt: str = None, project_type_idx: int = None)
                 description = wizard_prompt("  What should it do", default_desc)
 
                 if description.strip():  # Non-empty after stripping whitespace
-
+                    # Show wrapped version for better readability
+                    if len(description) > 70:
+                        click.echo()
+                        click.secho("  📝 Description:", fg="bright_black")
+                        wrapped = textwrap.fill(description, width=70, initial_indent="  ", subsequent_indent="  ")
+                        click.secho(wrapped, fg="white")
                     break
 
                 click.secho("  ⚠️  Please describe what your project should do", fg="yellow")
