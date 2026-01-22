@@ -110,33 +110,58 @@ def run_project_wizard(initial_prompt: str = None, project_type_idx: int = None)
         
         click.echo()
         
+        # Smart project type detection from description
+        detected_type_idx = None
+        if description:
+            desc_lower = description.lower()
+            
+            # Keyword matching for project types
+            if any(word in desc_lower for word in ['website', 'web app', 'landing page', 'dashboard', 'frontend', 'react', 'html', 'css']):
+                detected_type_idx = 1  # Web App
+            elif any(word in desc_lower for word in ['api', 'backend', 'rest', 'fastapi', 'flask', 'server', 'endpoint']):
+                detected_type_idx = 3  # API/Backend
+            elif any(word in desc_lower for word in ['agent', 'bot', 'automation', 'workflow', 'ai agent', 'crew']):
+                detected_type_idx = 4  # AI Agent  
+            elif any(word in desc_lower for word in ['script', 'python', 'automation', 'scraper', 'tool']):
+                detected_type_idx = 2  # Python Script
+        
         # Project type
         if project_type_idx is None:
-            click.secho("  🎯 Select project type:", fg="white", bold=True)
-            click.echo()
-            for i, (name, _, desc) in enumerate(PROJECT_TYPES, 1):
-                click.secho(f"      [{i}] ", fg="cyan", nl=False)
-                click.secho(name, fg="white", bold=True, nl=False)
-                click.secho(f"  {desc}", fg="bright_black")
-            click.echo()
-            
-            while True:
-                type_input = click.prompt(
-                    click.style("  Choice", fg="cyan"),
-                    type=str,
-                    default="1"
-                )
-                if is_back_command(type_input):
-                    raise BackToMenu()
-                try:
-                    type_choice = int(type_input)
-                    if 1 <= type_choice <= len(PROJECT_TYPES):
-                        break
-                except ValueError:
-                    pass
-                click.secho("  Please enter a valid number", fg="yellow")
-            
-            project_type = PROJECT_TYPES[type_choice - 1]
+            # If we detected a type and have initial_prompt, use it automatically
+            if detected_type_idx and initial_prompt:
+                project_type = PROJECT_TYPES[detected_type_idx - 1]
+                click.secho(f"  🎯 Detected type: {project_type[0]}", fg="green")
+            else:
+                # Ask user to select
+                click.secho("  🎯 Select project type:", fg="white", bold=True)
+                click.echo()
+                for i, (name, _, desc) in enumerate(PROJECT_TYPES, 1):
+                    click.secho(f"      [{i}] ", fg="cyan", nl=False)
+                    click.secho(name, fg="white", bold=True, nl=False)
+                    click.secho(f"  {desc}", fg="bright_black")
+                click.echo()
+                
+                # Show detected suggestion if any
+                if detected_type_idx:
+                    click.secho(f"  💡 Suggested: [{detected_type_idx}] based on description", fg="yellow")
+                
+                while True:
+                    type_input = click.prompt(
+                        click.style("  Choice", fg="cyan"),
+                        type=str,
+                        default=str(detected_type_idx) if detected_type_idx else "1"
+                    )
+                    if is_back_command(type_input):
+                        raise BackToMenu()
+                    try:
+                        type_choice = int(type_input)
+                        if 1 <= type_choice <= len(PROJECT_TYPES):
+                            break
+                    except ValueError:
+                        pass
+                    click.secho("  Please enter a valid number", fg="yellow")
+                
+                project_type = PROJECT_TYPES[type_choice - 1]
         else:
             # Use pre-selected type (adjusted for 0-index if passing from menu that might use 1-index)
             # But wait, let's assume valid PROJECT_TYPES index + 1 is passed or just index
