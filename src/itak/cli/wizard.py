@@ -100,6 +100,8 @@ def run_project_wizard(initial_prompt: str = None, project_type_idx: int = None)
             
         click.secho("  📁 Project Setup", fg="white", bold=True)
         click.echo()
+        click.secho("  💡 Tip: Type as much as you want, it will wrap nicely", fg="bright_black")
+        click.echo()
         project_name = wizard_prompt("  Project name", default_name)
     
         # Description (Skip if we already have it from initial_prompt)
