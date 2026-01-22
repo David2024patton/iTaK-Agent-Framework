@@ -883,6 +883,45 @@ def save_wizard(name, role, goal, tools, llm):
     input("\n  Press Enter to continue...")
 
 
+def initialize_default_wizards():
+    """Initialize default web dev wizards if none exist. Silent operation."""
+    ensure_dirs()
+    
+    # Check if we already have wizards
+    existing_wizards = list(AGENTS_DIR.glob('*.yaml'))
+    if existing_wizards:
+        return  # Already initialized
+    
+    # Create the 5 default web dev wizards silently
+    default_wizards = [
+        'project_manager', 'frontend_wizard', 'javascript_wizard', 
+        'content_wizard', 'qa_wizard'
+    ]
+    
+    for wizard_key in default_wizards:
+        if wizard_key in WIZARD_TEMPLATES:
+            template = WIZARD_TEMPLATES[wizard_key]
+            safe_name = wizard_key
+            
+            agent_def = {
+                'name': template['name'],
+                'role': template['role'],
+                'goal': template['goal'],
+                'backstory': template['backstory'],
+                'tools': template['tools'],
+                'llm': template['llm'],
+                'verbose': True,
+                'allow_delegation': False,
+            }
+            
+            agent_file = AGENTS_DIR / f"{safe_name}.yaml"
+            
+            with open(agent_file, 'w') as f:
+                yaml.dump(agent_def, f, default_flow_style=False)
+
+
+
+
 
 
 # Pre-built guild templates with example compositions
