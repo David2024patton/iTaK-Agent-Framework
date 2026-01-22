@@ -240,6 +240,9 @@ class EventListener(BaseEventListener):
             _: Any, event: LiteAgentExecutionStartedEvent
         ) -> None:
             """Handle LiteAgent execution started event."""
+            # Skip printing if agent has verbose=False
+            if not event.agent_info.get("verbose", True):
+                return
             self.formatter.handle_lite_agent_execution(
                 event.agent_info["role"], status="started", **event.agent_info
             )
@@ -249,6 +252,9 @@ class EventListener(BaseEventListener):
             _: Any, event: LiteAgentExecutionCompletedEvent
         ) -> None:
             """Handle LiteAgent execution completed event."""
+            # Skip printing if agent has verbose=False
+            if not event.agent_info.get("verbose", True):
+                return
             self.formatter.handle_lite_agent_execution(
                 event.agent_info["role"], status="completed", **event.agent_info
             )
