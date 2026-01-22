@@ -107,8 +107,14 @@ def run_project_wizard(initial_prompt: str = None, project_type_idx: int = None)
         # Description (Skip if we already have it from initial_prompt)
         if initial_prompt:
             description = initial_prompt
-        else:
-            description = wizard_prompt("  What should it do", default_desc)
+        else:
+            # Force user to enter a description (required for auto-detection)
+            while True:
+                description = wizard_prompt("  What should it do", default_desc)
+                if description.strip():  # Non-empty after stripping whitespace
+                    break
+                click.secho("  ⚠️  Please describe what your project should do", fg="yellow")
+                click.echo()
         
         click.echo()
         
