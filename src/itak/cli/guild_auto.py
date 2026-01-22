@@ -5,10 +5,8 @@ Automatically creates and runs guilds (teams of wizards) based on project type.
 Uses sequential LiteAgent execution for multi-agent collaboration.
 """
 
-import os
 import yaml
 from pathlib import Path
-from typing import Optional, List
 import click
 
 # Directories
@@ -102,12 +100,8 @@ def run_guild_build(guild_name: str, project_description: str, output_dir: str):
         output_dir: Where to create files
     """
     from itak.lite_agent import LiteAgent
-    from itak.tools.agent_tools.file_tools import (
-        FileReadTool,
-        FileWriteTool,
-    )
-    from itak.tools.agent_tools.code_search import RipGrepTool
-    from itak.tools.agent_tools.code_editor import SmartEditTool
+    from itak.tools.smart_edit import SmartEditTool
+    from itak.tools.ripgrep import RipGrepTool
     
     # Load guild configuration
     guild_file = CREWS_DIR / f"{guild_name}.yaml"
@@ -137,22 +131,17 @@ def run_guild_build(guild_name: str, project_description: str, output_dir: str):
         wizard_configs.append(wizard)
     
     if not wizard_configs:
-        click.secho("\n  ❌ No wizards available. Run 'itak' → [3] Wizards to create some first.", fg="red")
+        click.secho("\n  ❌ No wizards available.", fg="red")
         return
     
     click.secho(f"\n  🚀 Starting {len(wizard_configs)}-wizard collaboration...", fg="cyan")
     click.secho(f"  📋 Project: {project_description}", fg="white")
     click.secho(f"  📁 Output: {output_dir}\n", fg="white")
     
-    # Initialize tool registry
-    all_tools = {
-        'file_read': FileReadTool(),
-        'file_write': FileWriteTool(),
-        'code_search': RipGrepTool(),
-        'smart_edit': SmartEditTool(),
-    }
+    # All wizards get SmartEdit and RipGrep tools
+    tools = [SmartEditTool(), RipGrepTool()]
     
-    # Run wizards sequentially, passing context between them
+    # Run wizards sequentially
     previous_output = ""
     
     for i, wizard_config in enumerate(wizard_configs, 1):
@@ -160,29 +149,22 @@ def run_guild_build(guild_name: str, project_description: str, output_dir: str):
         wizard_role = wizard_config.get('role', 'Developer')
         wizard_goal = wizard_config.get('goal', 'Complete the task')
         backstory = wizard_config.get('backstory', 'An expert in their field')
-        tool_names = wizard_config.get('tools', [])
         llm = wizard_config.get('llm', 'ollama/qwen3-vl:2b')
         
         click.secho(f"\n  🔮 [{i}/{len(wizard_configs)}] {wizard_name} working...", fg="magenta")
         
-        # Map tool names to actual tool instances
-        wizard_tools = [all_tools[name] for name in tool_names if name in all_tools]
-        
-        # Create task based on wizard role and previous output
+        # Create task
         if i == 1:
-            # First wizard: Plan the project
-            task = f"{project_description}. Working directory: {output_dir}. Create a plan and start building."
+            task = f"{project_description}. Working directory: {output_dir}"
         else:
-            # Subsequent wizards: Build on previous work
-            task = f"Continue working on: {project_description}. Working directory: {output_dir}.\n\nPrevious work:\n{previous_output}"
+            task = f"Continue: {project_description}. Directory: {output_dir}.\nPrevious:\n{previous_output[:500]}"
         
-        # Create and run the wizard
         try:
             wizard_agent = LiteAgent(
                 role=wizard_role,
                 goal=wizard_goal,
                 backstory=backstory,
-                tools=wizard_tools,
+                tools=tools,
                 llm=llm,
                 verbose=False,
                 max_iterations=10,
@@ -198,4 +180,4 @@ def run_guild_build(guild_name: str, project_description: str, output_dir: str):
             continue
     
     click.secho(f"\n  ✅ Guild collaboration complete!", fg="green", bold=True)
-    click.secho(f"  📁 Check {output_dir} for generated files\n", fg="cyan")
+    click.secho(f"  📁 Check {output_dir} for files\n", fg="cyan")
