@@ -357,7 +357,8 @@ def _check_auto_update():
 @click.argument("prompt", nargs=-1, required=True)
 @click.option("--model", "-m", default=None, help="Model to use (default: ollama/qwen3-vl:2b)")
 @click.option("--output", "-o", default=".", help="Output directory for generated files")
-def auto(prompt, model, output):
+@click.option("--skip-wizard", is_flag=True, default=False, help="Skip wizard routing for project creation")
+def auto(prompt, model, output, skip_wizard):
     """Process a prompt with AI and generate code/files.
     
     Example:
@@ -373,28 +374,29 @@ def auto(prompt, model, output):
     
     model = model or "ollama/qwen3-vl:2b"
     
-    # Check for project creation intent
+    # Check for project creation intent (unless skip_wizard is True)
     # If user wants to build a full project/app, route to wizard
-    low_prompt = prompt.lower()
+    if not skip_wizard:
+        low_prompt = prompt.lower()
     intent_keywords = ["create", "build", "new", "make", "scaffold", "generate", "start"]
     project_keywords = ["project", "app", "application", "website", "site", "platform", "dashboard", "tool", "cli", "bot", "agent", "system", "blog", "saas"]
     
-    is_creation = any(k in low_prompt for k in intent_keywords) and \
-                  any(k in low_prompt for k in project_keywords)
-                  
-    # Exclude obvious code snippets if possible (heuristic)
-    # e.g. "script", "function", "class", "snippet" might be code only
-    # But "create a python script" is ambiguous. Let's keep it simple.
-    
-    if is_creation:
-        click.secho(f"\n🚀 usage detected: '{prompt}'", fg="cyan")
-        click.secho("   Starting project creation wizard...", dim=True)
-        try:
-            from .wizard import run_project_wizard
-            run_project_wizard(initial_prompt=prompt)
-            return
-        except ImportError:
-            pass
+        is_creation = any(k in low_prompt for k in intent_keywords) and \
+                      any(k in low_prompt for k in project_keywords)
+                      
+        # Exclude obvious code snippets if possible (heuristic)
+        # e.g. "script", "function", "class", "snippet" might be code only
+        # But "create a python script" is ambiguous. Let's keep it simple.
+        
+        if is_creation:
+            click.secho(f"\n🚀 usage detected: '{prompt}'", fg="cyan")
+            click.secho("   Starting project creation wizard...", dim=True)
+            try:
+                from .wizard import run_project_wizard
+                run_project_wizard(initial_prompt=prompt)
+                return
+            except ImportError:
+                pass
             
     # iTaK Smart Agent Mode
     from itak.lite_agent import LiteAgent
