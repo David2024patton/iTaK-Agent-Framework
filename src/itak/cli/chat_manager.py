@@ -177,6 +177,13 @@ def natural_chat():
                 if not user_input:
                     continue
                 
+                # Display user input with word wrap
+                if len(user_input) > 70:
+                    wrapped_input = word_wrap(user_input, width=70, indent="       ")
+                    print(f"\r  {CYAN}You ✨{RESET} {wrapped_input.split(chr(10))[0]}")
+                    for line in wrapped_input.split('\n')[1:]:
+                        print(f"       {line}")
+                
                 # Exit CLI completely
                 if user_input.lower() in ['/exit', '/quit', 'exit', 'quit']:
                     print(f"\n{YELLOW}Goodbye!{RESET}\n")
@@ -542,6 +549,13 @@ Always be helpful, accurate, and stay in character. Be concise but thorough.
         while True:
             try:
                 user_input = click.prompt(click.style("  You ✨", fg="cyan"), default="", show_default=False).strip()
+                
+                # Display user input with word wrap
+                if len(user_input) > 70:
+                    wrapped_input = word_wrap(user_input, width=70, indent="       ")
+                    print(f"\r  {CYAN}You ✨{RESET} {wrapped_input.split(chr(10))[0]}")
+                    for line in wrapped_input.split('\n')[1:]:
+                        print(f"       {line}")
                 
                 if not user_input:
                     continue
