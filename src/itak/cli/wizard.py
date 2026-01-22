@@ -255,7 +255,7 @@ def start_build(prompt: str, output_dir: str):
         
         # Run itak auto as subprocess
         result = subprocess.run(
-            [sys.executable, "-m", "itak.cli.cli", "auto", prompt],
+            [sys.executable, "-m", "itak.cli.cli", "auto", "--skip-wizard", prompt],
             cwd=output_dir,
             shell=False
         )
