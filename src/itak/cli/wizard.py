@@ -241,7 +241,7 @@ def run_project_wizard(initial_prompt: str = None, project_type_idx: int = None)
             full_prompt = build_prompt(project_name, description, project_type)
         
         # Run iTaK auto
-        start_build(full_prompt, output_dir)
+        start_build(full_prompt, output_dir, project_type[1])
     
     except BackToMenu:
         click.secho("\n  Cancelled. Returning to menu...\n", fg="yellow")
