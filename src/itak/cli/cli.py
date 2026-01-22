@@ -378,9 +378,9 @@ def auto(prompt, model, output, skip_wizard):
     # If user wants to build a full project/app, route to wizard
     if not skip_wizard:
         low_prompt = prompt.lower()
-    intent_keywords = ["create", "build", "new", "make", "scaffold", "generate", "start"]
-    project_keywords = ["project", "app", "application", "website", "site", "platform", "dashboard", "tool", "cli", "bot", "agent", "system", "blog", "saas"]
-    
+        intent_keywords = ["create", "build", "new", "make", "scaffold", "generate", "start"]
+        project_keywords = ["project", "app", "application", "website", "site", "platform", "dashboard", "tool", "cli", "bot", "agent", "system", "blog", "saas"]
+        
         is_creation = any(k in low_prompt for k in intent_keywords) and \
                       any(k in low_prompt for k in project_keywords)
                       
@@ -1094,3 +1094,4 @@ if __name__ == "__main__":
 # Entry point for console_scripts
 def main():
     iTaK()
+
