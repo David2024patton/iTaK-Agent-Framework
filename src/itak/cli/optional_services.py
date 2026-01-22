@@ -130,45 +130,28 @@ def start_service(service_key):
     print(f"  {DIM}This may take a few minutes for first-time setup{RESET}")
     print()
     
-    try:
-        compose_file = DOCKER_DIR / 'docker-compose.yml'
-        
-        print(f"  {DIM}Pulling Docker image (please wait)...{RESET}\n")
-        
-        # Set environment for UTF-8 to avoid Windows encoding issues
-        env = os.environ.copy()
-        env['PYTHONIOENCODING'] = 'utf-8'
-        
-        # Use shell=True for Windows compatibility, let output flow to terminal
-        result = subprocess.run(
-            f'docker compose -f "{compose_file}" -p api-gateway --profile optional up -d {service["container"]}',
-            cwd=str(DOCKER_DIR),
-            shell=True,
-            env=env
-        )
-        
-        # Also start extra containers if any
-        if 'extra_containers' in service:
-            for extra in service['extra_containers']:
-                print(f"\n  {DIM}Starting {extra}...{RESET}")
-                subprocess.run(
-                    f'docker compose -f "{compose_file}" -p api-gateway --profile optional up -d {extra}',
-                    cwd=str(DOCKER_DIR),
-                    shell=True,
-                    env=env
-                )
-        
-        if result.returncode == 0:
-            # Update .env file
-            update_env_file(service['env_var'], service['url'])
-            print(f"\n  {GREEN}✅ {service['name']} installed and started!{RESET}")
-            print(f"     {DIM}{service['url']}{RESET}")
-            return True
-        else:
-            print(f"\n  {RED}❌ Failed to start {service['name']}{RESET}")
-            return False
-    except Exception as e:
-        print(f"\n  {RED}❌ Error: {e}{RESET}")
+    compose_file = DOCKER_DIR / 'docker-compose.yml'
+    
+    print(f"  {DIM}Pulling Docker image (please wait)...{RESET}\n")
+    
+    # Use os.system() to avoid Windows encoding issues entirely
+    cmd = f'docker compose -f "{compose_file}" -p api-gateway --profile optional up -d {service["container"]}'
+    result = os.system(cmd)
+    
+    # Also start extra containers if any
+    if 'extra_containers' in service:
+        for extra in service['extra_containers']:
+            print(f"\n  {DIM}Starting {extra}...{RESET}")
+            os.system(f'docker compose -f "{compose_file}" -p api-gateway --profile optional up -d {extra}')
+    
+    if result == 0:
+        # Update .env file
+        update_env_file(service['env_var'], service['url'])
+        print(f"\n  {GREEN}✅ {service['name']} installed and started!{RESET}")
+        print(f"     {DIM}{service['url']}{RESET}")
+        return True
+    else:
+        print(f"\n  {RED}❌ Failed to start {service['name']}{RESET}")
         return False
 
 
