@@ -129,10 +129,11 @@ def run_project_wizard(initial_prompt: str = None, project_type_idx: int = None)
         
         # Project type
         if project_type_idx is None:
-            # If we detected a type and have initial_prompt, use it automatically
-            if detected_type_idx and initial_prompt:
+            # If we detected a type, use it automatically (skip selection)
+            if detected_type_idx:
                 project_type = PROJECT_TYPES[detected_type_idx - 1]
                 click.secho(f"  🎯 Detected type: {project_type[0]}", fg="green")
+                click.echo()
             else:
                 # Ask user to select
                 click.secho("  🎯 Select project type:", fg="white", bold=True)
@@ -143,15 +144,11 @@ def run_project_wizard(initial_prompt: str = None, project_type_idx: int = None)
                     click.secho(f"  {desc}", fg="bright_black")
                 click.echo()
                 
-                # Show detected suggestion if any
-                if detected_type_idx:
-                    click.secho(f"  💡 Suggested: [{detected_type_idx}] based on description", fg="yellow")
-                
                 while True:
                     type_input = click.prompt(
                         click.style("  Choice", fg="cyan"),
                         type=str,
-                        default=str(detected_type_idx) if detected_type_idx else "1"
+                        default="1"
                     )
                     if is_back_command(type_input):
                         raise BackToMenu()
