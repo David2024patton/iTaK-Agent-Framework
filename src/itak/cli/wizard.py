@@ -10,6 +10,8 @@ import sys
 import textwrap
 from pathlib import Path
 from typing import Optional
+from .guild_auto import get_or_create_guild_for_project, run_guild_build
+from .agent_manager import initialize_default_wizards
 
 import click
 
@@ -263,48 +265,33 @@ def build_prompt(name: str, description: str, project_type: tuple) -> str:
     return prompts.get(type_key, description)
 
 
-def start_build(prompt: str, output_dir: str):
-    """Start the build process with iTaK auto."""
-    click.secho("  🚀 Starting build...", fg="cyan", bold=True)
+def start_build(prompt: str, output_dir: str, project_type: str = 'custom'):
+    """Start the build process using guild system."""
+    import click
+    
+    # Initialize default wizards if they don't exist
+    click.secho("  🔮 Initializing wizards...", fg="magenta")
+    initialize_default_wizards()
+    
+    click.secho("  🚀 Starting guild build...",  fg="cyan", bold=True)
     click.echo()
-    click.secho(f"  Prompt: ", fg="white", nl=False)
-    click.secho(prompt[:80] + "..." if len(prompt) > 80 else prompt, fg="bright_black")
+    click.secho(f"  Project: ", fg="white", nl=False)
+    click.secho(prompt[:70] + "..." if len(prompt) > 70 else prompt, fg="bright_black")
     click.echo()
     
     # Create output directory
     try:
+        from pathlib import Path
         Path(output_dir).mkdir(parents=True, exist_ok=True)
     except Exception as e:
-        click.secho(f"  ⚠️ Could not create directory: {e}", fg="yellow")
+        click.secho(f"  ⚠️  Could not create directory: {e}", fg="yellow")
         output_dir = "."
     
-    # Run itak auto command via subprocess
-    click.secho("  Running: ", fg="white", nl=False)
-    click.secho(f'itak auto "..."', fg="cyan")
-    click.echo()
+    # Get or create appropriate guild
+    guild_name = get_or_create_guild_for_project(project_type, prompt)
     
-    try:
-        import subprocess
-        import sys
-        
-        # Run itak auto as subprocess
-        result = subprocess.run(
-            [sys.executable, "-m", "itak.cli.cli", "auto", "--skip-wizard", prompt],
-            cwd=output_dir,
-            shell=False
-        )
-        
-        if result.returncode == 0:
-            click.secho("  ✅ Build complete!", fg="green")
-        else:
-            click.secho(f"  ⚠️ Build finished with code {result.returncode}", fg="yellow")
-            
-    except Exception as e:
-        click.secho(f"  ❌ Error: {e}", fg="red")
-        click.echo()
-        click.echo("  To run manually:")
-        click.secho(f'  cd {output_dir}', fg="cyan")
-        click.secho(f'  itak auto "{prompt}"', fg="cyan")
+    # Run guild build
+    run_guild_build(guild_name, prompt, output_dir)
 
 
 if __name__ == "__main__":
