@@ -654,10 +654,11 @@ def run():
     run_crew()
 
 
-@iTaK.command()
-def update():
+@iTaK.command(name="update-crew-uv")
+def update_crew_uv():
     """Update the pyproject.toml of the Crew project to use uv."""
     update_crew()
+
 
 
 @iTaK.command()

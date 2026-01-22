@@ -1,0 +1,41 @@
+# FRP Client Configuration for iTaK API Gateway
+# Connects local services to VPS at 145.79.2.67
+
+serverAddr = "145.79.2.67"
+serverPort = 7000
+
+[auth]
+method = "token"
+token = "83b958b5efbb4f8a8d521cde16e2c9d3"
+
+# Ollama LLM API
+[[proxies]]
+name = "ollama"
+type = "tcp"
+localIP = "host.docker.internal"
+localPort = 11434
+remotePort = 11434
+
+# ChromaDB Vector Database
+[[proxies]]
+name = "chromadb"
+type = "tcp"
+localIP = "host.docker.internal"
+localPort = 29800
+remotePort = 29800
+
+# Playwright Browser Automation
+[[proxies]]
+name = "playwright"
+type = "tcp"
+localIP = "host.docker.internal"
+localPort = 39281
+remotePort = 39281
+
+# SearXNG Search Engine
+[[proxies]]
+name = "searxng"
+type = "tcp"
+localIP = "host.docker.internal"
+localPort = 48192
+remotePort = 48192
