@@ -77,7 +77,7 @@ def run_project_wizard(initial_prompt: str = None, project_type_idx: int = None)
     try:
         # Infer defaults from initial prompt
         default_name = "my-project"
-        default_desc = "A new iTaK project"
+        default_desc = ""  # No default - user must describe project
         
         if initial_prompt:
             # Simple heuristic to extract potential name
@@ -275,3 +275,4 @@ def start_build(prompt: str, output_dir: str):
 
 if __name__ == "__main__":
     run_project_wizard()
+
