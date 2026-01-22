@@ -96,7 +96,7 @@ class iTaKREPL:
             # Wizard Mode - Clear screen for fresh view
             os.system('cls' if os.name == 'nt' else 'clear')
             try:
-                from .wizard import run_project_wizard
+                from .wizard import run_project_wizard, ExitCLI
                 run_project_wizard()  # No pre-selection, wizard asks for type
                 # After returning from wizard, restart main menu
                 self.start()

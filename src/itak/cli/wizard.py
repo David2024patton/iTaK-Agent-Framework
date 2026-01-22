@@ -18,19 +18,33 @@ class BackToMenu(Exception):
     pass
 
 
+class ExitCLI(Exception):
+    """Raised when user wants to exit the CLI completely."""
+    pass
+
+
 def is_back_command(text: str) -> bool:
-    """Check if input is a back/exit command."""
+    """Check if input is a back command (returns to menu)."""
     if text is None:
         return False
     cmd = text.strip().lower()
+    return cmd in ['back', '/back', '0']
+
+
+def is_exit_command(text: str) -> bool:
+    """Check if input is an exit command (exits CLI completely)."""
+    if text is None:
+        return False
     cmd = text.strip().lower()
-    return cmd in ['back', '/back', '0', 'exit', '/exit', '/quit']  # Include exit commands
+    return cmd in ['exit', '/exit', '/quit', 'quit']
 
 
 def wizard_prompt(label: str, default: str = "") -> str:
     """Prompt that checks for back/exit commands."""
-    click.echo(f"  {click.style('(type 0 or back to cancel)', fg='bright_black')}")
+    click.echo(f"  {click.style('(type 0 or back to cancel, /exit to quit)', fg='bright_black')}")
     result = click.prompt(click.style(f"  {label}", fg="cyan"), type=str, default=default)
+    if is_exit_command(result):
+        raise ExitCLI()
     if is_back_command(result):
         raise BackToMenu()
     return result
@@ -107,14 +121,22 @@ def run_project_wizard(initial_prompt: str = None, project_type_idx: int = None)
         # Description (Skip if we already have it from initial_prompt)
         if initial_prompt:
             description = initial_prompt
-        else:
-            # Force user to enter a description (required for auto-detection)
-            while True:
-                description = wizard_prompt("  What should it do", default_desc)
-                if description.strip():  # Non-empty after stripping whitespace
-                    break
-                click.secho("  ⚠️  Please describe what your project should do", fg="yellow")
-                click.echo()
+        else:
+
+            # Force user to enter a description (required for auto-detection)
+
+            while True:
+
+                description = wizard_prompt("  What should it do", default_desc)
+
+                if description.strip():  # Non-empty after stripping whitespace
+
+                    break
+
+                click.secho("  ⚠️  Please describe what your project should do", fg="yellow")
+
+                click.echo()
+
         
         click.echo()
         
