@@ -1,0 +1,19 @@
+ICON PLACEHOLDERS
+
+Replace these placeholder files with actual application icons:
+
+1. icon.icns - macOS icon (1024x1024 PNG converted to ICNS)
+   Use: iconutil or online converter
+   
+2. icon.ico - Windows icon (256x256 multi-resolution ICO)
+   Use: ImageMagick or online converter
+   
+3. icon.png - Linux icon (512x512 PNG)
+   Standard PNG format
+
+Branding:
+- Use OpenClaw branding colors and logo
+- Ensure icons are clear at all sizes (16x16 to 1024x1024)
+- Follow platform icon guidelines
+
+Logo source: https://mintcdn.com/clawdhub/FaXdIfo7gPK_jSWb/assets/openclaw-logo-text.png
