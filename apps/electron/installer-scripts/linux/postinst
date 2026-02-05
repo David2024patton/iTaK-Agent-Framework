@@ -1,0 +1,38 @@
+#!/bin/bash
+# Post-installation script for iTaK Agent on Linux (deb package)
+
+set -e
+
+INSTALL_DIR="/opt/iTaK Agent"
+CLI_SCRIPT="$INSTALL_DIR/usr/bin/itak-cli.sh"
+SYMLINK_TARGET="/usr/local/bin/itak"
+
+echo "Installing iTaK CLI to system PATH..."
+
+# Make the CLI script executable
+if [ -f "$CLI_SCRIPT" ]; then
+    chmod +x "$CLI_SCRIPT"
+    
+    # Create symlink to /usr/local/bin
+    if [ ! -d "/usr/local/bin" ]; then
+        mkdir -p "/usr/local/bin"
+    fi
+    
+    # Remove existing symlink if present
+    if [ -L "$SYMLINK_TARGET" ]; then
+        rm "$SYMLINK_TARGET"
+    fi
+    
+    ln -s "$CLI_SCRIPT" "$SYMLINK_TARGET"
+    echo "iTaK CLI installed to /usr/local/bin/itak"
+else
+    echo "Warning: CLI script not found at $CLI_SCRIPT"
+fi
+
+# Set permissions
+chmod 755 "$INSTALL_DIR" 2>/dev/null || true
+
+echo "iTaK Agent installation complete!"
+echo "You can now use 'itak' command from any terminal."
+
+exit 0

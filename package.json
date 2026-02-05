@@ -22,7 +22,14 @@
         "itak": "./bin/itak.js"
     },
     "scripts": {
-        "postinstall": "node scripts/postinstall.js"
+        "postinstall": "node scripts/postinstall.js",
+        "electron:install": "cd apps/electron && npm install",
+        "electron:dev": "cd apps/electron && npm run dev",
+        "electron:build": "cd apps/electron && npm run build",
+        "electron:package": "cd apps/electron && npm run package",
+        "electron:package:mac": "cd apps/electron && npm run package:mac",
+        "electron:package:win": "cd apps/electron && npm run package:win",
+        "electron:package:linux": "cd apps/electron && npm run package:linux"
     },
     "engines": {
         "node": ">=16.0.0"
