@@ -1,0 +1,9 @@
+# Placeholder for application icon
+# 
+# To add a proper icon:
+# 1. Create a 512x512 PNG file named 'icon.png'
+# 2. For macOS: Convert to ICNS format using `png2icns icon.icns icon.png`
+# 3. For Windows: Convert to ICO format (256x256, 128x128, 64x64, 48x48, 32x32, 16x16)
+#
+# Icon should represent iTaK Agent Framework branding
+# Suggested: Robot/AI themed icon with dark blue/cyan colors

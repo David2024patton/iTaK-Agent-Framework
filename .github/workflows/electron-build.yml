@@ -1,0 +1,58 @@
+name: Electron App Build
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'apps/electron/**'
+      - '.github/workflows/electron-build.yml'
+  pull_request:
+    branches: [main]
+    paths:
+      - 'apps/electron/**'
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ${{ matrix.os }}
+    
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+          cache-dependency-path: apps/electron/package-lock.json
+      
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      
+      - name: Install dependencies
+        working-directory: apps/electron
+        run: npm ci
+      
+      - name: Build Electron app
+        working-directory: apps/electron
+        run: npm run build
+      
+      - name: Package Electron app (optional)
+        if: github.event_name == 'workflow_dispatch'
+        working-directory: apps/electron
+        run: npm run package
+      
+      - name: Upload build artifacts (optional)
+        if: github.event_name == 'workflow_dispatch'
+        uses: actions/upload-artifact@v4
+        with:
+          name: electron-app-${{ matrix.os }}
+          path: apps/electron/release/
+          retention-days: 7

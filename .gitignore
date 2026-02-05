@@ -33,3 +33,11 @@ build/
 .pytest_cache/
 .coverage
 htmlcov/
+
+# Electron app
+apps/electron/node_modules/
+apps/electron/dist/
+apps/electron/release/
+apps/electron/.vite/
+apps/electron/.electron-builder/
+apps/electron/*.tsbuildinfo
