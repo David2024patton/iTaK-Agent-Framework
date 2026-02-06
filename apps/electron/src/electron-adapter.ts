@@ -194,7 +194,7 @@ export class ElectronAdapter extends EventEmitter {
   async runCommand(args: string[]): Promise<CommandResult> {
     return new Promise((resolve) => {
       try {
-        const process = spawn(
+        const childProc = spawn(
           this.pythonCommand,
           ['-m', 'itak.cli.cli', ...args],
           {
@@ -208,19 +208,19 @@ export class ElectronAdapter extends EventEmitter {
         let stdout = '';
         let stderr = '';
 
-        process.stdout?.on('data', (data) => {
+        childProc.stdout?.on('data', (data: Buffer) => {
           const output = data.toString();
           stdout += output;
           this.emit('log', { level: 'info', message: output });
         });
 
-        process.stderr?.on('data', (data) => {
+        childProc.stderr?.on('data', (data: Buffer) => {
           const output = data.toString();
           stderr += output;
           this.emit('log', { level: 'error', message: output });
         });
 
-        process.on('exit', (code) => {
+        childProc.on('exit', (code: number | null) => {
           resolve({
             success: code === 0,
             output: stdout,
@@ -229,7 +229,7 @@ export class ElectronAdapter extends EventEmitter {
           });
         });
 
-        process.on('error', (error) => {
+        childProc.on('error', (error: Error) => {
           resolve({
             success: false,
             output: stdout,
