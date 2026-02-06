@@ -1,0 +1,22 @@
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "lib": ["ES2022", "DOM", "DOM.Iterable"],
+    "jsx": "react-jsx",
+    "module": "ES2022",
+    // Using 'bundler' moduleResolution for Vite compatibility
+    // This is optimized for modern bundlers and differs from 'node' in tsconfig.main
+    "moduleResolution": "bundler",
+    "allowImportingTsExtensions": true,
+    "strict": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "noEmit": true,
+    "types": ["node"]
+  },
+  "include": ["src/renderer/**/*"],
+  "exclude": ["node_modules"]
+}

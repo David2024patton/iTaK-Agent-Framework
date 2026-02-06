@@ -1,0 +1,102 @@
+{
+  "name": "openclaw-desktop",
+  "version": "0.1.0",
+  "description": "OpenClaw Desktop - Electron wrapper for iTaK Agent Framework CLI",
+  "main": "dist/main/main.js",
+  "type": "module",
+  "author": "David Patton",
+  "license": "MIT",
+  "scripts": {
+    "dev": "npm run build:main && concurrently \"npm run watch:main\" \"npm run watch:renderer\" \"npm run start:electron\"",
+    "build": "npm run build:main && npm run build:renderer",
+    "build:main": "tsc -p tsconfig.main.json",
+    "build:renderer": "vite build",
+    "watch:main": "tsc -p tsconfig.main.json --watch",
+    "watch:renderer": "vite build --watch",
+    "start:electron": "electron .",
+    "dist": "npm run build && electron-builder",
+    "dist:mac": "npm run build && electron-builder --mac",
+    "dist:win": "npm run build && electron-builder --win",
+    "dist:linux": "npm run build && electron-builder --linux",
+    "pack": "npm run build && electron-builder --dir"
+  },
+  "dependencies": {
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.10.0",
+    "@types/react": "^18.2.0",
+    "@types/react-dom": "^18.2.0",
+    "@vitejs/plugin-react": "^4.2.1",
+    "concurrently": "^8.2.2",
+    "electron": "^28.1.0",
+    "electron-builder": "^24.9.1",
+    "typescript": "^5.3.3",
+    "vite": "^5.0.8"
+  },
+  "build": {
+    "appId": "com.openclaw.desktop",
+    "productName": "OpenClaw",
+    "directories": {
+      "output": "release"
+    },
+    "files": [
+      "dist/**/*",
+      "assets/**/*",
+      "package.json"
+    ],
+    "extraResources": [
+      {
+        "from": "../../",
+        "to": "app",
+        "filter": [
+          "src/**/*",
+          "bin/**/*",
+          "scripts/**/*",
+          "pyproject.toml",
+          "README.md",
+          "!**/__pycache__",
+          "!**/*.pyc"
+        ]
+      }
+    ],
+    "mac": {
+      "category": "public.app-category.developer-tools",
+      "target": ["dmg"],
+      "icon": "assets/icon.icns"
+    },
+    "dmg": {
+      "contents": [
+        {
+          "x": 130,
+          "y": 220
+        },
+        {
+          "x": 410,
+          "y": 220,
+          "type": "link",
+          "path": "/Applications"
+        }
+      ]
+    },
+    "win": {
+      "target": ["nsis"],
+      "icon": "assets/icon.ico"
+    },
+    "nsis": {
+      "oneClick": false,
+      "perMachine": true,
+      "allowToChangeInstallationDirectory": true,
+      "include": "scripts/installer.nsh"
+    },
+    "linux": {
+      "target": ["AppImage", "deb"],
+      "category": "Development",
+      "icon": "assets/icon.png"
+    },
+    "deb": {
+      "afterInstall": "scripts/postinstall.sh"
+    }
+  }
+}
