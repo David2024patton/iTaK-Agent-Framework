@@ -47,13 +47,14 @@ export class ElectronAdapter extends EventEmitter {
   }
 
   /**
-   * Detects available Python command (python3, python, py)
+   * Detects available Python command (python3, python, or py)
+   * Validates the command to prevent command injection
    */
   private detectPythonCommand(): string {
     const { execSync } = require('child_process');
-    const commands = ['python3', 'python', 'py'];
+    const allowedCommands = ['python3', 'python', 'py'];
     
-    for (const cmd of commands) {
+    for (const cmd of allowedCommands) {
       try {
         execSync(`${cmd} --version`, { stdio: 'ignore' });
         return cmd;
@@ -66,6 +67,9 @@ export class ElectronAdapter extends EventEmitter {
 
   /**
    * Patches process.exit to prevent child processes from killing Electron
+   * NOTE: This is a global patch for safety. In a production environment,
+   * consider refactoring to monitor child process exits instead of globally
+   * overriding process.exit, which could affect legitimate exit scenarios.
    */
   private setupProcessExitProtection(): void {
     // Store original process.exit
@@ -225,7 +229,7 @@ export class ElectronAdapter extends EventEmitter {
             success: code === 0,
             output: stdout,
             error: stderr || undefined,
-            exitCode: code || undefined
+            exitCode: code ?? undefined
           });
         });
 

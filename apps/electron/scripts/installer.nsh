@@ -3,6 +3,8 @@
 
 !macro customInstall
   ; Build batch wrapper for terminal invocation
+  ; NOTE: The --headless flag tells the app to run in CLI mode without GUI
+  ; Verify this flag is implemented in the iTaK CLI before production release
   Var /GLOBAL shimFileHandle
   StrCpy $shimFileHandle "$INSTDIR\openclaw.cmd"
   FileOpen $0 $shimFileHandle w
